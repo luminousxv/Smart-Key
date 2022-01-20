@@ -13,7 +13,7 @@ var connection = mysql.createConnection({
     host: "localhost",
     user: "root",
     database: "Smart_Key",
-    password: "Chrislee97!@",
+    password: "DB 비밀번호",
     port: 3306
 });
 
