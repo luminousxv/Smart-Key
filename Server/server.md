@@ -1,24 +1,18 @@
 # Server
+
 ## 개요
 
 mysql, express, body-parser, crpyto library 이용
 
 localhost기반으로 테스트를 진행하였고,  request는 Postman 활용
 
-```jsx
-var mysql = require('mysql');
-var express  = require('express');
-var bodyParser = require('body-parser');
-var app = express();
-const crypto = require('crypto');
-
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: true}));
-```
+router 모듈화를 해서 유지 보수 및 수정이 편리하게 했다. (1.21 수정 완료)
 
 ## DB Connection
 
 ```jsx
+const mysql = require('mysql');
+
 var connection = mysql.createConnection({
     host: "localhost",
     user: "root",
@@ -26,6 +20,8 @@ var connection = mysql.createConnection({
     password: "DB 비밀번호",
     port: 3306
 });
+
+module.exports = connection;
 ```
 
 ## Join API
@@ -44,8 +40,17 @@ json 파일 형태는
 형태로 테스트 진행해봤다. (Back-End 쪽 테스트이니 바뀔 수 있다)
 
 ```jsx
+const express = require("express");
+const router = express.Router();
+const connection = require("../database/dbconnection");
+const crypto = require("crypto");
+var bodyParser = require("body-parser");
+
+router.use(bodyParser.json());
+router.use(bodyParser.urlencoded({ extended: true }));
+
 //Join API
-app.post('/user/join', function (req, res) {
+router.post('/user/join', function (req, res) {
     console.log(req.body);
     var userEmail = req.body.userEmail;
     var userPwd = req.body.userPwd;
@@ -122,6 +127,8 @@ function blackSearch(pw, name, email, birth) {
         return false;
     }
 }
+
+module.exports = router;
 ```
 
 비밀번호는 salt값을 이용해 단방향 암호화를 했다. 회원가입 하면, 그 때 사용한 salt값을 DB에 저장 후, 로그인 할 때 client측에서 입력한 비밀번호에 동일한  salt값을 적용해 hashing을 한 후 비교를 하는 방법이다.
@@ -151,8 +158,17 @@ Client가 보내는 JSON파일 양식은
 이런 형태로 보낸다. (Back-End 테스트 용으로 바뀔수 있다)
 
 ```jsx
+const express = require("express");
+const router = express.Router();
+const connection = require("../database/dbconnection");
+const crypto = require("crypto");
+var bodyParser = require("body-parser");
+
+router.use(bodyParser.json());
+router.use(bodyParser.urlencoded({ extended: true }));
+
 //Login API
-app.post('/user/login', function(req, res) {
+router.post('/user/login', function(req, res) {
     var userEmail = req.body.userEmail;
     var userPwd = req.body.userPwd;
     //Check if account exists
@@ -188,6 +204,8 @@ app.post('/user/login', function(req, res) {
         });
     })
 });
+
+module.exports = router;
 ```
 
 위 JSON 파일 형식으로 서버로 보내면 다음과 같은 응답을 client에게 보낸다.
@@ -198,9 +216,21 @@ app.post('/user/login', function(req, res) {
     "message": "로그인 성공! 이창현님 환영합니다!"
 }
 ```
-server는 다음과 같이 했다. 
+
+## app.js
+
+실제로 구동되는 서버 프로그램은 다음과 같다.
 
 ```jsx
+var express  = require('express');
+var app = express();
+
+var joinRouter = require('./routes/join');
+app.use('/Smart-Key', joinRouter);
+
+var loginRouter = require('./routes/login');
+app.use('/Smart-Key', loginRouter);
+
 //Server
 var server = app.listen(8080,'localhost', function(){
     var host = server.address().address;
@@ -208,5 +238,3 @@ var server = app.listen(8080,'localhost', function(){
     console.log("start at http:// %s:%s", host, port);
 })
 ```
-
-로컬호스트에 있는 client(Postman)으로 연결하였고, 포트는 8080을 사용하였다.
