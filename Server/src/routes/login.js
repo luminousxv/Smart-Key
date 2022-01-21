@@ -22,7 +22,7 @@ router.post('/user/login', function(req, res) {
             console.log(err);
         }
         else if(result.length === 0) {
-            resultCode = 204;
+            resultCode = 400;
             message = '존재하지 않는 계정입니다.';
         }
         else{
@@ -30,7 +30,7 @@ router.post('/user/login', function(req, res) {
             const hashedPw2 = crypto.pbkdf2Sync(userPwd, result[0].Salt, 1, 32, 'sha512').toString('base64');
 
             if (result[0].UserPwd !== hashedPw2) {
-                resultCode = 204;
+                resultCode = 401;
                 message = '비밀번호가 틀렸습니다!';
             } else {
                 resultCode = 200;

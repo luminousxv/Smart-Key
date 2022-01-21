@@ -31,7 +31,7 @@ router.post('/user/join', function (req, res) {
 
         //Form Check
         else if(formSearch(userPwd, userName, userEmail, userBirth)) {
-            resultCode = 203;
+            resultCode = 400;
             message = '이메일/이름/비밀번호의 양식이 틀렸습니다. 다시 입력해주세요!';
             res.json({
                 'code': resultCode,
@@ -67,7 +67,7 @@ router.post('/user/join', function (req, res) {
 
         //Account Exists
         else if (userEmail === result[0].UserEmail) {
-            resultCode = 203;
+            resultCode = 400;
             message = '존재하는 회원입니다.';
             res.json({
                 'code': resultCode,
