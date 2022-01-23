@@ -233,7 +233,7 @@ module.exports = router;
 }
 ```
 
-위 이메일에는 이런 형태로 이메일이 와있다.
+위 이메일에는 이런 형태로 이메일이 와 있다.
 
 <aside>
 💡 from: Smart_Key_KPU <noreply.gmail.com>
