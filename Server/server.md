@@ -233,6 +233,20 @@ module.exports = router;
 }
 ```
 
+위 이메일에는 이런 형태로 이메일이 와있다.
+
+<aside>
+💡 from: Smart_Key_KPU <noreply.gmail.com>
+
+💡 to: drgvyhn@gmail.com
+
+💡 subject: Smart Key 회원가입 인증 번호 메일입니다.
+
+💡 text: 인증번호는 000000 입니다.
+</aside>
+
+이 인증번호를 가지고 클라이언트 측에서는 /Smart-Key/user/join_success/ 로 리퀘스트 한다. 리퀘스트 바디로는 인증번호를 보내 서버측에서 가지고 있는 인증번호와 일치하면 db에다가 기록을 하게 한다.
+
 ## Login API
 
 위에서 설명 했듯이 client측에서 보내온 userPwd값을 그 계정 instance의 salt값으로 hashing 후 비교를 한다.
