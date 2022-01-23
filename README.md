@@ -14,6 +14,8 @@
             join.js (Join API)
             
             login.js (Login API)
+
+            resetPW.js (reset_pw API)
             
         - database
             

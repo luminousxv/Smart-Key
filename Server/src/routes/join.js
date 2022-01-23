@@ -5,7 +5,7 @@ const nodemailer = require("nodemailer");
 const crypto = require("crypto");
 const session = require("express-session");
 const FileStore = require('session-file-store') (session);
-var bodyParser = require("body-parser");
+let bodyParser = require("body-parser");
 const bcrypt = require("bcrypt");
 router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: true }));
@@ -17,8 +17,8 @@ const smtpTransport = nodemailer.createTransport({
     port: 465,
     secure: true,
     auth : {
-        user: "gmail_id",
-        pass: "gmail_pw"
+        user: "google_id",
+        pass: "google_pw"
     }
 });
 
@@ -26,20 +26,21 @@ const smtpTransport = nodemailer.createTransport({
 router.use(session ({
     secret: 'keyboard cat',
     resave: false,
-    saveUninitialized: true,
-    stroe: new FileStore()
+    saveUninitialized: false,
+    store: new FileStore(),
+    cookie:{maxAge: 120000} //2minutes
 }));
 
 // Join API
 
 router.post('/user/email-verification', function (req, res) {
-    var userEmail = req.body.userEmail;
-    var userPwd = req.body.userPwd;
-    var userName = req.body.userName;
-    var userBirth = req.body.userBirth;
+    let userEmail = req.body.userEmail;
+    let userPwd = req.body.userPwd;
+    let userName = req.body.userName;
+    let userBirth = req.body.userBirth;
 
-    var resultCode;
-    var message;
+    let resultCode;
+    let message;
 
     //Repetition Check SQL Query
     var sql2 = 'SELECT * FROM Users WHERE UserEmail = ?';
@@ -99,7 +100,7 @@ router.post('/user/email-verification', function (req, res) {
                 } else{
                     console.log('success');
                 }
-            })
+            });
 
             resultCode = 200;
             message = req.session.user.Email + ' 로 인증 이메일을 보냈습니다. 확인해주세요!';
@@ -123,30 +124,37 @@ router.post('/user/email-verification', function (req, res) {
 
 //After verification
 router.post('/user/join_success', function (req, res) {
-    var inputAuth = req.body.inputAuth;
+    let inputAuth = req.body.inputAuth;
+
+    if (req.session.user === undefined) {
+        let resultCode = 404;
+        let message = '인증번호가 만료 되었습니다. 처음부터 다시 해주세요.';
+
+        res.status(resultCode).json({
+            'code': resultCode,
+            'message': message
+        });
+    }
 
     //compare with input and session's verification number
-    if (inputAuth !== req.session.user.Auth) {
-        var resultCode = 400;
-        var message = '인증번호가 틀렸습니다. 재인증 부탁드립니다.';
+    else if (inputAuth !== req.session.user.Auth) {
+        let resultCode = 400;
+        let message = '인증번호가 틀렸습니다. 다시 입력 해주세요.';
         
         res.status(resultCode).json({
             'code': resultCode,
             'message': message
         });
-        req.session.destroy(function(err){
-            if (err) throw err;
-        });
     } else{
         //DB Write Query
-        var sql = 'INSERT INTO Users (UserEmail, UserPwd, UserName, UserBirth, Salt) VALUES(?, ?, ?, ?, ?)';
-        var params = [req.session.user.Email, req.session.user.Password, req.session.user.Name, req.session.user.Birthday, req.session.user.Salt];
+        let sql = 'INSERT INTO Users (UserEmail, UserPwd, UserName, UserBirth, Salt) VALUES(?, ?, ?, ?, ?)';
+        let params = [req.session.user.Email, req.session.user.Password, req.session.user.Name, req.session.user.Birthday, req.session.user.Salt];
         
         connection.query(sql, params, function(err2, result2) {
             if (err2) {
                 console.log(err);
-                var resultCode = 404;
-                var message = '에러가 발생했습니다.';
+                let resultCode = 404;
+                let message = '에러가 발생했습니다.';
             } else{
                 resultCode = 200;
                 message = '회원가입에 성공했습니다.';
@@ -156,8 +164,8 @@ router.post('/user/join_success', function (req, res) {
                 'message': message
             });
             //delete session
-            req.session.destroy(function(err){
-                if (err) throw err;
+            req.session.destroy(function () {
+                req.session;
             });
         });
     }

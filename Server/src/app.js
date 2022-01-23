@@ -1,15 +1,18 @@
-var express  = require('express');
-var app = express();
+const express  = require('express');
+const app = express();
 
-var joinRouter = require('./routes/join');
+let joinRouter = require('./routes/join');
 app.use('/Smart-Key', joinRouter);
 
-var loginRouter = require('./routes/login');
+let loginRouter = require('./routes/login');
 app.use('/Smart-Key', loginRouter);
 
+let resetPwRouter = require('./routes/resetPW');
+app.use('/Smart-Key', resetPwRouter);
+
 //Server
-var server = app.listen(8080,'localhost', function(){
-    var host = server.address().address;
-    var port = server.address().port;
+let server = app.listen(8080,'localhost', function(){
+    let host = server.address().address;
+    let port = server.address().port;
     console.log("start at http:// %s:%s", host, port);
 })

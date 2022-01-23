@@ -1,4 +1,4 @@
-# Server
+# LOGIN/JOIN/RESETPW API
 
 ## 개요
 
@@ -9,6 +9,8 @@ localhost기반으로 테스트를 진행하였고,  request는 Postman 활용
 router 모듈화를 해서 유지 보수 및 수정이 편리하게 했다. (1.21 수정)
 
 회원가입 할 시 가입 할 이메일로 인증 번호를 받아 회원가입이 완료되게 하였다. (1.22 수정)
+
+비밀번호 초기화를 구현했다. (1.23 수정)
 
 ## DB Connection
 
@@ -130,7 +132,7 @@ router.post('/user/email-verification', function (req, res) {
 
             //Email
             const mailOptions = {
-                from: "Smart_Key_KPU <noreply.gmail_id>",
+                from: "Smart_Key_KPU <noreply.drgvyhn@gmail.com>",
                 to: req.session.user.Email,
                 subject: "Smart Key 회원가입 인증 번호 메일입니다.",
                 text: "인증번호는 " + authNum + " 입니다."
@@ -220,6 +222,8 @@ app.use('/', router);
 module.exports = router;
 ```
 
+클라이언트 측에서는 이메일, 비밀번호, 이름, 생년월일을 /Smart-Key/user/email-verification/ 으로 리퀘스트을 하면 서버 측에서는 이메일과 비밀번호, 이름을 확인 뒤 회원가입이 가능하면 리스폰스를 보낸다.
+
 비밀번호는 salt값을 이용해 단방향 암호화를 했다. 회원가입 하면, 그 때 사용한 salt값을 DB에 저장 후, 로그인 할 때 client측에서 입력한 비밀번호에 동일한  salt값을 적용해 hashing을 한 후 비교를 하는 방법이다.
 
 비밀번호를 암호화 후, 클라이언트 측이 입력한 이메일 주소로 인증 번호 이메일을 보내 그 값을 다시 입력해 보내게 했다. nodemailer를 사용했고, 보내는 동안은 session을 활용해서 유지되게 하였다.
@@ -233,16 +237,14 @@ module.exports = router;
 }
 ```
 
-위 이메일에는 이런 형태로 이메일이 와 있다.
+위 이메일에는 이런 형태로 이메일이 와있다.
 
 <aside>
 💡 from: Smart_Key_KPU <noreply.gmail.com>
+to: drgvyhn@gmail.com
+subject: Smart Key 회원가입 인증 번호 메일입니다.
+text: 인증번호는 000000 입니다.
 
-💡 to: drgvyhn@gmail.com
-
-💡 subject: Smart Key 회원가입 인증 번호 메일입니다.
-
-💡 text: 인증번호는 000000 입니다.
 </aside>
 
 이 인증번호를 가지고 클라이언트 측에서는 /Smart-Key/user/join_success/ 로 리퀘스트 한다. 리퀘스트 바디로는 인증번호를 보내 서버측에서 가지고 있는 인증번호와 일치하면 db에다가 기록을 하게 한다.
@@ -322,19 +324,284 @@ module.exports = router;
 }
 ```
 
+## resetPW API
+
+Salt/Hash를 이용해 단방향 암호화를 해서 original 비밀번호를 찾는건 불가능하다. 그러므로, 비밀번호를 까먹었을 때 다시 초기화를 수행해 새로운 비밀번호를 설정해줘야 한다.
+
+회원가입 시에 했던 이메일인증을 이용해 인증하는 방식으로 했다.
+
+먼저, 비밀번호를 초기화 하고자 하는 계정의 정보를 클라이언트 측에서 리퀘스트 해준다.
+
+```jsx
+{
+    "userEmail": "drgvyhn@gmail.com",
+    "userName": "이창현",
+    "userBirth": "1997.02.06"
+}
+```
+
+서버 측은 리스폰스로 이메일을 보내왔다고 리스폰스를 해준다.
+
+```jsx
+{
+    "code": 200,
+    "message": "이메일 인증을 위해 drgvyhn@gmail.com 으로 이메일을 보냈습니다."
+}
+```
+
+그럼 이메일에는 이런 형태의 이메일이 와 있다.
+
+<aside>
+💡 from: Smart_Key_KPU <noreply.gmail.com>
+to: drgvyhn@gmail.com
+subject: Smart Key 비밀번호 초기화 인증 번호 메일입니다.
+text: 인증번호는 000000 입니다.
+
+</aside>
+
+위 인증번호로 클라이언트 측은 리퀘스트를 다시 해준다.
+
+```jsx
+{
+    "inputAuth": "523790"
+}
+```
+
+인증번호가 맞으면 서버 측에서는 다음과 같은 리스폰스를 해준다.
+
+```jsx
+{
+    "code": 200,
+    "message": "이메일 인증이 완료되었습니다."
+}
+```
+
+클라이언트 측에서는 이제 사용자에게 새로운 비밀번호를 입력 받고 서버측으로 리퀘스트 해준다.
+
+```jsx
+{
+    "userPwd": "987654321"
+}
+```
+
+회원가입시 Salt값을 적용해 hashing해주는 과정을 거치면 UPDATE SQL 쿼리를 사용해 db 정보를 갱신한다. 그 후, 서버측의 리스폰스는 다음과 같다.
+
+```jsx
+{
+    "code": 200,
+    "message": "비밀번호 변경에 성공하셨습니다."
+}
+```
+
+다음은 resetPW API의 코드이다.
+
+```jsx
+const express = require("express");
+const router = express.Router();
+const connection = require("../database/dbconnection");
+const crypto = require("crypto");
+var bodyParser = require("body-parser");
+const session = require("express-session");
+const FileStore = require('session-file-store') (session);
+const bcrypt = require("bcrypt");
+const nodemailer = require("nodemailer");
+
+router.use(bodyParser.json());
+router.use(bodyParser.urlencoded({ extended: true }));
+
+router.use(session ({
+    secret: 'keyboard cat',
+    resave: false,
+    saveUninitialized: false,
+    store: new FileStore(),
+    cookie:{maxAge: 120000} //2minutes
+}));
+
+const smtpTransport = nodemailer.createTransport({
+    service : "gmail",
+    port: 465,
+    secure: true,
+    auth : {
+        user: "google_id",
+        pass: "google_pw"
+    }
+});
+
+router.post('/user/reset/verification/send_email', function(req, res) {
+    let userEmail = req.body.userEmail;
+    let userName = req.body.userName;
+    let userBirth = req.body.userBirth;
+
+    let sql1 = 'select * from Users where UserEmail = ? and UserName = ? and UserBirth = ?';
+    let params = [userEmail, userName, userBirth];
+
+    connection.query(sql1, params, function(err, result) {
+        if (err) {
+            let resultCode = 404;
+            let message = '에러가 발생했습니다.';
+            console.log(err);
+
+            res.status(resultCode).json ({
+                'code': resultCode,
+                'message': message
+            });
+        }
+
+        else if (result.length ===0) {
+            let resultCode = 400;
+            let message = '존재하지 않는 회원정보입니다. 다시 입력해주세요.';
+
+            res.status(resultCode).json ({
+                'code': resultCode,
+                'message': message
+            });
+        }
+
+        else{
+            let resultCode = 200;
+            let message = '이메일 인증을 위해 ' + result[0].UserEmail + ' 으로 이메일을 보냈습니다.';
+            
+            let authNum = Math.random().toString().substr(2, 6);
+
+            req.session.reset = {
+                Email: userEmail,
+                Auth: authNum
+            };
+
+            const mailOptions = {
+                from: "Smart_Key_KPU <noreply.google_id@gmail.com>",
+                to: req.session.reset.Email,
+                subject: "Smart Key 비밀번호 초기화 인증 번호 메일입니다.",
+                text: "인증번호는 " + authNum + " 입니다."
+            };
+
+            smtpTransport.sendMail(mailOptions, (err, res) => {
+                if(err) {
+                    console.log(err);
+                } else{
+                    console.log('success');
+                }
+            });
+
+            res.status(resultCode).json ({
+                'code': resultCode,
+                'message': message
+            });
+        }
+    })
+})
+
+router.post('/user/reset/verification', function (req, res) {
+    let inputAuth = req.body.inputAuth;
+
+    if (req.session.reset === undefined) {
+        let resultCode = 404;
+        let message = '인증번호가 만료 되었습니다. 처음부터 다시 해주세요.';
+
+        res.status(resultCode).json({
+            'code': resultCode,
+            'message': message
+        });
+    }
+
+    else if (inputAuth !== req.session.reset.Auth) {
+        let resultCode = 400;
+        let message = '인증번호가 틀렸습니다. 다시 입력해 주세요.';
+        
+        res.status(resultCode).json({
+            'code': resultCode,
+            'message': message
+        });
+    }
+
+    else{
+        let resultCode = 200;
+        let message = '이메일 인증이 완료되었습니다.';
+
+        req.session.reset.auth = '';
+        
+        res.status(resultCode).json({
+            'code': resultCode,
+            'message': message
+        });
+    }
+})
+
+router.post('/user/reset/change_pw', function (req, res) {
+    let userPwd = req.body.userPwd;
+
+    if (formSearch(userPwd)) {
+        let resultCode = 400;
+        let message = '비밀번호는 9자리 이상이어야 합니다. 다시 입력해주세요.';
+
+        res.status(resultCode).json({
+            'code': resultCode,
+            'message': message
+        });
+    }
+
+    else {
+        //Encryption: using salt as a key to encrypt the password
+        const salt = crypto.randomBytes(32).toString('base64');
+        const hashedPw = crypto.pbkdf2Sync(userPwd, salt, 1, 32, 'sha512').toString('base64');
+
+        let sql2 = 'update Users set UserPwd = ?, Salt = ? where UserEmail = ?';
+
+        connection.query(sql2, [hashedPw, salt, req.session.reset.Email], function (err, result){
+            if (err) {
+                let resultCode = 404;
+                let message = '에러가 발생했습니다.'
+                console.log(err);
+
+                res.status(resultCode).json({
+                    'code': resultCode,
+                    'message': message
+                });
+            }
+            else{
+                let resultCode = 200;
+                let message = '비밀번호 변경에 성공하셨습니다.';
+
+                res.status(resultCode).json({
+                    'code': resultCode,
+                    'message': message
+                });
+                req.session.destroy();
+            }
+        });
+    }
+})
+
+//Form Checking function
+function formSearch(pw, name, email, birth) {
+    if (pw.length < 8) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+module.exports = router;
+```
+
+세션을 이용해 비밀번호를 바꿀 사용자의 이메일 계정과 인증번호를 가지고 있게 한다.
+
 ## app.js
 
 실제로 구동되는 서버 프로그램은 다음과 같다.
 
 ```jsx
-var express  = require('express');
-var app = express();
+const express  = require('express');
+const app = express();
 
-var joinRouter = require('./routes/join');
+let joinRouter = require('./routes/join');
 app.use('/Smart-Key', joinRouter);
 
-var loginRouter = require('./routes/login');
+let loginRouter = require('./routes/login');
 app.use('/Smart-Key', loginRouter);
+
+let resetPwRouter = require('./routes/resetPW');
+app.use('/Smart-Key', resetPwRouter);
 
 //Server
 var server = app.listen(8080,'localhost', function(){
