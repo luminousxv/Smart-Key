@@ -241,9 +241,12 @@ module.exports = router;
 
 <aside>
 💡 from: Smart_Key_KPU <noreply.gmail.com>
-to: drgvyhn@gmail.com
-subject: Smart Key 회원가입 인증 번호 메일입니다.
-text: 인증번호는 000000 입니다.
+
+💡 to: drgvyhn@gmail.com
+
+💡 subject: Smart Key 회원가입 인증 번호 메일입니다.
+
+💡 text: 인증번호는 000000 입니다.
 
 </aside>
 
@@ -353,9 +356,12 @@ Salt/Hash를 이용해 단방향 암호화를 해서 original 비밀번호를 �
 
 <aside>
 💡 from: Smart_Key_KPU <noreply.gmail.com>
-to: drgvyhn@gmail.com
-subject: Smart Key 비밀번호 초기화 인증 번호 메일입니다.
-text: 인증번호는 000000 입니다.
+
+💡 to: drgvyhn@gmail.com
+
+💡 subject: Smart Key 비밀번호 초기화 인증 번호 메일입니다.
+
+💡 text: 인증번호는 000000 입니다.
 
 </aside>
 
