@@ -10,6 +10,12 @@ app.use('/Smart-Key', loginRouter);
 let resetPwRouter = require('./routes/resetPW');
 app.use('/Smart-Key', resetPwRouter);
 
+let keylistRouter = require('./routes/keylist');
+app.use('/Smart-Key', keylistRouter);
+
+let registerkeyRouter = require('./routes/register_key');
+app.use('/Smart-Key', registerkeyRouter);
+
 //Server
 let server = app.listen(8080,'localhost', function(){
     let host = server.address().address;

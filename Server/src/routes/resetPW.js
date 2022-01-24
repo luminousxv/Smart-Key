@@ -5,7 +5,6 @@ const crypto = require("crypto");
 var bodyParser = require("body-parser");
 const session = require("express-session");
 const FileStore = require('session-file-store') (session);
-const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");
 
 router.use(bodyParser.json());
