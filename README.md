@@ -2,7 +2,7 @@
 
 2022 컴퓨터공학부 종합설계 IoT 기반 스마트 키 Github 입니다.
 
-## 파일 구성 (2022.01.23 수정)
+## 파일 구성 (2022.01.24 수정)
 
 - Server
     - src
@@ -16,6 +16,10 @@
             login.js (Login API)
 
             resetPW.js (reset_pw API)
+
+            keylist.js (view keylist API)
+
+            register_key.js (register new key API)
             
         - database
             
