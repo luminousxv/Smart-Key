@@ -3,6 +3,7 @@ const router = express.Router();
 const connection = require("../database/dbconnection");
 let bodyParser = require("body-parser");
 
+
 router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 
@@ -39,6 +40,13 @@ router.post('/register_key', function (req, res) {
                 let sql2 = 'insert into KeyInfo (SerialNum, KeyName, KeyState, UserID) values (?, ?, ?, ?)';
                 let params = [serialNum, keyName, 'open', req.session.login.Email];
 
+                let time  = new Date(+new Date() + 3240 * 10000).toISOString().replace("T", " ").replace(/\..*/, '');
+                console.log(time);
+
+                let sql3 = 'insert into KeyRecord (SerialNum, Time, KeyState, Method) values (?, ?, ?, ?)';
+                let params2 = [serialNum, time, 'open', '처음 등록'];
+                console.log(time);
+
                 connection.query(sql2, params, function (err, result) {
                     if (err) {
                         res.status(500).json ({
@@ -47,10 +55,20 @@ router.post('/register_key', function (req, res) {
                         })
                     }
                     else{
-                        res.status(200).json ({
-                            'code': 200,
-                            'message': '새로운 Smart Key "' + keyName + '" 이(가) 등록되었습니다.'
-                        });
+                        connection.query(sql3, params2, function (err, result2) {
+                            if (err) {
+                                res.status(500).json ({
+                                    'code': 500,
+                                    'message': 'DB 오류가 발생했습니다.'
+                                })
+                            }
+                            else{
+                                res.status(200).json ({
+                                    'code': 200,
+                                    'message': '새로운 Smart Key "' + keyName + '" 이(가) 등록되었습니다.'
+                                });
+                            }
+                        })
                     }
                 })
             }
