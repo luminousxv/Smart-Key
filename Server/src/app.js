@@ -16,6 +16,9 @@ app.use('/Smart-Key', keylistRouter);
 let registerkeyRouter = require('./routes/register_key');
 app.use('/Smart-Key', registerkeyRouter);
 
+let deletekeyRouter = require('./routes/delete_key');
+app.use('/Smart-Key', deletekeyRouter);
+
 //Server
 let server = app.listen(8080,'localhost', function(){
     let host = server.address().address;

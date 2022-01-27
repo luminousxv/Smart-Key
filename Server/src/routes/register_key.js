@@ -41,11 +41,9 @@ router.post('/register_key', function (req, res) {
                 let params = [serialNum, keyName, 'open', req.session.login.Email];
 
                 let time  = new Date(+new Date() + 3240 * 10000).toISOString().replace("T", " ").replace(/\..*/, '');
-                console.log(time);
 
                 let sql3 = 'insert into KeyRecord (SerialNum, Time, KeyState, Method) values (?, ?, ?, ?)';
                 let params2 = [serialNum, time, 'open', '처음 등록'];
-                console.log(time);
 
                 connection.query(sql2, params, function (err, result) {
                     if (err) {

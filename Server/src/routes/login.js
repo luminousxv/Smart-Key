@@ -25,7 +25,6 @@ router.post('/user/login', function(req, res) {
     let sql = 'SELECT * FROM Users WHERE UserEmail = ?';
 
     connection.query(sql, userEmail, function(err, result) {
-        console.log(req.body);
         let resultCode = 404;
         let message = '에러가 발생했습니다.';
         
