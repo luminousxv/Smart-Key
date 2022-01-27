@@ -20,6 +20,8 @@
             keylist.js (view keylist API)
 
             register_key.js (register new key API)
+
+            delete_key.js (delete key API)
             
         - database
             

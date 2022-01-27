@@ -158,3 +158,149 @@ router.post('/register_key', function (req, res) {
 
 module.exports = router;
 ```
+
+## delete_key API
+
+등록되어 있는 키를 삭제를 할 때 사용이 된다. 클라이언트 측에서는 먼저 비밀번호를 입력해서 인증을 받는다. 다음과 같이 클라이언트는 서버에 리퀘스트를 한다.
+
+```jsx
+{
+    "UserPwd": "987654321"
+}
+```
+
+서버 측에서는 세션에 저장되어 있는 이메일을 통해  Users테이블에 있는  salt값을 가지고 리퀘스트 받은 비밀번호를 암호화 하고 저장되어 있는 비밀번호와 비교 후, 같으면 인증이 되는 방식이다. 리스폰스는 다음과 같이 서버가 클라이언트 측으로 보낸다.
+
+```jsx
+{
+    "code": 200,
+    "message": "인증되었습니다."
+}
+```
+
+그러면 클라이언트 측에서는 어떤 스마트 키를 삭제할 지 서버측에 보내면 된다. 클라이언트 측은 다음과 같이 서버측으로 보낸다.
+
+```jsx
+{
+    "SerialNum": "0000001"
+}
+```
+
+해당 시리얼 넘버가 KeyList 테이블에 존재하면 KeyList테이블에서 삭제를 하고, KeyRecord에서도 위 시러얼 넘버로 기록되어 있는 이력들을 삭제한다. 완료가 되면 스마트 키가 삭제되었다는 메세지와 함께 서버측이 클라이언트에게 리스폰스를 한다.
+
+```jsx
+{
+    "code": 200,
+    "message": "스마트 키가 삭제되었습니다."
+}
+```
+
+다음 delete_key.js 코드이다.
+
+```jsx
+const express = require("express");
+const router = express.Router();
+const connection = require("../database/dbconnection");
+let bodyParser = require("body-parser");
+const crypto = require("crypto");
+
+router.use(bodyParser.json());
+router.use(bodyParser.urlencoded({ extended: true }));
+
+router.post('/delete_key/verification', function(req, res) {
+    let userPwd = req.body.UserPwd;
+
+    let sql1 = 'select * from Users where UserEmail = ?';
+
+    if (req.session.login === undefined) {
+        let resultCode = 404;
+        let message = '세션이 만료되었습니다. 다시 로그인 하세요.';
+
+        res.status(resultCode). json ({
+            'code': resultCode,
+            'message': message
+        });
+    }
+
+    else{
+        connection.query(sql1, req.session.login.Email, function (err, result) {
+            if (err) {
+                res.status(500).json ({
+                    'code': 500,
+                    'message': 'DB 오류가 발생했습니다.'
+                })
+            }
+            else{
+                const salt = crypto.randomBytes(32).toString('base64');
+                const hashedPw = crypto.pbkdf2Sync(userPwd, result[0].Salt, 1, 32, 'sha512').toString('base64');
+
+                if (hashedPw !== result[0].UserPwd) {
+                    resultCode = 400;
+                    message = '존재하지 않는 계정입니다.';
+
+                    res.status(resultCode). json ({
+                        'code': resultCode,
+                        'message': message
+                    });
+                }
+                else{
+                    resultCode = 200;
+                    message = '인증되었습니다.'
+
+                    res.status(resultCode). json ({
+                        'code': resultCode,
+                        'message': message
+                    });
+                }
+            }
+        })
+    }
+})
+
+router.post('/delete_key', function (req, res) {
+    let serialNum = req.body.SerialNum;
+
+    let time  = new Date(+new Date() + 3240 * 10000).toISOString().replace("T", " ").replace(/\..*/, '');
+
+    let sql2 = 'delete from KeyInfo where SerialNum = ?';
+    let sql3 = 'delete from KeyRecord where SerialNum = ?';
+
+    if (req.session.login === undefined) {
+        let resultCode = 404;
+        let message = '세션이 만료되었습니다. 다시 로그인 하세요.';
+
+        res.status(resultCode). json ({
+            'code': resultCode,
+            'message': message
+        });
+    }
+    else{
+        connection.query(sql2, serialNum, function(err, result) {
+            if (err) {
+                res.status(500).json ({
+                    'code': 500,
+                    'message': 'DB1 오류가 발생했습니다.'
+                })
+            }
+            else{
+                connection.query(sql3, serialNum, function(err2, result2) {
+                    if (err2) {
+                        res.status(500).json ({
+                            'code': 500,
+                            'message': 'DB2 오류가 발생했습니다.'
+                        })
+                    }
+                    else{
+                        res.status(200).json ({
+                            'code': 200,
+                            'message': '스마트 키가 삭제되었습니다.'
+                        })
+                    }
+                })
+            }
+        })
+    }
+})
+
+module.exports = router;
+```
