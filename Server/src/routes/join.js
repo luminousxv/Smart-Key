@@ -16,8 +16,8 @@ const smtpTransport = nodemailer.createTransport({
     port: 465,
     secure: true,
     auth : {
-        user: "google_id",
-        pass: "google_pw"
+        user: "drgvyhn@gmail.com",
+        pass: "ulkjogihoxnxzqet"
     }
 });
 
@@ -32,7 +32,7 @@ router.use(session ({
 
 // Join API
 
-router.post('/user/email-verification', function (req, res) {
+router.post('/user/join/email-verification', function (req, res) {
     let userEmail = req.body.userEmail;
     let userPwd = req.body.userPwd;
     let userName = req.body.userName;
@@ -122,7 +122,7 @@ router.post('/user/email-verification', function (req, res) {
 });
 
 //After verification
-router.post('/user/join_success', function (req, res) {
+router.post('/user/join/join_success', function (req, res) {
     let inputAuth = req.body.inputAuth;
 
     if (req.session.user === undefined) {

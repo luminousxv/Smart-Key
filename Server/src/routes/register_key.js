@@ -2,14 +2,16 @@ const express = require("express");
 const router = express.Router();
 const connection = require("../database/dbconnection");
 let bodyParser = require("body-parser");
+const crypto = require("crypto");
 
 
 router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 
-router.post('/register_key', function (req, res) {
-    let serialNum = req.body.SerialNum;
-    let keyName = req.body.KeyName;
+router.post('/main/register_key', function (req, res) {
+    let serialNum = req.body.serialNum;
+    let keyName = req.body.keyName;
+    let smartPwd = req.body.smartPwd;
 
     let sql1 = 'select * from KeyInfo where SerialNum = ?';
 
@@ -37,8 +39,11 @@ router.post('/register_key', function (req, res) {
                 })
             }
             else{
-                let sql2 = 'insert into KeyInfo (SerialNum, KeyName, KeyState, UserID) values (?, ?, ?, ?)';
-                let params = [serialNum, keyName, 'open', req.session.login.Email];
+                const salt = crypto.randomBytes(32).toString('base64');
+                const hashedPw = crypto.pbkdf2Sync(smartPwd, salt, 1, 32, 'sha512').toString('base64');
+                
+                let sql2 = 'insert into KeyInfo (SerialNum, KeyName, KeyState, UserID, SmartPwd, Salt) values (?, ?, ?, ?, ?, ?)';
+                let params = [serialNum, keyName, 'open', req.session.login.Email, hashedPw, salt];
 
                 let time  = new Date(+new Date() + 3240 * 10000).toISOString().replace("T", " ").replace(/\..*/, '');
 

@@ -6,7 +6,7 @@ let bodyParser = require("body-parser");
 router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 
-router.get('/view/KeyList', function (req, res) {
+router.get('/main/view_keylist', function (req, res) {
     if (req.session.login === undefined) {
         let resultCode = 404;
         let message = '세션이 만료되었습니다. 다시 로그인 해주세요';

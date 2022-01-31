@@ -8,8 +8,8 @@ const crypto = require("crypto");
 router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 
-router.post('/delete_key/verification', function(req, res) {
-    let userPwd = req.body.UserPwd;
+router.post('/main/delete_key/pw', function(req, res) {
+    let userPwd = req.body.userPwd;
 
     let sql1 = 'select * from Users where UserEmail = ?';
 
@@ -58,13 +58,13 @@ router.post('/delete_key/verification', function(req, res) {
     }
 })
 
-router.post('/delete_key', function (req, res) {
-    let serialNum = req.body.SerialNum;
-
-    let time  = new Date(+new Date() + 3240 * 10000).toISOString().replace("T", " ").replace(/\..*/, '');
+router.post('/main/delete_key/success', function (req, res) {
+    let serialNum = req.body.serialNum;
+    let smartPwd = req.body.smartPwd;
 
     let sql2 = 'delete from KeyInfo where SerialNum = ?';
     let sql3 = 'delete from KeyRecord where SerialNum = ?';
+    let sql4 = 'select * from KeyInfo where SerialNum = ?';
 
     if (req.session.login === undefined) {
         let resultCode = 404;
@@ -76,25 +76,44 @@ router.post('/delete_key', function (req, res) {
         });
     }
     else{
-        connection.query(sql2, serialNum, function(err, result) {
+        connection.query(sql4, serialNum, function(err, result3) {
+            const hashedPw = crypto.pbkdf2Sync(smartPwd, result3[0].Salt, 1, 32, 'sha512').toString('base64');
+            console.log(result3);
             if (err) {
                 res.status(500).json ({
                     'code': 500,
-                    'message': 'DB1 오류가 발생했습니다.'
+                    'message': 'DB 오류가 발생했습니다.'
                 })
             }
+            else if (hashedPw !== result3[0].SmartPwd) {
+                res.status(400).json ({
+                    'code': 400,
+                    'message': '스마트 키 비밀번호가 틀렸습니다.'
+                })
+            }
+
             else{
-                connection.query(sql3, serialNum, function(err2, result2) {
-                    if (err2) {
+                connection.query(sql2, serialNum, function (err, result) {
+                    if (err) {
                         res.status(500).json ({
                             'code': 500,
-                            'message': 'DB2 오류가 발생했습니다.'
+                            'message': 'DB 오류가 발생했습니다.'
                         })
                     }
                     else{
-                        res.status(200).json ({
-                            'code': 200,
-                            'message': '스마트 키가 삭제되었습니다.'
+                        connection.query(sql3, serialNum, function (err, result2){
+                            if (err) {
+                                res.status(500).json ({
+                                    'code': 500,
+                                    'message': 'DB 오류가 발생했습니다.'
+                                })
+                            }
+                            else{
+                                res.status(200).json({
+                                    'code': 200,
+                                    'message': '삭제되었습니다.'
+                                })
+                            }
                         })
                     }
                 })

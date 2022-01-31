@@ -23,12 +23,12 @@ const smtpTransport = nodemailer.createTransport({
     port: 465,
     secure: true,
     auth : {
-        user: "google_id",
-        pass: "google_pw"
+        user: "drgvyhn@gmail.com",
+        pass: "ulkjogihoxnxzqet"
     }
 });
 
-router.post('/user/reset/verification/send_email', function(req, res) {
+router.post('/user/reset/email', function(req, res) {
     let userEmail = req.body.userEmail;
     let userName = req.body.userName;
     let userBirth = req.body.userBirth;
