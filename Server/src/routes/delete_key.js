@@ -77,7 +77,6 @@ router.post('/main/delete_key/success', function (req, res) {
     }
     else{
         connection.query(sql4, serialNum, function(err, result3) {
-            const hashedPw = crypto.pbkdf2Sync(smartPwd, result3[0].Salt, 1, 32, 'sha512').toString('base64');
             if (err) {
                 res.status(500).json ({
                     'code': 500,
