@@ -85,6 +85,12 @@ router.post('/main/delete_key/success', function (req, res) {
                     'message': 'DB 오류가 발생했습니다.'
                 })
             }
+            else if (result3.length === 0){
+                res.status(400).json ({
+                    'code': 400,
+                    'message': '해당 스마트키는 등록되지 않았습니다.'
+                })
+            }
             else if (hashedPw !== result3[0].SmartPwd) {
                 res.status(400).json ({
                     'code': 400,
