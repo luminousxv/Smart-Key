@@ -78,7 +78,6 @@ router.post('/main/delete_key/success', function (req, res) {
     else{
         connection.query(sql4, serialNum, function(err, result3) {
             const hashedPw = crypto.pbkdf2Sync(smartPwd, result3[0].Salt, 1, 32, 'sha512').toString('base64');
-            console.log(result3);
             if (err) {
                 res.status(500).json ({
                     'code': 500,
@@ -91,38 +90,40 @@ router.post('/main/delete_key/success', function (req, res) {
                     'message': '해당 스마트키는 등록되지 않았습니다.'
                 })
             }
-            else if (hashedPw !== result3[0].SmartPwd) {
-                res.status(400).json ({
-                    'code': 400,
-                    'message': '스마트 키 비밀번호가 틀렸습니다.'
-                })
-            }
-
-            else{
-                connection.query(sql2, serialNum, function (err, result) {
-                    if (err) {
-                        res.status(500).json ({
-                            'code': 500,
-                            'message': 'DB 오류가 발생했습니다.'
-                        })
-                    }
-                    else{
-                        connection.query(sql3, serialNum, function (err, result2){
-                            if (err) {
-                                res.status(500).json ({
-                                    'code': 500,
-                                    'message': 'DB 오류가 발생했습니다.'
-                                })
-                            }
-                            else{
-                                res.status(200).json({
-                                    'code': 200,
-                                    'message': '삭제되었습니다.'
-                                })
-                            }
-                        })
-                    }
-                })
+            else {
+                const hashedPw = crypto.pbkdf2Sync(smartPwd, result3[0].Salt, 1, 32, 'sha512').toString('base64');
+                if (hashedPw !== result3[0].SmartPwd) {
+                    res.status(400).json ({
+                        'code': 400,
+                        'message': '비밀번호가 틀렸습니다. 다시 입력해주세요.'
+                    })
+                }
+                else{
+                    connection.query(sql2, serialNum, function (err, result) {
+                        if (err) {
+                            res.status(500).json ({
+                                'code': 500,
+                                'message': 'DB 오류가 발생했습니다.'
+                            })
+                        }
+                        else{
+                            connection.query(sql3, serialNum, function (err, result2){
+                                if (err) {
+                                    res.status(500).json ({
+                                        'code': 500,
+                                        'message': 'DB 오류가 발생했습니다.'
+                                    })
+                                }
+                                else{
+                                    res.status(200).json({
+                                        'code': 200,
+                                        'message': '삭제되었습니다.'
+                                    })
+                                }
+                            })
+                        }
+                    })
+                }
             }
         })
     }
