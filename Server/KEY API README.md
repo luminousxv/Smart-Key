@@ -1,10 +1,10 @@
-# KEYLIST/REGISTER_KEY API
+# KEYLIST/REGISTER_KEY/DELETE_KEY/KEYRECORD API
 
 ## 개요
 
-DB에서 KeyInfo라는 테이블을 이용해 테이블을 등록, 조회, 삭제를 하는  API들이다. (1.27 수정)
+DB에서 KeyInfo라는 테이블을 이용해 테이블을 등록, 조회, 삭제를 하는  API들이다.
 
-로그인 세션을 만들어 15분동안 조작이 가능하게 했다.  
+로그인 세션을 만들어 15분동안 조작이 가능하게 했다. 
 
 ## keylist API
 
@@ -19,19 +19,19 @@ let bodyParser = require("body-parser");
 router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 
-router.get('/view/KeyList', function (req, res) {
+router.get('/main/view_keylist', function (req, res) {
     if (req.session.login === undefined) {
         let resultCode = 404;
         let message = '세션이 만료되었습니다. 다시 로그인 해주세요';
 
-        req.status(resultCode). json ({
+        req.status(resultCode).json ({
             'code': resultCode,
             'message': message
         });
     }
     
     else{
-        let sql1 = 'select * from KeyInfo where UserID = ?';
+        let sql1 = 'select SerialNum, KeyName, KeyState from KeyInfo where UserID = ?';
 
         connection.query(sql1, req.session.login.Email, function (err, result) {
             if (err) {
@@ -40,7 +40,6 @@ router.get('/view/KeyList', function (req, res) {
                     'message': 'DB 오류가 발생했습니다.'
                 })
             }
-            
             else{
                 let resultCode = 200;
 
@@ -100,13 +99,15 @@ const express = require("express");
 const router = express.Router();
 const connection = require("../database/dbconnection");
 let bodyParser = require("body-parser");
+const crypto = require("crypto");
 
 router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 
-router.post('/register_key', function (req, res) {
-    let serialNum = req.body.SerialNum;
-    let keyName = req.body.KeyName;
+router.post('/main/register_key', function (req, res) {
+    let serialNum = req.body.serialNum;
+    let keyName = req.body.keyName;
+    let smartPwd = req.body.smartPwd;
 
     let sql1 = 'select * from KeyInfo where SerialNum = ?';
 
@@ -134,8 +135,16 @@ router.post('/register_key', function (req, res) {
                 })
             }
             else{
-                let sql2 = 'insert into KeyInfo (SerialNum, KeyName, KeyState, UserID) values (?, ?, ?, ?)';
-                let params = [serialNum, keyName, 'open', req.session.login.Email];
+                const salt = crypto.randomBytes(32).toString('base64');
+                const hashedPw = crypto.pbkdf2Sync(smartPwd, salt, 1, 32, 'sha512').toString('base64');
+                
+                let sql2 = 'insert into KeyInfo (SerialNum, KeyName, KeyState, UserID, SmartPwd, Salt) values (?, ?, ?, ?, ?, ?)';
+                let params = [serialNum, keyName, 'open', req.session.login.Email, hashedPw, salt];
+
+                let time  = new Date(+new Date() + 3240 * 10000).toISOString().replace("T", " ").replace(/\..*/, '');
+
+                let sql3 = 'insert into KeyRecord (SerialNum, Time, KeyState, Method) values (?, ?, ?, ?)';
+                let params2 = [serialNum, time, 'open', '처음 등록'];
 
                 connection.query(sql2, params, function (err, result) {
                     if (err) {
@@ -145,10 +154,20 @@ router.post('/register_key', function (req, res) {
                         })
                     }
                     else{
-                        res.status(200).json ({
-                            'code': 200,
-                            'message': '새로운 Smart Key "' + keyName + '" 이(가) 등록되었습니다.'
-                        });
+                        connection.query(sql3, params2, function (err, result2) {
+                            if (err) {
+                                res.status(500).json ({
+                                    'code': 500,
+                                    'message': 'DB 오류가 발생했습니다.'
+                                })
+                            }
+                            else{
+                                res.status(200).json ({
+                                    'code': 200,
+                                    'message': '새로운 Smart Key "' + keyName + '" 이(가) 등록되었습니다.'
+                                });
+                            }
+                        })
                     }
                 })
             }
@@ -207,8 +226,8 @@ const crypto = require("crypto");
 router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 
-router.post('/delete_key/verification', function(req, res) {
-    let userPwd = req.body.UserPwd;
+router.post('/main/delete_key/pw', function(req, res) {
+    let userPwd = req.body.userPwd;
 
     let sql1 = 'select * from Users where UserEmail = ?';
 
@@ -257,13 +276,13 @@ router.post('/delete_key/verification', function(req, res) {
     }
 })
 
-router.post('/delete_key', function (req, res) {
-    let serialNum = req.body.SerialNum;
-
-    let time  = new Date(+new Date() + 3240 * 10000).toISOString().replace("T", " ").replace(/\..*/, '');
+router.post('/main/delete_key/success', function (req, res) {
+    let serialNum = req.body.serialNum;
+    let smartPwd = req.body.smartPwd;
 
     let sql2 = 'delete from KeyInfo where SerialNum = ?';
     let sql3 = 'delete from KeyRecord where SerialNum = ?';
+    let sql4 = 'select * from KeyInfo where SerialNum = ?';
 
     if (req.session.login === undefined) {
         let resultCode = 404;
@@ -275,27 +294,129 @@ router.post('/delete_key', function (req, res) {
         });
     }
     else{
-        connection.query(sql2, serialNum, function(err, result) {
+        connection.query(sql4, serialNum, function(err, result3) {
             if (err) {
                 res.status(500).json ({
                     'code': 500,
-                    'message': 'DB1 오류가 발생했습니다.'
+                    'message': 'DB 오류가 발생했습니다.'
+                })
+            }
+            else if (result3.length === 0){
+                res.status(400).json ({
+                    'code': 400,
+                    'message': '해당 스마트키는 등록되지 않았습니다.'
+                })
+            }
+            else {
+                const hashedPw = crypto.pbkdf2Sync(smartPwd, result3[0].Salt, 1, 32, 'sha512').toString('base64');
+                if (hashedPw !== result3[0].SmartPwd) {
+                    res.status(400).json ({
+                        'code': 400,
+                        'message': '비밀번호가 틀렸습니다. 다시 입력해주세요.'
+                    })
+                }
+                else{
+                    connection.query(sql2, serialNum, function (err, result) {
+                        if (err) {
+                            res.status(500).json ({
+                                'code': 500,
+                                'message': 'DB 오류가 발생했습니다.'
+                            })
+                        }
+                        else{
+                            connection.query(sql3, serialNum, function (err, result2){
+                                if (err) {
+                                    res.status(500).json ({
+                                        'code': 500,
+                                        'message': 'DB 오류가 발생했습니다.'
+                                    })
+                                }
+                                else{
+                                    res.status(200).json({
+                                        'code': 200,
+                                        'message': '삭제되었습니다.'
+                                    })
+                                }
+                            })
+                        }
+                    })
+                }
+            }
+        })
+    }
+})
+
+module.exports = router;
+```
+
+## view keyrecord API
+
+클라이언트 측에서 스마트키의 시리얼 넘버를 보내서 리퀘스트 하면, 서버 측에서는 그 시리얼 넘버에 해당되는 이력들을 리스폰스 해준다. 클라이언트 측의 리퀘스트는 다음과 같이 보낸다.
+
+```jsx
+{
+    "serialNum": "0000001"
+}
+```
+
+해당 시리얼 번호로 이력이 저장되어 있으면 그 이력을 리스폰스 해준다.
+
+```jsx
+{
+    "code": 200,
+    "message": [
+        {
+            "SerialNum": "0000001",
+            "Time": "2022-02-02T13:59:32.000Z",
+            "KeyState": "open",
+            "GPSLat": null,
+            "GPSLong": null,
+            "Method": "처음 등록"
+        }
+    ]
+}
+```
+
+다음 keyrecord.js 코드이다.
+
+```jsx
+const express = require("express");
+const router = express.Router();
+const connection = require("../database/dbconnection");
+let bodyParser = require("body-parser");
+
+router.use(bodyParser.json());
+router.use(bodyParser.urlencoded({ extended: true }));
+
+router.get('/main/view_keyrecord', function(req, res) {
+    let serialNum = req.body.serialNum;
+
+    let sql1 = 'select SerialNum, Time, KeyState, GPSLat, GPSLong, Method from KeyRecord where serialNum = ?';
+
+    if (req.session.login === undefined) {
+        res.status(404).json ({
+            'code': 404,
+            'message': '세션이 만료되었습니다. 다시 로그인 해주세요'
+        })
+    }
+    else{
+        connection.query(sql1, serialNum, function(err, result) {
+            if (err) {
+                res.status(500).json ({
+                    'code': 500,
+                    'message': 'DB 오류가 발생했습니다.'
+                })
+            }
+            else if (result.length === 0) {
+                res.status(400).json ({
+                    'code': 404,
+                    'message': '해당 스마트키의 이력이 없습니다.'
                 })
             }
             else{
-                connection.query(sql3, serialNum, function(err2, result2) {
-                    if (err2) {
-                        res.status(500).json ({
-                            'code': 500,
-                            'message': 'DB2 오류가 발생했습니다.'
-                        })
-                    }
-                    else{
-                        res.status(200).json ({
-                            'code': 200,
-                            'message': '스마트 키가 삭제되었습니다.'
-                        })
-                    }
+                res.status(200).json ({
+                    'code': 200,
+                    'message': result
                 })
             }
         })

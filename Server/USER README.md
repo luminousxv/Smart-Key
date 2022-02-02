@@ -12,6 +12,8 @@ router 모듈화를 해서 유지 보수 및 수정이 편리하게 했다. (1.2
 
 비밀번호 초기화를 구현했다. (1.23 수정)
 
+url 수정을 하였다. (2.2 수정)
+
 ## DB Connection
 
 ```jsx
@@ -51,8 +53,7 @@ const nodemailer = require("nodemailer");
 const crypto = require("crypto");
 const session = require("express-session");
 const FileStore = require('session-file-store') (session);
-var bodyParser = require("body-parser");
-const bcrypt = require("bcrypt");
+let bodyParser = require("body-parser");
 router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 const app = express();
@@ -63,8 +64,8 @@ const smtpTransport = nodemailer.createTransport({
     port: 465,
     secure: true,
     auth : {
-        user: "gmail id",
-        pass: "gmail password"
+        user: "drgvyhn@gmail.com",
+        pass: "ulkjogihoxnxzqet"
     }
 });
 
@@ -72,20 +73,21 @@ const smtpTransport = nodemailer.createTransport({
 router.use(session ({
     secret: 'keyboard cat',
     resave: false,
-    saveUninitialized: true,
-    stroe: new FileStore()
+    saveUninitialized: false,
+    store: new FileStore(),
+    cookie:{maxAge: 120000} //2minutes
 }));
 
 // Join API
 
-router.post('/user/email-verification', function (req, res) {
-    var userEmail = req.body.userEmail;
-    var userPwd = req.body.userPwd;
-    var userName = req.body.userName;
-    var userBirth = req.body.userBirth;
+router.post('/user/join/email-verification', function (req, res) {
+    let userEmail = req.body.userEmail;
+    let userPwd = req.body.userPwd;
+    let userName = req.body.userName;
+    let userBirth = req.body.userBirth;
 
-    var resultCode;
-    var message;
+    let resultCode;
+    let message;
 
     //Repetition Check SQL Query
     var sql2 = 'SELECT * FROM Users WHERE UserEmail = ?';
@@ -145,7 +147,7 @@ router.post('/user/email-verification', function (req, res) {
                 } else{
                     console.log('success');
                 }
-            })
+            });
 
             resultCode = 200;
             message = req.session.user.Email + ' 로 인증 이메일을 보냈습니다. 확인해주세요!';
@@ -168,31 +170,38 @@ router.post('/user/email-verification', function (req, res) {
 });
 
 //After verification
-router.post('/user/join_success', function (req, res) {
-    var inputAuth = req.body.inputAuth;
+router.post('/user/join/join_success', function (req, res) {
+    let inputAuth = req.body.inputAuth;
+
+    if (req.session.user === undefined) {
+        let resultCode = 404;
+        let message = '인증번호가 만료 되었습니다. 처음부터 다시 해주세요.';
+
+        res.status(resultCode).json({
+            'code': resultCode,
+            'message': message
+        });
+    }
 
     //compare with input and session's verification number
-    if (inputAuth !== req.session.user.Auth) {
-        var resultCode = 400;
-        var message = '인증번호가 틀렸습니다. 재인증 부탁드립니다.';
+    else if (inputAuth !== req.session.user.Auth) {
+        let resultCode = 400;
+        let message = '인증번호가 틀렸습니다. 다시 입력 해주세요.';
         
         res.status(resultCode).json({
             'code': resultCode,
             'message': message
         });
-        req.session.destroy(function(err){
-            if (err) throw err;
-        });
     } else{
         //DB Write Query
-        var sql = 'INSERT INTO Users (UserEmail, UserPwd, UserName, UserBirth, Salt) VALUES(?, ?, ?, ?, ?)';
-        var params = [req.session.user.Email, req.session.user.Password, req.session.user.Name, req.session.user.Birthday, req.session.user.Salt];
+        let sql = 'INSERT INTO Users (UserEmail, UserPwd, UserName, UserBirth, Salt) VALUES(?, ?, ?, ?, ?)';
+        let params = [req.session.user.Email, req.session.user.Password, req.session.user.Name, req.session.user.Birthday, req.session.user.Salt];
         
         connection.query(sql, params, function(err2, result2) {
             if (err2) {
                 console.log(err);
-                var resultCode = 404;
-                var message = '에러가 발생했습니다.';
+                let resultCode = 404;
+                let message = '에러가 발생했습니다.';
             } else{
                 resultCode = 200;
                 message = '회원가입에 성공했습니다.';
@@ -202,8 +211,8 @@ router.post('/user/join_success', function (req, res) {
                 'message': message
             });
             //delete session
-            req.session.destroy(function(err){
-                if (err) throw err;
+            req.session.destroy(function () {
+                req.session;
             });
         });
     }
@@ -241,12 +250,9 @@ module.exports = router;
 
 <aside>
 💡 from: Smart_Key_KPU <noreply.gmail.com>
-
-💡 to: drgvyhn@gmail.com
-
-💡 subject: Smart Key 회원가입 인증 번호 메일입니다.
-
-💡 text: 인증번호는 000000 입니다.
+to: drgvyhn@gmail.com
+subject: Smart Key 회원가입 인증 번호 메일입니다.
+text: 인증번호는 000000 입니다.
 
 </aside>
 
@@ -273,42 +279,56 @@ const router = express.Router();
 const connection = require("../database/dbconnection");
 const crypto = require("crypto");
 var bodyParser = require("body-parser");
+const session = require("express-session");
+const FileStore = require('session-file-store') (session);
 
 router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 
+router.use(session ({
+    secret: 'keyboard cat',
+    resave: false,
+    saveUninitialized: false,
+    store: new FileStore(),
+    cookie:{maxAge: 900000} //15minutes
+}));
+
 //Login API
 router.post('/user/login', function(req, res) {
-    var userEmail = req.body.userEmail;
-    var userPwd = req.body.userPwd;
+    let userEmail = req.body.userEmail;
+    let userPwd = req.body.userPwd;
     //Check if account exists
-    var sql = 'select * from Users where UserEmail = ?';
+    let sql = 'SELECT * FROM Users WHERE UserEmail = ?';
 
     connection.query(sql, userEmail, function(err, result) {
-        var resultCode = 404;
-        var message = '에러가 발생했습니다.';
+        let resultCode = 404;
+        let message = '에러가 발생했습니다.';
         
         if (err) {
             console.log(err);
         }
         else if(result.length === 0) {
-            resultCode = 204;
+            resultCode = 400;
             message = '존재하지 않는 계정입니다.';
         }
         else{
-            //hash input password to compare with password in DB
+            //encrypt input password to compare with password in DB
             const hashedPw2 = crypto.pbkdf2Sync(userPwd, result[0].Salt, 1, 32, 'sha512').toString('base64');
 
             if (result[0].UserPwd !== hashedPw2) {
-                resultCode = 204;
+                resultCode = 401;
                 message = '비밀번호가 틀렸습니다!';
             } else {
+                req.session.login = {
+                    Email : userEmail,
+                    Name : result[0].UserName
+                }
                 resultCode = 200;
                 message = '로그인 성공! ' + result[0].UserName + '님 환영합니다!';
             }
         }
 
-        res.json({
+        res.status(resultCode).json({
             'code': resultCode,
             'message': message
         });
@@ -356,12 +376,9 @@ Salt/Hash를 이용해 단방향 암호화를 해서 original 비밀번호를 �
 
 <aside>
 💡 from: Smart_Key_KPU <noreply.gmail.com>
-
-💡 to: drgvyhn@gmail.com
-
-💡 subject: Smart Key 비밀번호 초기화 인증 번호 메일입니다.
-
-💡 text: 인증번호는 000000 입니다.
+to: drgvyhn@gmail.com
+subject: Smart Key 비밀번호 초기화 인증 번호 메일입니다.
+text: 인증번호는 000000 입니다.
 
 </aside>
 
@@ -369,7 +386,7 @@ Salt/Hash를 이용해 단방향 암호화를 해서 original 비밀번호를 �
 
 ```jsx
 {
-    "inputAuth": "000000"
+    "inputAuth": "523790"
 }
 ```
 
@@ -409,7 +426,6 @@ const crypto = require("crypto");
 var bodyParser = require("body-parser");
 const session = require("express-session");
 const FileStore = require('session-file-store') (session);
-const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");
 
 router.use(bodyParser.json());
@@ -428,12 +444,12 @@ const smtpTransport = nodemailer.createTransport({
     port: 465,
     secure: true,
     auth : {
-        user: "google_id",
-        pass: "google_pw"
+        user: "drgvyhn@gmail.com",
+        pass: "ulkjogihoxnxzqet"
     }
 });
 
-router.post('/user/reset/verification/send_email', function(req, res) {
+router.post('/user/reset/email', function(req, res) {
     let userEmail = req.body.userEmail;
     let userName = req.body.userName;
     let userBirth = req.body.userBirth;
@@ -475,7 +491,7 @@ router.post('/user/reset/verification/send_email', function(req, res) {
             };
 
             const mailOptions = {
-                from: "Smart_Key_KPU <noreply.google_id@gmail.com>",
+                from: "Smart_Key_KPU <noreply.drgvyhn@gmail.com>",
                 to: req.session.reset.Email,
                 subject: "Smart Key 비밀번호 초기화 인증 번호 메일입니다.",
                 text: "인증번호는 " + authNum + " 입니다."
@@ -609,10 +625,22 @@ app.use('/Smart-Key', loginRouter);
 let resetPwRouter = require('./routes/resetPW');
 app.use('/Smart-Key', resetPwRouter);
 
+let keylistRouter = require('./routes/keylist');
+app.use('/Smart-Key', keylistRouter);
+
+let registerkeyRouter = require('./routes/register_key');
+app.use('/Smart-Key', registerkeyRouter);
+
+let deletekeyRouter = require('./routes/delete_key');
+app.use('/Smart-Key', deletekeyRouter);
+
+let keyrecordRouter = require('./routes/keyrecord');
+app.use('/Smart-Key', keyrecordRouter)
+
 //Server
-var server = app.listen(8080,'localhost', function(){
-    var host = server.address().address;
-    var port = server.address().port;
+let server = app.listen(8080,'localhost', function(){
+    let host = server.address().address;
+    let port = server.address().port;
     console.log("start at http:// %s:%s", host, port);
 })
 ```
