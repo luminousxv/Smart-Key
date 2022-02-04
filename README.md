@@ -2,7 +2,7 @@
 
 2022 컴퓨터공학부 종합설계 IoT 기반 스마트 키 Github 입니다.
 
-## 파일 구성 (2022.02.02 수정)
+## 파일 구성 (2022.02.04 수정)
 
 - Server
     - src
@@ -24,6 +24,10 @@
             delete_key.js (delete key API)
 
             keyrecord.js (view keyrecord API)
+
+            keyPW.js (key password verification API)
+
+            keycontrol.ks (key control API)
             
         - database
             
