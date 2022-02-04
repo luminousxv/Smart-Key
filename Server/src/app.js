@@ -22,6 +22,12 @@ app.use('/Smart-Key', deletekeyRouter);
 let keyrecordRouter = require('./routes/keyrecord');
 app.use('/Smart-Key', keyrecordRouter)
 
+let keycontrolRouter = require('./routes/keycontrol');
+app.use('/Smart-Key', keycontrolRouter);
+
+let keyPwdRouter = require('./routes/keyPW');
+app.use('/Smart-Key', keyPwdRouter);
+
 //Server
 let server = app.listen(8080,'localhost', function(){
     let host = server.address().address;
