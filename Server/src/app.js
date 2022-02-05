@@ -28,6 +28,9 @@ app.use('/Smart-Key', keycontrolRouter);
 let keyPwdRouter = require('./routes/keyPW');
 app.use('/Smart-Key', keyPwdRouter);
 
+let rpiRouter = require('./routes/rpi_control');
+app.use('/Smart-Key', rpiRouter);
+
 //Server
 let server = app.listen(8080,'localhost', function(){
     let host = server.address().address;
