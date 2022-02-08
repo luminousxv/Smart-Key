@@ -11,7 +11,7 @@ router.get('/main/view_keylist', function (req, res) {
         let resultCode = 404;
         let message = '세션이 만료되었습니다. 다시 로그인 해주세요';
 
-        req.status(resultCode).json ({
+        res.status(resultCode).json ({
             'code': resultCode,
             'message': message
         });
@@ -22,7 +22,7 @@ router.get('/main/view_keylist', function (req, res) {
 
         connection.query(sql1, req.session.login.Email, function (err, result) {
             if (err) {
-                req.status(500).json ({
+                res.status(500).json ({
                     'code': 500,
                     'message': 'DB 오류가 발생했습니다.'
                 })

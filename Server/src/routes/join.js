@@ -6,6 +6,7 @@ const crypto = require("crypto");
 const session = require("express-session");
 const FileStore = require('session-file-store') (session);
 let bodyParser = require("body-parser");
+const http = require('http');
 router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 const app = express();
@@ -23,11 +24,11 @@ const smtpTransport = nodemailer.createTransport({
 
 //Session Configuration
 router.use(session ({
-    secret: 'keyboard cat',
+    secret: 'joinsuccess',
     resave: false,
     saveUninitialized: false,
     store: new FileStore(),
-    cookie:{maxAge: 120000} //2minutes
+    cookie:{maxAge: 900000} //15minutes
 }));
 
 // Join API
@@ -37,6 +38,7 @@ router.post('/user/join/email-verification', function (req, res) {
     let userPwd = req.body.userPwd;
     let userName = req.body.userName;
     let userBirth = req.body.userBirth;
+    console.log('입력값: ' + userEmail + ' '+userPwd + ' ' + userName + ' ' + userBirth);
 
     let resultCode;
     let message;
@@ -103,6 +105,9 @@ router.post('/user/join/email-verification', function (req, res) {
 
             resultCode = 200;
             message = req.session.user.Email + ' 로 인증 이메일을 보냈습니다. 확인해주세요!';
+            console.log('세션 아이디: ' + req.sessionID);
+            console.log('----user 세션----');
+            console.log(req.session.user);
             res.status(resultCode).json({
                 'code': resultCode,
                 'message': message
@@ -124,6 +129,10 @@ router.post('/user/join/email-verification', function (req, res) {
 //After verification
 router.post('/user/join/join_success', function (req, res) {
     let inputAuth = req.body.inputAuth;
+    console.log('입력값:' + inputAuth);
+    console.log('세션 아이디: ' + req.sessionID);
+    console.log('----user 세션----');
+    console.log(req.session.user);
 
     if (req.session.user === undefined) {
         let resultCode = 404;

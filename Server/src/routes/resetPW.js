@@ -11,11 +11,11 @@ router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 
 router.use(session ({
-    secret: 'keyboard cat',
+    secret: 'passwordreset',
     resave: false,
     saveUninitialized: false,
     store: new FileStore(),
-    cookie:{maxAge: 120000} //2minutes
+    cookie:{maxAge: 900000} //2minutes
 }));
 
 const smtpTransport = nodemailer.createTransport({
@@ -32,6 +32,8 @@ router.post('/user/reset/email', function(req, res) {
     let userEmail = req.body.userEmail;
     let userName = req.body.userName;
     let userBirth = req.body.userBirth;
+
+    console.log('입력값: ' + userEmail + ' ' + userName + ' ' + userBirth);
 
     let sql1 = 'select * from Users where UserEmail = ? and UserName = ? and UserBirth = ?';
     let params = [userEmail, userName, userBirth];
@@ -83,7 +85,9 @@ router.post('/user/reset/email', function(req, res) {
                     console.log('success');
                 }
             });
-
+            console.log('세션 아이디: ' + req.sessionID);
+            console.log('----reset 세션----');
+            console.log(req.session.reset);
             res.status(resultCode).json ({
                 'code': resultCode,
                 'message': message
@@ -94,6 +98,9 @@ router.post('/user/reset/email', function(req, res) {
 
 router.post('/user/reset/verification', function (req, res) {
     let inputAuth = req.body.inputAuth;
+    console.log('입력값: ' + inputAuth);
+    console.log('----reset 세션----');
+    console.log(req.session.reset);
 
     if (req.session.reset === undefined) {
         let resultCode = 404;
@@ -130,6 +137,7 @@ router.post('/user/reset/verification', function (req, res) {
 
 router.post('/user/reset/change_pw', function (req, res) {
     let userPwd = req.body.userPwd;
+    console.log('입력값: ' + userPwd);
 
     if (formSearch(userPwd)) {
         let resultCode = 400;

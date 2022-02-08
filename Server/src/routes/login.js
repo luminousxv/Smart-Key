@@ -10,7 +10,7 @@ router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 
 router.use(session ({
-    secret: 'keyboard cat',
+    secret: 'loginsuccess',
     resave: false,
     saveUninitialized: false,
     store: new FileStore(),
@@ -21,6 +21,8 @@ router.use(session ({
 router.post('/user/login', function(req, res) {
     let userEmail = req.body.userEmail;
     let userPwd = req.body.userPwd;
+
+    console.log('입력값: ' + userEmail + ' ' + userPwd);
     //Check if account exists
     let sql = 'SELECT * FROM Users WHERE UserEmail = ?';
 
@@ -47,11 +49,14 @@ router.post('/user/login', function(req, res) {
                     Email : userEmail,
                     Name : result[0].UserName
                 }
+                
                 resultCode = 200;
                 message = '로그인 성공! ' + result[0].UserName + '님 환영합니다!';
             }
         }
-
+        console.log('세션 아이디: ' + req.sessionID);
+        console.log('----login 세션----');
+        console.log(req.session.login);
         res.status(resultCode).json({
             'code': resultCode,
             'message': message
