@@ -1,4 +1,4 @@
-# LOGIN/JOIN/RESETPW API
+# Login/Join/ResetPW API 및 app.js(main server program)
 
 ## 개요
 
@@ -11,8 +11,6 @@ router 모듈화를 해서 유지 보수 및 수정이 편리하게 했다. (1.2
 회원가입 할 시 가입 할 이메일로 인증 번호를 받아 회원가입이 완료되게 하였다. (1.22 수정)
 
 비밀번호 초기화를 구현했다. (1.23 수정)
-
-url 수정을 하였다. (2.2 수정)
 
 ## DB Connection
 
@@ -54,6 +52,7 @@ const crypto = require("crypto");
 const session = require("express-session");
 const FileStore = require('session-file-store') (session);
 let bodyParser = require("body-parser");
+const http = require('http');
 router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 const app = express();
@@ -65,17 +64,17 @@ const smtpTransport = nodemailer.createTransport({
     secure: true,
     auth : {
         user: "drgvyhn@gmail.com",
-        pass: "ulkjogihoxnxzqet"
+        pass: "google_pw"
     }
 });
 
 //Session Configuration
 router.use(session ({
-    secret: 'keyboard cat',
+    secret: 'joinsuccess',
     resave: false,
     saveUninitialized: false,
     store: new FileStore(),
-    cookie:{maxAge: 120000} //2minutes
+    cookie:{maxAge: 900000} //15minutes
 }));
 
 // Join API
@@ -85,6 +84,7 @@ router.post('/user/join/email-verification', function (req, res) {
     let userPwd = req.body.userPwd;
     let userName = req.body.userName;
     let userBirth = req.body.userBirth;
+    console.log('입력값: ' + userEmail + ' '+userPwd + ' ' + userName + ' ' + userBirth);
 
     let resultCode;
     let message;
@@ -151,6 +151,9 @@ router.post('/user/join/email-verification', function (req, res) {
 
             resultCode = 200;
             message = req.session.user.Email + ' 로 인증 이메일을 보냈습니다. 확인해주세요!';
+            console.log('세션 아이디: ' + req.sessionID);
+            console.log('----user 세션----');
+            console.log(req.session.user);
             res.status(resultCode).json({
                 'code': resultCode,
                 'message': message
@@ -172,6 +175,10 @@ router.post('/user/join/email-verification', function (req, res) {
 //After verification
 router.post('/user/join/join_success', function (req, res) {
     let inputAuth = req.body.inputAuth;
+    console.log('입력값:' + inputAuth);
+    console.log('세션 아이디: ' + req.sessionID);
+    console.log('----user 세션----');
+    console.log(req.session.user);
 
     if (req.session.user === undefined) {
         let resultCode = 404;
@@ -256,7 +263,22 @@ text: 인증번호는 000000 입니다.
 
 </aside>
 
-이 인증번호를 가지고 클라이언트 측에서는 /Smart-Key/user/join_success/ 로 리퀘스트 한다. 리퀘스트 바디로는 인증번호를 보내 서버측에서 가지고 있는 인증번호와 일치하면 db에다가 기록을 하게 한다.
+이 인증번호를 가지고 클라이언트 측에서는 /Smart-Key/user/join_success/ 로 리퀘스트 한다. 리퀘스트 바디로는 인증번호를 보내 서버측에서 가지고 있는 인증번호와 일치하면 db에다가 기록을 하게 한다. 다음과 같이 클라이언트는 서버에게 리퀘스트를 한다.
+
+```jsx
+{
+    "inputAuth" : "000000"
+}
+```
+
+서버에서는 DB에 정보들이 갱신되고 완료가 되면 다음과 같이 리스폰스를 해준다.
+
+```jsx
+{
+    "code": 200,
+    "message": "회원가입에 성공했습니다!"
+}
+```
 
 ## Login API
 
@@ -286,7 +308,7 @@ router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 
 router.use(session ({
-    secret: 'keyboard cat',
+    secret: 'loginsuccess',
     resave: false,
     saveUninitialized: false,
     store: new FileStore(),
@@ -297,6 +319,8 @@ router.use(session ({
 router.post('/user/login', function(req, res) {
     let userEmail = req.body.userEmail;
     let userPwd = req.body.userPwd;
+
+    console.log('입력값: ' + userEmail + ' ' + userPwd);
     //Check if account exists
     let sql = 'SELECT * FROM Users WHERE UserEmail = ?';
 
@@ -323,11 +347,14 @@ router.post('/user/login', function(req, res) {
                     Email : userEmail,
                     Name : result[0].UserName
                 }
+                
                 resultCode = 200;
                 message = '로그인 성공! ' + result[0].UserName + '님 환영합니다!';
             }
         }
-
+        console.log('세션 아이디: ' + req.sessionID);
+        console.log('----login 세션----');
+        console.log(req.session.login);
         res.status(resultCode).json({
             'code': resultCode,
             'message': message
@@ -432,11 +459,11 @@ router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 
 router.use(session ({
-    secret: 'keyboard cat',
+    secret: 'passwordreset',
     resave: false,
     saveUninitialized: false,
     store: new FileStore(),
-    cookie:{maxAge: 120000} //2minutes
+    cookie:{maxAge: 900000} //2minutes
 }));
 
 const smtpTransport = nodemailer.createTransport({
@@ -445,7 +472,7 @@ const smtpTransport = nodemailer.createTransport({
     secure: true,
     auth : {
         user: "drgvyhn@gmail.com",
-        pass: "ulkjogihoxnxzqet"
+        pass: "google_pw"
     }
 });
 
@@ -453,6 +480,8 @@ router.post('/user/reset/email', function(req, res) {
     let userEmail = req.body.userEmail;
     let userName = req.body.userName;
     let userBirth = req.body.userBirth;
+
+    console.log('입력값: ' + userEmail + ' ' + userName + ' ' + userBirth);
 
     let sql1 = 'select * from Users where UserEmail = ? and UserName = ? and UserBirth = ?';
     let params = [userEmail, userName, userBirth];
@@ -504,7 +533,9 @@ router.post('/user/reset/email', function(req, res) {
                     console.log('success');
                 }
             });
-
+            console.log('세션 아이디: ' + req.sessionID);
+            console.log('----reset 세션----');
+            console.log(req.session.reset);
             res.status(resultCode).json ({
                 'code': resultCode,
                 'message': message
@@ -515,6 +546,9 @@ router.post('/user/reset/email', function(req, res) {
 
 router.post('/user/reset/verification', function (req, res) {
     let inputAuth = req.body.inputAuth;
+    console.log('입력값: ' + inputAuth);
+    console.log('----reset 세션----');
+    console.log(req.session.reset);
 
     if (req.session.reset === undefined) {
         let resultCode = 404;
@@ -551,6 +585,7 @@ router.post('/user/reset/verification', function (req, res) {
 
 router.post('/user/reset/change_pw', function (req, res) {
     let userPwd = req.body.userPwd;
+    console.log('입력값: ' + userPwd);
 
     if (formSearch(userPwd)) {
         let resultCode = 400;
@@ -611,36 +646,3 @@ module.exports = router;
 ## app.js
 
 실제로 구동되는 서버 프로그램은 다음과 같다.
-
-```jsx
-const express  = require('express');
-const app = express();
-
-let joinRouter = require('./routes/join');
-app.use('/Smart-Key', joinRouter);
-
-let loginRouter = require('./routes/login');
-app.use('/Smart-Key', loginRouter);
-
-let resetPwRouter = require('./routes/resetPW');
-app.use('/Smart-Key', resetPwRouter);
-
-let keylistRouter = require('./routes/keylist');
-app.use('/Smart-Key', keylistRouter);
-
-let registerkeyRouter = require('./routes/register_key');
-app.use('/Smart-Key', registerkeyRouter);
-
-let deletekeyRouter = require('./routes/delete_key');
-app.use('/Smart-Key', deletekeyRouter);
-
-let keyrecordRouter = require('./routes/keyrecord');
-app.use('/Smart-Key', keyrecordRouter)
-
-//Server
-let server = app.listen(8080,'localhost', function(){
-    let host = server.address().address;
-    let port = server.address().port;
-    console.log("start at http:// %s:%s", host, port);
-})
-```
