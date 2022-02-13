@@ -101,7 +101,7 @@ router.post('/main/close_key', function(req, res){
         let resultCode = 404;
         let message = '세션이 만료되었습니다. 다시 로그인 해주세요';
 
-        req.status(resultCode).json ({
+        res.status(resultCode).json ({
             'code': resultCode,
             'message': message
         });
