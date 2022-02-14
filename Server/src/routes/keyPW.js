@@ -3,9 +3,6 @@ const router = express.Router();
 const connection = require("../database/dbconnection");
 let bodyParser = require("body-parser");
 const crypto = require("crypto");
-let cookieParser = require("cookie-parser");
-
-router.use(cookieParser());
 
 
 router.use(bodyParser.json());
