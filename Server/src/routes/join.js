@@ -7,9 +7,12 @@ const session = require("express-session");
 const FileStore = require('session-file-store') (session);
 let bodyParser = require("body-parser");
 const http = require('http');
+let cookieParser = require("cookie-parser");
 router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 const app = express();
+
+router.use(cookieParser());
 
 //Email Configuration
 const smtpTransport = nodemailer.createTransport({
@@ -26,7 +29,7 @@ const smtpTransport = nodemailer.createTransport({
 router.use(session ({
     secret: 'joinsuccess',
     resave: false,
-    saveUninitialized: false,
+    saveUninitialized: true,
     store: new FileStore(),
     cookie:{maxAge: 900000} //15minutes
 }));
@@ -108,6 +111,8 @@ router.post('/user/join/email-verification', function (req, res) {
             console.log('세션 아이디: ' + req.sessionID);
             console.log('----user 세션----');
             console.log(req.session.user);
+            console.log('----------------');
+            console.log(res.header.cookies);
             res.status(resultCode).json({
                 'code': resultCode,
                 'message': message
@@ -171,6 +176,7 @@ router.post('/user/join/join_success', function (req, res) {
                 'code': resultCode,
                 'message': message
             });
+            
             //delete session
             req.session.destroy(function () {
                 req.session;
