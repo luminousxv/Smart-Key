@@ -70,33 +70,12 @@
 
 <img src ="images/System_Diagram.jpg">
 
-- ### Server System
-
-    System: Microsoft Azure
-
-    OS: Ubuntu Server 20.04 LTS
-
-    Back-End Language: Node.js
-
-    Database: MySQL
-
-- ### Smart Key
-
-    Module: Raspberry PI 4B
-
-    OS: Raspberry PI
-
-    Motor: Server Motor
-
-    Language: Python
-
-- ### Android Application
-
-    IDE: Android Studio
-
-    Library: Retrofit2
-
-    Language: Kotlin
+| |Server|Smart Key|Android Application|
+|:---:|:---:|:---:|:---:|
+|**System**|Microsoft Azure|Raspberry PI 4B|Android Emulator(test)|
+|**OS**|Ubuntu Server 20.04 LTS|Raspberry PI OS|Android|
+|**Language**|Node.JS|Python|Kotlin|
+||DB: MySQL|Motor: Servo|IDE: Android Studio|
 
 ## System Flowchart
 
