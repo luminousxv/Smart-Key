@@ -68,7 +68,7 @@
 
 ## System Diagram
 
-![System_Diagram](/Smart-Key/images/System_Diagram.jpg)
+<img src ="images/System_Diagram.jpg">
 
 - ### Server System
 
@@ -100,11 +100,11 @@
 
 ## System Flowchart
 
-![System_Flowchart](/Smart-Key/images/system_flowchart.jpg)
+<img src = "images/system_flowchart.jpg">
 
 ## Database Structure
 
-![DB](/Smart-Key/images/Table_Sketch.jpg)
+<img src = "images/Table_Sketch.jpg">
 
 현재(2.15) SHARE_INFO 테이블 외에는 전부 서버에 적용 시킨 상태이다.
 
@@ -112,7 +112,7 @@
 
 ### Join
 
-![Flowchart1](/Smart-Key/images/user_join.jpg)
+<img src = "images/user_join.jpg">
 
 앱에서 회원가입 버튼을 누르면 해당 정보들을 입력 후 서버로 전송.
 
@@ -124,7 +124,7 @@
 
 ### Reset Password
 
-![Flowchart2](/Smart-Key/images/user_pw_reset.jpg)
+<img src = "images/user_pw_reset.jpg">
 
 앱에서 이메일/이름/생년월일을 입력 한 후 서버로 전송.
 
@@ -138,7 +138,7 @@
 
 ### Register Key
 
-![Flowchart3](/Smart-Key/images/register_smart_key.jpg)
+<img src = "images/register_smart_key.jpg">
 
 앱에서 이메일/비밀번호 입력 후 서버로 전송.
 
@@ -156,7 +156,7 @@
 
 ### Delete Key
 
-![Flowchart4](/Smart-Key/images/delete_smart_key.jpg)
+<img src = "images/delete_smart_key.jpg">
 
 앱에서 이메일/비밀번호 입력 후 서버로 전송.
 
@@ -172,7 +172,7 @@
 
 ### Key Control
 
-![Flowchart5](/Smart-Key/images/control_smart_key.jpg)
+<img src = "images/control_smart_key.jpg">
 
 앱에서 이메일/비밀번호 입력 후 서버로 전송.
 
