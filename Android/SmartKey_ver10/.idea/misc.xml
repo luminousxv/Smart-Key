@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DesignSurface">
+    <option name="filePathToZoomLevelMap">
+      <map>
+        <entry key="..\:/Users/Yong/Downloads/2017150024/finalexam2/SmartKey_ver10/app/src/main/res/layout/activity_main.xml" value="0.1" />
+        <entry key="..\:/Users/Yong/Downloads/2017150024/finalexam2/SmartKey_ver10/app/src/main/res/layout/activity_register_login.xml" value="0.1" />
+        <entry key="..\:/Users/Yong/Downloads/2017150024/finalexam2/SmartKey_ver10/app/src/main/res/layout/activity_smartkey_detail.xml" value="0.1" />
+        <entry key="..\:/Users/Yong/Downloads/2017150024/finalexam2/SmartKey_ver10/app/src/main/res/layout/activity_smartkey_log.xml" value="0.1" />
+        <entry key="..\:/Users/Yong/Downloads/2017150024/finalexam2/SmartKey_ver10/app/src/main/res/layout/activity_smartkey_main.xml" value="0.17980072463768115" />
+        <entry key="..\:/Users/Yong/Downloads/2017150024/finalexam2/SmartKey_ver10/app/src/main/res/layout/item_view.xml" value="0.17980072463768115" />
+      </map>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="Android Studio default JDK" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/build/classes" />
+  </component>
+  <component name="ProjectType">
+    <option name="id" value="Android" />
+  </component>
+</project>
