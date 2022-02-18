@@ -7,7 +7,9 @@ router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 
 router.get('/main/view_keyrecord', function(req, res) {
-    let serialNum = req.body.serialNum;
+    let serialNum = req.query.serialNum;
+
+    console.log(serialNum);
 
     let sql1 = 'select SerialNum, Time, KeyState, GPSLat, GPSLong, Method from KeyRecord where serialNum = ?';
 
