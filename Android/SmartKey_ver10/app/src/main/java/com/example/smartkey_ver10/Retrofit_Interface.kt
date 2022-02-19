@@ -34,6 +34,16 @@ interface Retrofit_Interface {
     fun postClose(@Header("Cookie") cookieid: String,
                   @FieldMap fields: HashMap<String, String>): Call<P_op_cl>
 
+    @FormUrlEncoded
+    @POST("main/key_pw/")
+    fun postSmartPw(@Header("Cookie") cookieid: String,
+                  @FieldMap fields: HashMap<String, String>): Call<PostSmartPw>
+
+    @FormUrlEncoded
+    @POST("main/delete_key/")
+    fun postDelserialNum(@Header("Cookie") cookieid: String,
+                  @FieldMap fields: HashMap<String, String>): Call<PostserialNum>
+
 
     /*-----------------------------Get-----------------------*/
     @GET("main/view_keylist/")

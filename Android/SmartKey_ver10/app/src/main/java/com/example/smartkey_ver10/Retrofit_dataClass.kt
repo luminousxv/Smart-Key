@@ -24,7 +24,6 @@ data class GetKeyInfo(
     var code: String,
     var message: List<KeyInfo>
 )
-
 data class KeyInfo(
     var KeyID: String = "",
     var SerialNum: String ="",
@@ -47,15 +46,20 @@ data class P_op_cl(
     var GPSLat:String
 )
 
-data class PostSerNum(
+//키 삭제
+data class PostSmartPw(
+    var serialNum: String,
+    var smartPwd: String
+)
+data class PostserialNum(
     var serialNum: String
 )
 
+//키 이력관리 갯
 data class GetKeyrecord(
     var code: String,
     var message: List<KeyLog>
 )
-
 data class KeyLog(
     var SerialNum: String,
     var Time: String,
