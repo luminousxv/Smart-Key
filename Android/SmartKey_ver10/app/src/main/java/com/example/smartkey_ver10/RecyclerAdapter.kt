@@ -10,7 +10,7 @@ class RecyclerUserAdapter(private val items: ArrayList<ViewItem>
                           , private val onClick: (ViewItem) -> Unit)
     : RecyclerView.Adapter<RecyclerUserAdapter.ViewHolder>() {
 
-    override fun getItemCount(): Int = items.size
+    override fun getItemCount(): Int {return items.size}
 
     override fun onBindViewHolder(holder: RecyclerUserAdapter.ViewHolder, position: Int) {
 
