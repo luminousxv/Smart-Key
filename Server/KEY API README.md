@@ -31,10 +31,9 @@ router.get('/main/view_keylist', function (req, res) {
     }
     
     else{
-        let sql1 = 'select SerialNum, KeyName, KeyState, UserID, Shared from KeyInfo where UserID = ?';
-
-        connection.query(sql1, req.session.login.Email, function (err, result) {
-            if (err) {
+        let sql1 = 'select SerialNum, KeyName, KeyState, UserID, Shared from KeyInfo where UserID = ? or SharedID = ?';
+        let params = [req.session.login.Email, req.session.login.Email];
+        connection.query(sql1, params, function (err, result) {
                 res.status(500).json ({
                     'code': 500,
                     'message': 'DB 오류가 발생했습니다.'
@@ -55,7 +54,8 @@ router.get('/main/view_keylist', function (req, res) {
 module.exports = router;
 ```
 
-클라이언트의 리퀘스트 바디는 아무것도 안보내고 url로만 요청을 하면 서버 측에서는 세션에 있는 이메일과 같은 값을 가지고 있는 스마트키의 데이터들을 가져오게 된다. 서버측은 리스폰스를 다음과 같이 보낸다.
+클라이언트(앱)의 리퀘스트 바디는 아무것도 안보내고 url로만 요청을 하면 서버 측에서는 세션에 있는 이메일과 같은 값을 가지고 있는 스마트키의 데이터들을 가져오게 된다(공유된 스마트키도 세션에 저장된 이메일 값을 가지고 불러온다). </br>
+서버측은 리스폰스를 다음과 같이 보낸다.
 
 ```jsx
 {
@@ -72,9 +72,12 @@ module.exports = router;
 }
 ```
 
+클라이언트(앱)는 Shared키의 값으로 먼저 공유 여부를 확인 후, 공유 상태이면 UserID를 통해 현재 로그인 되어있는 계정의 이메일과 비교해 본다. 같으면 현 계정의 스마트키 이고, 다르면 공유 받은 스마트키 이므로</br>
+클라이언트(앱)은 판단 후 소유/공유 목록으로 나누어 주면 된다.
+
 ## register_key API
 
-새로운 키를 등록 할 때 사용한다.  클라이언트 측에서 서버로 리퀘스트할 바디는 다음과 같다.
+새로운 키를 등록 할 때 사용한다.  클라이언트(앱) 측에서 서버로 리퀘스트할 바디는 다음과 같다.
 
 ```jsx
 {
@@ -84,7 +87,7 @@ module.exports = router;
 }
 ```
 
-그럼 서버측에서는 로그인 세션이 살아 있는지, 해당 키는 이미 등록이 되어있는지 판단하고, 새로운 키가 맞다면 DB에 기록을 한다. 그럼 서버는 클라이언트에게 다음과 같이 리스폰스를 해준다.
+그럼 서버측에서는 로그인 세션이 살아 있는지, 해당 키는 이미 등록이 되어있는지 판단하고, 새로운 키가 맞다면 DB에 기록을 한다. 그럼 서버는 클라이언트(앱)에게 다음과 같이 리스폰스를 해준다.
 
 ```jsx
 {
@@ -196,7 +199,7 @@ module.exports = router;
 ## delete_key API
 
 먼저 <u>Key PW API</u>를 사용해야된다. </br>
-클라이언트 측에서는 먼저 스마트키 비밀번호를 입력해서 인증을 받는다. 다음과 같이 클라이언트는 서버에 리퀘스트를 한다.
+클라이언트(앱) 측에서는 먼저 스마트키 비밀번호를 입력해서 인증을 받는다. 다음과 같이 클라이언트(앱)는 서버에 리퀘스트를 한다.
 
 ```jsx
 {
@@ -213,7 +216,7 @@ module.exports = router;
 }
 ```
 
-그러면 클라이언트 측에서는 어떤 스마트 키를 삭제할 지 서버측에 보내면 된다. 클라이언트 측은 다음과 같이 서버측으로 보낸다.
+그러면 클라이언트(앱) 측에서는 어떤 스마트 키를 삭제할 지 서버측에 보내면 된다. 클라이언트(앱) 측은 다음과 같이 서버측으로 보낸다.
 
 ```jsx
 {
@@ -221,7 +224,7 @@ module.exports = router;
 }
 ```
 
-해당 시리얼 넘버가 KeyList 테이블에 존재하면 KeyList테이블에서 삭제를 하고, KeyRecord에서도 위 시러얼 넘버로 기록되어 있는 이력들을 삭제한다. 완료가 되면 스마트 키가 삭제되었다는 메세지와 함께 서버측이 클라이언트에게 리스폰스를 한다.
+해당 시리얼 넘버가 KeyList 테이블에 존재하면 KeyList테이블에서 삭제를 하고, KeyRecord에서도 위 시러얼 넘버로 기록되어 있는 이력들을 삭제한다. 완료가 되면 스마트 키가 삭제되었다는 메세지와 함께 서버측이 클라이언트(앱)에게 리스폰스를 한다.
 
 ```jsx
 {
@@ -250,6 +253,7 @@ router.post('/main/delete_key', function (req, res) {
     let sql3 = 'delete from KeyRecord where SerialNum = ?';
     let sql4 = 'select * from KeyInfo where SerialNum = ?';
     let sql5 = 'select OwnerID from Key_Authority where SerialNum = ?';
+    let sql6 = 'delete from Key_Authority where SerialNum = ?';
 
     if (req.session.login === undefined) {
         let resultCode = 404;
@@ -305,9 +309,19 @@ router.post('/main/delete_key', function (req, res) {
                                         })
                                     }
                                     else{
-                                        res.status(200).json({
-                                            'code': 200,
-                                            'message': '삭제되었습니다.'
+                                        connection.query(sql6, serialNum, function (err, result6){
+                                            if (err) {
+                                                res.status(500).json ({
+                                                    'code': 500,
+                                                    'message': 'DB 오류가 발생했습니다.'
+                                                })
+                                            }
+                                            else{
+                                                res.status(200).json({
+                                                    'code': 200,
+                                                    'message': '삭제되었습니다.'
+                                                })
+                                            }
                                         })
                                     }
                                 })
@@ -325,7 +339,7 @@ module.exports = router;
 
 ## view keyrecord API
 
-클라이언트 측에서 스마트키의 시리얼 넘버를 보내서 리퀘스트 하면, 서버 측에서는 그 시리얼 넘버에 해당되는 이력들을 리스폰스 해준다. 클라이언트 측의 쿼리로 다음과 같이 보낸다. </br>
+클라이언트(앱) 측에서 스마트키의 시리얼 넘버를 보내서 리퀘스트 하면, 서버 측에서는 그 시리얼 넘버에 해당되는 이력들을 리스폰스 해준다. 클라이언트(앱) 측의 쿼리로 다음과 같이 보낸다. </br>
 http://서버IP/Smart-Key/main/view_keyrecord/?serialNum=0000001 </br>
 보면 엔드 포인트 뒤에 serialNum이란 키와 0000001이라는 값을 쿼리로 서버로 리퀘스트한다.
 
