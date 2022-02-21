@@ -16,11 +16,10 @@ router.get('/main/view_keylist', function (req, res) {
             'message': message
         });
     }
-    
     else{
-        let sql1 = 'select SerialNum, KeyName, KeyState, UserID, Shared from KeyInfo where UserID = ?';
-
-        connection.query(sql1, req.session.login.Email, function (err, result) {
+        let sql1 = 'select SerialNum, KeyName, KeyState, UserID, Shared from KeyInfo where UserID = ? or SharedID = ?';
+        let params = [req.session.login.Email, req.session.login.Email];
+        connection.query(sql1, params, function (err, result) {
             if (err) {
                 res.status(500).json ({
                     'code': 500,
@@ -28,15 +27,14 @@ router.get('/main/view_keylist', function (req, res) {
                 })
             }
             else{
-                let resultCode = 200;
-
+                let resultCode = 200
                 res.status(resultCode).json ({
                     'code': resultCode,
                     'message': result
                 });
             }
         })
-    }
+    }    
 })
 
 module.exports = router;
