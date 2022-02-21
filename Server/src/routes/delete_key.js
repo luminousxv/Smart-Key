@@ -14,6 +14,7 @@ router.post('/main/delete_key', function (req, res) {
     let sql2 = 'delete from KeyInfo where SerialNum = ?';
     let sql3 = 'delete from KeyRecord where SerialNum = ?';
     let sql4 = 'select * from KeyInfo where SerialNum = ?';
+    let sql5 = 'select OwnerID from Key_Authority where SerialNum = ?';
 
     if (req.session.login === undefined) {
         let resultCode = 404;
@@ -25,29 +26,35 @@ router.post('/main/delete_key', function (req, res) {
         });
     }
     else{
-        connection.query(sql4, serialNum, function(err, result3) {
+        connection.query(sql5, serialNum, function(err, result4){
             if (err) {
                 res.status(500).json ({
                     'code': 500,
                     'message': 'DB 오류가 발생했습니다.'
                 })
             }
-            else if (result3.length === 0){
-                res.status(400).json ({
-                    'code': 400,
-                    'message': '해당 스마트키는 등록되지 않았습니다.'
+            else if (result4[0].OwnerID != req.session.login.Email){
+                res.status(401).json ({
+                    'code': 401,
+                    'message': '허가 되지 않은 계정입니다.'
                 })
             }
-            else {
-                connection.query(sql2, serialNum, function (err, result) {
+            else{
+                connection.query(sql4, serialNum, function(err, result3) {
                     if (err) {
                         res.status(500).json ({
                             'code': 500,
                             'message': 'DB 오류가 발생했습니다.'
                         })
                     }
-                    else{
-                        connection.query(sql3, serialNum, function (err, result2){
+                    else if (result3.length === 0){
+                        res.status(400).json ({
+                            'code': 400,
+                            'message': '해당 스마트키는 등록되지 않았습니다.'
+                        })
+                    }
+                    else {
+                        connection.query(sql2, serialNum, function (err, result) {
                             if (err) {
                                 res.status(500).json ({
                                     'code': 500,
@@ -55,9 +62,19 @@ router.post('/main/delete_key', function (req, res) {
                                 })
                             }
                             else{
-                                res.status(200).json({
-                                    'code': 200,
-                                    'message': '삭제되었습니다.'
+                                connection.query(sql3, serialNum, function (err, result2){
+                                    if (err) {
+                                        res.status(500).json ({
+                                            'code': 500,
+                                            'message': 'DB 오류가 발생했습니다.'
+                                        })
+                                    }
+                                    else{
+                                        res.status(200).json({
+                                            'code': 200,
+                                            'message': '삭제되었습니다.'
+                                        })
+                                    }
                                 })
                             }
                         })
