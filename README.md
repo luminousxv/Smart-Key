@@ -83,9 +83,12 @@
 
 ## Database Structure
 
-<img src = "images/Table_Sketch.jpg">
+<img src = "images/Table_Sketch.png">
 
-현재(2.15) SHARE_INFO 테이블 외에는 전부 서버에 적용 시킨 상태이다.
+<strike>현재(2.15) SHARE_INFO 테이블 외에는 전부 서버에 적용 시킨 상태이다.</strike> </br>
+-(2.21)- </br>
+공유 확인은 권한 테이블로 판단. 서버에서 스마트키 권한 확인 여부를 위한 Key_Authority 테이블 추가. </br>
+테이블 이름 및 Attribute 최신화.
 
 ## Application Flowchart
 
