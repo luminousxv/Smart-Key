@@ -18,7 +18,7 @@ router.get('/main/view_keylist', function (req, res) {
     }
     
     else{
-        let sql1 = 'select SerialNum, KeyName, KeyState, Shared from KeyInfo where UserID = ?';
+        let sql1 = 'select SerialNum, KeyName, KeyState, UserID, Shared from KeyInfo where UserID = ?';
 
         connection.query(sql1, req.session.login.Email, function (err, result) {
             if (err) {
