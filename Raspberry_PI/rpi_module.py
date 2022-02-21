@@ -85,18 +85,30 @@ try:
                 sleep(1.5)
         elif res_code == 400:                   # 존재하지 않는 키일 경우
             print("존재하지 않는 스마트키입니다.")
+            if distance <= 100:
+                display.lcd_backlight(1)
+            else
+                display.lcd_backlight(0)
             doAngle(close_angle)
             display.lcd_display_string("This is a non-", 1)
             display.lcd_display_string("existent key", 2)
             sleep(1.5)
         elif res_code == 500:                   # DB 오류가 발생하였을 경우
             print("DB 오류가 발생했습니다.")
+            if distance <= 100:
+                display.lcd_backlight(1)
+            else
+                display.lcd_backlight(0)
             doAngle(close_angle)
             display.lcd_display_string("DB error", 1)
             display.lcd_display_string("occurred", 2)
             sleep(1.5)
         else:                                   # 서버와 연결이 되지 않을 경우
             print("서버와 연결이 되지 않았습니다.")
+            if distance <= 100:
+                display.lcd_backlight(1)
+            else
+                display.lcd_backlight(0)
             doAngle(close_angle)
             display.lcd_display_string("No connection", 1)
             display.lcd_display_string("to server", 2)
