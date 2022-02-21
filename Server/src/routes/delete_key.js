@@ -15,6 +15,7 @@ router.post('/main/delete_key', function (req, res) {
     let sql3 = 'delete from KeyRecord where SerialNum = ?';
     let sql4 = 'select * from KeyInfo where SerialNum = ?';
     let sql5 = 'select OwnerID from Key_Authority where SerialNum = ?';
+    let sql6 = 'delete from Key_Authority where SerialNum = ?';
 
     if (req.session.login === undefined) {
         let resultCode = 404;
@@ -70,9 +71,19 @@ router.post('/main/delete_key', function (req, res) {
                                         })
                                     }
                                     else{
-                                        res.status(200).json({
-                                            'code': 200,
-                                            'message': '삭제되었습니다.'
+                                        connection.query(sql6, serialNum, function (err, result6){
+                                            if (err) {
+                                                res.status(500).json ({
+                                                    'code': 500,
+                                                    'message': 'DB 오류가 발생했습니다.'
+                                                })
+                                            }
+                                            else{
+                                                res.status(200).json({
+                                                    'code': 200,
+                                                    'message': '삭제되었습니다.'
+                                                })
+                                            }
                                         })
                                     }
                                 })
