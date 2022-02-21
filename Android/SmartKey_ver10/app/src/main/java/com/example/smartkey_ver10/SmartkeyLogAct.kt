@@ -46,28 +46,27 @@ class SmartkeyLogAct : AppCompatActivity() {
                         for(i in 0..tablesize){
                             var time_text = TextView(this@SmartkeyLogAct)
                             time_text.gravity = Gravity.CENTER
-                            var place_text = TextView(this@SmartkeyLogAct)
-                            place_text.gravity = Gravity.CENTER
                             var state_text = TextView(this@SmartkeyLogAct)
+                            state_text.gravity = Gravity.CENTER
+                            var method_text = TextView(this@SmartkeyLogAct)
                             state_text.gravity = Gravity.CENTER
 
 
                             time_text.text = logtable[i].Time
-                            place_text.text = logtable[i].KeyState
-                            state_text.text = logtable[i].Method
+                            state_text.text = logtable[i].KeyState
+                            method_text.text = logtable[i].Method
 
 
                             var tableLayout = findViewById<TableLayout>(R.id.table_layout)
                             var tableRow = TableRow(this@SmartkeyLogAct)
 
                             tableRow.addView(time_text)
-                            tableRow.addView(place_text)
                             tableRow.addView(state_text)
+                            tableRow.addView(method_text)
 
                             tableLayout.addView(tableRow)
                         }
                     }
-                     Log.d("Test","이미열려있음")
                 }
             }
             override fun onFailure(call: Call<GetKeyrecord>, t: Throwable) {
