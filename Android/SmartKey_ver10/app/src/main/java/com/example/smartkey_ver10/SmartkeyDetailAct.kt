@@ -94,9 +94,61 @@ class SmartkeyDetailAct : AppCompatActivity() {
 
         //키 삭제하기
         btn_Delete.setOnClickListener {
-            val Del_intent = Intent(this, SmartkeyDelete::class.java)
-            Del_intent.putExtra("serialnum", keynum)
-            startActivity(Del_intent)
-        }
+            //다이얼로그 띄우기
+            val main_intent = Intent(this, SmartkeyMain::class.java)
+            val dialog = SmartkeyPwDailog(this)
+            dialog.Checkdialog()
+
+            //다이얼로그 입력후 클릭 시
+            dialog.setOnClickListener(object : SmartkeyPwDailog.OnDialogClickListener{
+                override fun onClicked(smartpw: String) {
+
+                    var inputkey = HashMap<String, String>()
+                    inputkey.put("smartPwd", smartpw)
+                    inputkey.put("serialNum", keynum!!)
+
+                    //삭제 전 smartpw 인증
+                    service.postSmartPw(cookieid = cookie, inputkey).enqueue(object : Callback<PostSmartPw> {
+                        override fun onResponse(call: Call<PostSmartPw>, response: Response<PostSmartPw>) {
+                            var rescode = response.raw().code
+                            if(rescode == 200){
+                                Log.d("SmartPwd인증","인증 성공")
+                                Log.d("response", response.raw().toString())
+
+                                //인증 성공 시, 삭제 포스트
+                                var inputserNum = HashMap<String, String>()
+                                inputserNum.put("serialNum", keynum!!)
+
+                                service.postDelserialNum(cookieid = cookie, inputserNum).enqueue(object :
+                                    Callback<PostserialNum> {
+                                    override fun onResponse(call: Call<PostserialNum>, response: Response<PostserialNum>) {
+                                        var rescode = response.raw().code
+                                        if(rescode == 200) {
+                                            Log.d("Delete키", "삭제 성공")
+                                            Log.d("response", response.raw().toString())
+                                            startActivity(main_intent)
+                                            Toast.makeText(this@SmartkeyDetailAct, "$keyname 가 삭제되었습니다.",Toast.LENGTH_SHORT).show()
+                                            finish()
+                                        }
+                                        else Log.d("Delete키","삭제 실패")
+                                    }
+
+                                    override fun onFailure(call: Call<PostserialNum>, t: Throwable) {
+                                        Log.d("Delete 키 실패","t"+t.message)
+                                    }
+                                })//postDelKey 끝
+
+                            }
+                            else {Log.d("SmartPwd","인증실패")
+                                Toast.makeText(this@SmartkeyDetailAct, "비밀번호가 틀렸습니다.",Toast.LENGTH_SHORT).show()}
+                        }
+
+                        override fun onFailure(call: Call<PostSmartPw>, t: Throwable) {
+                            Log.d("SmartPwd실패","t"+t.message)
+                        }
+                    })//postSmartPw 끝
+                }
+            })//다이얼로그 클릭이벤트 끝
+        }//키 삭제버튼 끝
     }
 }
