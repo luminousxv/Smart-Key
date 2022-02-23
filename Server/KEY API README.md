@@ -6,6 +6,17 @@ DB에서 KeyInfo라는 테이블을 이용해 테이블을 등록, 조회, 삭�
 
 로그인 세션을 만들어 15분동안 조작이 가능하게 했다. 
 
+## url
+/Smart-Key/main/view_keylist
+
+/Smart-Key/main/register_key
+
+/Smart-Key/main/delete_key
+
+/Smart-Key/main/view_keyrecord
+
+/Smart-Key/main/key_pw
+
 ## keylist API
 
 사용자의 키 리스트를 DB에서 가져와 주는 API이다. 사용자의 로그인 세션이 만료가 안되었다면 DB에서 가져와서 리스폰스를 보내주는 방식이다.

@@ -12,6 +12,19 @@ router 모듈화를 해서 유지 보수 및 수정이 편리하게 했다. (1.2
 
 비밀번호 초기화를 구현했다. (1.23 수정)
 
+## url
+/Smart-Key/user/join/email-verification
+
+/Smart-Key/user/join/join_success
+
+/Smart-Key/user/login
+
+/Smart-Key/user/reset/email
+
+/Smart-Key/user/reset/verification
+
+/Smart-Key/user/reset/change_pw
+
 ## DB Connection
 
 ```jsx
