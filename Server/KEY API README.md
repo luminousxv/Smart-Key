@@ -232,6 +232,13 @@ module.exports = router;
     "message": "스마트 키가 삭제되었습니다."
 }
 ```
+해당 키로 공유를 받은 사람은 삭제를 할 수 없다. 공유 받은 계정이 호출하게 되면 다음과 같이 서버에서는 리스폰스를 한다.
+~~~jsx
+{
+    "code": 401,
+    "message" : "허가 받지 않는 계정입니다."
+}
+~~~
 
 다음 delete_key.js 코드이다.
 
@@ -362,6 +369,14 @@ http://서버IP/Smart-Key/main/view_keyrecord/?serialNum=0000001 </br>
 }
 ```
 
+공유 받은 계정으로는 해당키의 이력 조회가 불가능하다. 공유 받은 계정으로 이력조회를 호출 하면 다음과 같이 서버가 리스폰스한다.
+~~~jsx
+{
+    "code": 401,
+    "message" : "허가 받지 않는 계정입니다."
+}
+~~~
+
 다음 keyrecord.js 코드이다.
 
 ```jsx
@@ -369,7 +384,9 @@ const express = require("express");
 const router = express.Router();
 const connection = require("../database/dbconnection");
 let bodyParser = require("body-parser");
+let cookieParser = require("cookie-parser");
 
+router.use(cookieParser());
 router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 
@@ -380,6 +397,7 @@ router.get('/main/view_keyrecord', function(req, res) {
 
     let sql1 = 'select SerialNum, Time, KeyState, GPSLat, GPSLong, Method, Email from KeyRecord where serialNum = ?';
     let sql2 = 'select OwnerID from Key_Authority where SerialNum = ?';
+    let sql3 = 'select * from KeyInfo where SerialNum = ?';
 
     if (req.session.login === undefined) {
         res.status(404).json ({
@@ -388,7 +406,7 @@ router.get('/main/view_keyrecord', function(req, res) {
         })
     }
     else{
-        connection.query(sql2, serialNum, function(err, result2){
+        connection.query(sql3, serialNum, function (err, result3){
             if (err) {
                 console.log(err);
                 res.status(500).json ({
@@ -396,31 +414,48 @@ router.get('/main/view_keyrecord', function(req, res) {
                     'message': 'DB 오류가 발생했습니다.'
                 })
             }
-            else if (result2[0].OwnerID != req.session.login.Email){
-                res.status(401).json ({
-                    'code' : 401,
-                    "message" : '허가 받지 않은 계정입니다.'
+            else if(result3.length === 0){
+                res.status(400).json ({
+                    'code': 404,
+                    'message': '해당 스마트키의 이력이 없습니다.'
                 })
             }
             else{
-                connection.query(sql1, serialNum, function(err, result) {
+                connection.query(sql2, serialNum, function(err, result2){
                     if (err) {
-                        console.log(err)
+                        console.log(err);
                         res.status(500).json ({
                             'code': 500,
                             'message': 'DB 오류가 발생했습니다.'
                         })
                     }
-                    else if (result.length === 0) {
-                        res.status(400).json ({
-                            'code': 404,
-                            'message': '해당 스마트키의 이력이 없습니다.'
+                    else if (result2[0].OwnerID != req.session.login.Email){
+                        res.status(401).json ({
+                            'code' : 401,
+                            "message" : '허가 받지 않은 계정입니다.'
                         })
                     }
                     else{
-                        res.status(200).json ({
-                            'code': 200,
-                            'message': result
+                        connection.query(sql1, serialNum, function(err, result) {
+                            if (err) {
+                                console.log(err)
+                                res.status(500).json ({
+                                    'code': 500,
+                                    'message': 'DB 오류가 발생했습니다.'
+                                })
+                            }
+                            else if (result.length === 0) {
+                                res.status(400).json ({
+                                    'code': 404,
+                                    'message': '해당 스마트키의 이력이 없습니다.'
+                                })
+                            }
+                            else{
+                                res.status(200).json ({
+                                    'code': 200,
+                                    'message': result
+                                })
+                            }
                         })
                     }
                 })
