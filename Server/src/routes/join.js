@@ -10,6 +10,9 @@ const http = require('http');
 router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 const app = express();
+let cookieParser = require("cookie-parser");
+
+router.use(cookieParser());
 
 //Email Configuration
 const smtpTransport = nodemailer.createTransport({
