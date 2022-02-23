@@ -20,6 +20,8 @@
 
     [RPI 관련 API README](https://github.com/luminousxv/Smart-Key/blob/main/Server/RPI%20API%20README.md)
 
+    [Share 관련 API README](https://github.com/luminousxv/Smart-Key/blob/main/Server/SHARE%20API%20README.md)
+
 - Android
 
     [Android Application README](https://github.com/luminousxv/Smart-Key/blob/main/Android/Android_README.md)
@@ -29,7 +31,7 @@
     [Raspberry PI README](https://github.com/luminousxv/Smart-Key/blob/main/Raspberry_PI/RPI_README.md)
 
 
-## File Structure (2022.02.15 수정)
+## File Structure (2022.02.23 수정)
 
 - Server
     - src
@@ -55,6 +57,8 @@
             keyPW.js (key password verification API)
 
             keycontrol.js (key control API)
+
+            keyshare.js (Key Share API)
 
             rpi_control.js (Raspberry Pi control API)
             
@@ -162,7 +166,7 @@
 
 로그인 성공 시 등록된 사용자의 키 목록을 서버로 요청.
 
-서버에서 키 목록을 받은 후, 제어 할 키 선택
+서버에서 키 목록을 받은 후, 제어 할 키 선택.
 
 잠금/해제 버튼 클릭. 키 비밀번호 입력 후 서버로 전송.
 
@@ -185,3 +189,21 @@
     RPI는 주기적으로 해당 KeyState값을 서버로 요청하고 있음.
 
     값이 변경이 된 것을 확인하면 바뀐 값으로 해당 기능 수행
+
+### Share Key
+<img src = "images/Share_Register.png">
+앱에서 이메일/비밀번호 입력 후 서버로 전송.</br>
+서버는 해당 정보가 DB와 일치하는지 판단 후 결과 전송.</br>
+로그인 성공 시 사용자의 키 목록을 서버로 요청.</br>
+서버에서 키 목록을 받은 후, 제어 할 키 선택.</br>
+등록 버튼 클릭, 키 비밀번호 입력 후 서버로 전송.</br>
+해당 비밀번호가 맞으면 앱은 공유 할 아이디 입력 후 서버로 전송.</br>
+서버에서는 보낸 정보들이 유효한지 확인 후, 유효하면 DB에 기록.</br>
+<img src = "images/Share_Delete.png">
+앱에서 이메일/비밀번호 입력 후 서버로 전송.</br>
+서버는 해당 정보가 DB와 일치하는지 판단 후 결과 전송.</br>
+로그인 성공 시 사용자의 키 목록을 서버로 요청.</br>
+서버에서 키 목록을 받은 후, 제어 할 키 선택.</br>
+등록 버튼 클릭, 키 비밀번호 입력 후 서버로 전송.</br>
+해당 비밀번호가 맞으면 앱은 삭제 API 호출.</br>
+서버는 DB에 해당 키 공유 관련 데이터 삭제.</br>
