@@ -1,6 +1,7 @@
 package com.example.smartkey_ver10
 
 import android.app.AlertDialog
+import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
@@ -9,6 +10,7 @@ import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
+import android.widget.Toast
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -18,8 +20,8 @@ class SmartkeyDetailAct : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_smartkey_detail)
 
-        val keynum = intent.getStringExtra("serialnum")
-        val keyname = intent.getStringExtra("keyname")
+        val keynum = intent.getStringExtra("serialnum") //선택한 key의 serialnum
+        val keyname = intent.getStringExtra("keyname") // 선택한 key의 이름
 
         findViewById<TextView>(R.id.nameSmartkey).text = keyname
 
@@ -34,7 +36,7 @@ class SmartkeyDetailAct : AppCompatActivity() {
         val service = Retrofit_service.service
 
 
-        //잠금 해제
+        //잠금
         btn_lock.setOnClickListener {
             var Keyinput = HashMap<String, String>()
             Keyinput.put("serialNum", keynum!!)
@@ -43,20 +45,17 @@ class SmartkeyDetailAct : AppCompatActivity() {
 
             service.postClose(cookieid = cookie, Keyinput).enqueue(object : Callback<P_op_cl> {
                 override fun onResponse(call: Call<P_op_cl>, response: Response<P_op_cl>) {
-                    if(response.isSuccessful()){
-                        var rescode = response.raw().code
-                        if(rescode == 200){
-                            Log.d("Test","클로즈 성공")
-                            Log.d("response", response.raw().toString())
-                        }
-                        else Log.d("Test","이미닫혀있음")
-                    }
+                    var rescode = response.raw().code
+                    if(rescode == 200){
+                        Log.d("Test","클로즈 성공")
+                        Log.d("response", response.raw().toString())
+                    } else Log.d("Test","이미닫혀있음")
                 }
                 override fun onFailure(call: Call<P_op_cl>, t: Throwable) {
                     Log.d("postTest실패","t"+t.message)
                 }
             })
-        }
+        }//잠금 끝
 
         //열림
         btn_unlock.setOnClickListener {
@@ -67,20 +66,17 @@ class SmartkeyDetailAct : AppCompatActivity() {
 
             service.postOpen(cookieid = cookie, Keyinput).enqueue(object : Callback<P_op_cl> {
                 override fun onResponse(call: Call<P_op_cl>, response: Response<P_op_cl>) {
-                    if(response.isSuccessful()){
-                        var rescode = response.raw().code
-                        if(rescode == 200){
-                            Log.d("Test","오픈 성공")
-                            Log.d("response", response.raw().toString())
-                        }
-                        else Log.d("Test","이미열려있음")
-                    }
+                    var rescode = response.raw().code
+                    if(rescode == 200){
+                        Log.d("Test","오픈 성공")
+                        Log.d("response", response.raw().toString())
+                    } else Log.d("Test","이미열려있음")
                 }
                 override fun onFailure(call: Call<P_op_cl>, t: Throwable) {
                     Log.d("postTest실패","t"+t.message)
                 }
             })
-        }
+        }//열림 끝
 
         //이력
         btn_log.setOnClickListener {
@@ -89,27 +85,70 @@ class SmartkeyDetailAct : AppCompatActivity() {
             log_intent.putExtra("keyname", keyname)
             startActivity(log_intent)
         }
+
         /*//공유하기
         btn_sharing.setOnClickListener {
             val sharing_intent = Intent(this, SharingAct::class.java)
             startActivity(sharing_intent)
         }*/
-        //삭제하기
+
+        //키 삭제하기
         btn_Delete.setOnClickListener {
-            var builder = AlertDialog.Builder(this)
-            builder.setTitle("사용자 비밀번호를 입력해주세요")
+            //다이얼로그 띄우기
+            val main_intent = Intent(this, SmartkeyMain::class.java)
+            val dialog = SmartkeyPwDailog(this)
+            dialog.Checkdialog()
 
-            var dialview = layoutInflater.inflate(R.layout.delete_dialog, null)
-            builder.setView(dialview)
+            //다이얼로그 입력후 클릭 시
+            dialog.setOnClickListener(object : SmartkeyPwDailog.OnDialogClickListener{
+                override fun onClicked(smartpw: String) {
 
-            var listener = DialogInterface.OnCancelListener { p0 ->
-                var alert = p0 as AlertDialog
-                var edit: EditText? = alert.findViewById(R.id.edit_delpw)
-            }
-            //builder.setPositiveButton("확인", listener)
-            builder.setNegativeButton("취소",null)
+                    var inputkey = HashMap<String, String>()
+                    inputkey.put("smartPwd", smartpw)
+                    inputkey.put("serialNum", keynum!!)
 
-            builder.show()
-        }
+                    //삭제 전 smartpw 인증
+                    service.postSmartPw(cookieid = cookie, inputkey).enqueue(object : Callback<PostSmartPw> {
+                        override fun onResponse(call: Call<PostSmartPw>, response: Response<PostSmartPw>) {
+                            var rescode = response.raw().code
+                            if(rescode == 200){
+                                Log.d("SmartPwd인증","인증 성공")
+                                Log.d("response", response.raw().toString())
+
+                                //인증 성공 시, 삭제 포스트
+                                var inputserNum = HashMap<String, String>()
+                                inputserNum.put("serialNum", keynum!!)
+
+                                service.postDelserialNum(cookieid = cookie, inputserNum).enqueue(object :
+                                    Callback<PostserialNum> {
+                                    override fun onResponse(call: Call<PostserialNum>, response: Response<PostserialNum>) {
+                                        var rescode = response.raw().code
+                                        if(rescode == 200) {
+                                            Log.d("Delete키", "삭제 성공")
+                                            Log.d("response", response.raw().toString())
+                                            startActivity(main_intent)
+                                            Toast.makeText(this@SmartkeyDetailAct, "$keyname 가 삭제되었습니다.",Toast.LENGTH_SHORT).show()
+                                            finish()
+                                        }
+                                        else Log.d("Delete키","삭제 실패")
+                                    }
+
+                                    override fun onFailure(call: Call<PostserialNum>, t: Throwable) {
+                                        Log.d("Delete 키 실패","t"+t.message)
+                                    }
+                                })//postDelKey 끝
+
+                            }
+                            else {Log.d("SmartPwd","인증실패")
+                                Toast.makeText(this@SmartkeyDetailAct, "비밀번호가 틀렸습니다.",Toast.LENGTH_SHORT).show()}
+                        }
+
+                        override fun onFailure(call: Call<PostSmartPw>, t: Throwable) {
+                            Log.d("SmartPwd실패","t"+t.message)
+                        }
+                    })//postSmartPw 끝
+                }
+            })//다이얼로그 클릭이벤트 끝
+        }//키 삭제버튼 끝
     }
 }
