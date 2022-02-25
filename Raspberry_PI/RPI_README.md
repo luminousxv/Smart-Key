@@ -140,8 +140,8 @@ GPIO.cleanup()                                  # GPIO 핀 초기화
 가까워지면 LCD화면이 켜지고, 멀어지면 LCD화면이 꺼지는 방식으로 한다. 
 
 ## RPI Flowchart
-
+<img src = "../images/rpi_control.png">
 
 ## RPI Blueprint
-
 <img src = "../images/RPI_Blueprint.jpg">
+왼쪽 아래에는 raspberry Pi 4B 보드이고, 왼쪽 위는 서보 모터, 오른쪽 위는 초음파 센서, 오른쪽 아래는 LCD이다.
