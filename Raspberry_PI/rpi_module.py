@@ -11,8 +11,8 @@ GPIO.setmode(GPIO.BCM)          # GPIO 핀들의 번호 지정 규칙
 GPIO.setup(servo_pin, GPIO.OUT)       # 서보핀을 출력으로 지정
 servo = GPIO.PWM(servo_pin, 50)       # 50 Hz
 servo.start(0)                  # 서보모터 초기값 0
-open_angle = 9                  # 열림
-close_angle = 6                 # 닫힘
+open_angle = 3.5                  # 열림
+close_angle = 7                # 닫힘
 state = ''
 GPIO_TRIGGER = 24               # 초음파 거리 센서 트리거
 GPIO_ECHO = 23                  # 초음파 거리 센서 에코
