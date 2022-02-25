@@ -31,7 +31,7 @@
     [Raspberry PI README](https://github.com/luminousxv/Smart-Key/blob/main/Raspberry_PI/RPI_README.md)
 
 
-## File Structure (2022.02.23 수정)
+## File Structure (2022.02.25 수정)
 
 - Server
     - src
@@ -68,7 +68,64 @@
 
 - Android
 
+    - SmartKey_ver10
+
+        build.gradle (gradle properties)
+
+        - app
+        
+            - src
+
+                - main
+
+                    - /java/com/exmaples/smartkey_ver10
+
+                        CookieHandler.kt (session cookie handler)
+
+                        MainActivity.kt (login)
+
+                        RecyclerAdapter.kt (recyler view)
+
+                        Register_login.kt (join)
+
+                        Retrofit_Interface.kt (request url)
+
+                        Retrofit_dataClass.kt (request data format)
+
+                        Retrofit_service.kt (base url)
+
+                        SharedPrefApp.kt (local variable storage)
+
+                        SmartkeyDetailAct.kt (key control)
+
+                        SmartkeyLogAct.kt (key record)
+
+                        SmartkeyMain.kt (key list)
+
+                        SmartkeyPwDailog.kt (key password dialog)
+
+                - res
+
+                    - layout
+
+                        activity_main.xml (login xml)
+
+                        activity_register_login.xml (join xml)
+
+                        activity_smartkey_detail.xml (key control xml)
+
+                        activity_smartkey_log.xml (key record xml)
+
+                        activity_smartkey_main.xml (key list xml)
+
+                        dialog_smartkey_pw.xml (key password dialog xml)
+
+                        item_view.xml (recycler view xml)
+
+
 - Raspberry_PI
+
+    rpi_module.py (Smart Key python application)
 
 ## System Diagram
 
