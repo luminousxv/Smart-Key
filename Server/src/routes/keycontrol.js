@@ -184,8 +184,8 @@ router.post('/main/close_key', function(req, res){
                                     }
                                     else {
                                         let time  = new Date(+new Date() + 3240 * 10000).toISOString().replace("T", " ").replace(/\..*/, '');
-                                        let sql3 = 'insert into KeyRecord (SerialNum, Time, KeyState, GPSLat, GPSLong, Method) values (?, ?, ?, ?, ? ,?)';
-                                        let params2 = [serialNum, time, 'close', GPSLat, GPSLong, '원격'];
+                                        let sql3 = 'insert into KeyRecord (SerialNum, Time, KeyState, GPSLat, GPSLong, Method, Email) values (?, ?, ?, ?, ? ,?, ?)';
+                                        let params2 = [serialNum, time, 'close', GPSLat, GPSLong, '원격', req.session.login.Email];
                 
                                         connection.query(sql3, params2, function(err, result3){
                                             if (err) {
