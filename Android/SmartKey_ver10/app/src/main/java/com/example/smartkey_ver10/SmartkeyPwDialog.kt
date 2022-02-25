@@ -7,7 +7,7 @@ import android.widget.Button
 import android.widget.EditText
 
 //액티비티 없이 비밀번호 간단 인증을 위한 다이얼로그 클래스
-class SmartkeyPwDailog(context: Context) {
+class SmartkeyPwDialog(context: Context) {
 
     private val dialog = Dialog(context)
     private lateinit var onClickListener: OnDialogClickListener

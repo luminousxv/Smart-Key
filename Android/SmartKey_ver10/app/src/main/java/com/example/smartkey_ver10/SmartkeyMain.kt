@@ -34,7 +34,7 @@ class SmartkeyMain : AppCompatActivity() {
                 if(response.code()==200){
                     keyList = response.body()!!.message
                     listSize = keyList.size-1
-                    Log.d("Test","Get 성공" + response.raw().toString())
+                    Log.d("SmartkeyGet","Get 성공" + response.raw().toString())
 
                     //리사이클러뷰 아이템 생성
                     for(i in 0..listSize){
@@ -45,10 +45,10 @@ class SmartkeyMain : AppCompatActivity() {
                     val adapter = RecyclerUserAdapter(vlist, {data->adapterOnClick(data)})
                     findViewById<RecyclerView>(R.id.recycleView).adapter = adapter
                 }
-                else Log.d("Test", "Get 실패")
+                else Log.d("SmartkeyGet", "Get 실패")
             }
             override fun onFailure(call: Call<GetKeyInfo>, t: Throwable) {
-                Log.d("getTest실패","t"+t.message)
+                Log.d("SmartkeyGet","t"+t.message)
             }
         })
     }
@@ -60,11 +60,11 @@ class SmartkeyMain : AppCompatActivity() {
         nexintent.putExtra("keyname", data.name)
 
         //다이얼로그 띄우기
-        val dialog = SmartkeyPwDailog(this)
+        val dialog = SmartkeyPwDialog(this)
         dialog.Checkdialog()
 
         //다이얼로그 입력후 클릭 시
-        dialog.setOnClickListener(object : SmartkeyPwDailog.OnDialogClickListener{
+        dialog.setOnClickListener(object : SmartkeyPwDialog.OnDialogClickListener{
             override fun onClicked(smartpw: String) {
 
                 var inputkey = HashMap<String, String>()
@@ -85,7 +85,7 @@ class SmartkeyMain : AppCompatActivity() {
                             Toast.makeText(this@SmartkeyMain, "비밀번호가 틀렸습니다.",Toast.LENGTH_SHORT).show()}
                     }
                     override fun onFailure(call: Call<PostSmartPw>, t: Throwable) {
-                        Log.d("SmartPwd실패","t"+t.message)
+                        Log.d("SmartPwd인증","t"+t.message)
                     }
                 })//postSmartPw 끝
             }

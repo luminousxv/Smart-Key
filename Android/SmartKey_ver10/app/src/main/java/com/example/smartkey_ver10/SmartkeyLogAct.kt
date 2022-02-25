@@ -35,21 +35,19 @@ class SmartkeyLogAct : AppCompatActivity() {
 
         getservice.GetKeyLog(cookieid = cookie, sernum = keynum!!).enqueue(object : Callback<GetKeyrecord> {
             override fun onResponse(call: Call<GetKeyrecord>, response: Response<GetKeyrecord>) {
-                Log.d("gg",response.raw().toString())
                 if(response.isSuccessful()){
                     var rescode = response.raw().code
-                    Log.d("gggg",response.raw().toString())
                     if(rescode == 200){
-                        Log.d("Test","테이블 갯 성공")
+                        Log.d("SmartkeyLog","테이블 갯 성공")
                         logtable = response.body()!!.message
                         tablesize = logtable.size-1
                         for(i in 0..tablesize){
                             var time_text = TextView(this@SmartkeyLogAct)
-                            time_text.gravity = Gravity.CENTER
+                            time_text.gravity = Gravity.LEFT
                             var state_text = TextView(this@SmartkeyLogAct)
-                            state_text.gravity = Gravity.CENTER
+                            state_text.gravity = Gravity.LEFT
                             var method_text = TextView(this@SmartkeyLogAct)
-                            state_text.gravity = Gravity.CENTER
+                            state_text.gravity = Gravity.LEFT
 
 
                             time_text.text = logtable[i].Time
@@ -70,7 +68,7 @@ class SmartkeyLogAct : AppCompatActivity() {
                 }
             }
             override fun onFailure(call: Call<GetKeyrecord>, t: Throwable) {
-                Log.d("postTest실패","t"+t.message)
+                Log.d("SmartkeyLog","t"+t.message)
             }
         })
 

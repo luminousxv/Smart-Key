@@ -1,14 +1,10 @@
 package com.example.smartkey_ver10
 
-import android.app.AlertDialog
-import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
-import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import retrofit2.Call
@@ -47,12 +43,15 @@ class SmartkeyDetailAct : AppCompatActivity() {
                 override fun onResponse(call: Call<P_op_cl>, response: Response<P_op_cl>) {
                     var rescode = response.raw().code
                     if(rescode == 200){
-                        Log.d("Test","클로즈 성공")
+                        Log.d("LockPost","클로즈 성공")
                         Log.d("response", response.raw().toString())
-                    } else Log.d("Test","이미닫혀있음")
+                    } else {
+                        Log.d("LockPost","이미닫혀있음")
+                        Toast.makeText(this@SmartkeyDetailAct, "이미 닫혀있습니다.",Toast.LENGTH_SHORT).show()
+                    }
                 }
                 override fun onFailure(call: Call<P_op_cl>, t: Throwable) {
-                    Log.d("postTest실패","t"+t.message)
+                    Log.d("LockPost","t"+t.message)
                 }
             })
         }//잠금 끝
@@ -68,12 +67,14 @@ class SmartkeyDetailAct : AppCompatActivity() {
                 override fun onResponse(call: Call<P_op_cl>, response: Response<P_op_cl>) {
                     var rescode = response.raw().code
                     if(rescode == 200){
-                        Log.d("Test","오픈 성공")
+                        Log.d("UnlockPost","오픈 성공")
                         Log.d("response", response.raw().toString())
-                    } else Log.d("Test","이미열려있음")
+                    } else {Toast.makeText(this@SmartkeyDetailAct, "이미 열려있습니다.",Toast.LENGTH_SHORT).show()
+                        Log.d("UnlockPost","이미열려있음")
+                    }
                 }
                 override fun onFailure(call: Call<P_op_cl>, t: Throwable) {
-                    Log.d("postTest실패","t"+t.message)
+                    Log.d("UnlockPost","t"+t.message)
                 }
             })
         }//열림 끝
@@ -96,11 +97,11 @@ class SmartkeyDetailAct : AppCompatActivity() {
         btn_Delete.setOnClickListener {
             //다이얼로그 띄우기
             val main_intent = Intent(this, SmartkeyMain::class.java)
-            val dialog = SmartkeyPwDailog(this)
+            val dialog = SmartkeyPwDialog(this)
             dialog.Checkdialog()
 
             //다이얼로그 입력후 클릭 시
-            dialog.setOnClickListener(object : SmartkeyPwDailog.OnDialogClickListener{
+            dialog.setOnClickListener(object : SmartkeyPwDialog.OnDialogClickListener{
                 override fun onClicked(smartpw: String) {
 
                     var inputkey = HashMap<String, String>()
