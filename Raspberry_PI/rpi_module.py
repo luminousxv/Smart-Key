@@ -60,14 +60,14 @@ try:
             if res_message == state:            # 현재 키 상태 비교
                 if distance <= 100:
                     display.lcd_backlight(1)
-                else
+                else:
                     display.lcd_backlight(0)
                 continue                        # 동일하면 if문 탈출
             elif res_message == 'open':         # 현재 키 상태가 open 일때
                 state = res_message
                 if distance <= 100:
                     display.lcd_backlight(1)
-                else
+                else:
                     display.lcd_backlight(0)
                 doAngle(open_angle)
                 display.lcd_clear()
@@ -77,7 +77,7 @@ try:
                 state = res_message
                 if distance <= 100:
                     display.lcd_backlight(1)
-                else
+                else:
                     display.lcd_backlight(0)
                 doAngle(close_angle)
                 display.lcd_clear()
@@ -87,7 +87,7 @@ try:
             print("존재하지 않는 스마트키입니다.")
             if distance <= 100:
                 display.lcd_backlight(1)
-            else
+            else:
                 display.lcd_backlight(0)
             doAngle(close_angle)
             display.lcd_display_string("This is a non-", 1)
@@ -97,7 +97,7 @@ try:
             print("DB 오류가 발생했습니다.")
             if distance <= 100:
                 display.lcd_backlight(1)
-            else
+            else:
                 display.lcd_backlight(0)
             doAngle(close_angle)
             display.lcd_display_string("DB error", 1)
@@ -107,7 +107,7 @@ try:
             print("서버와 연결이 되지 않았습니다.")
             if distance <= 100:
                 display.lcd_backlight(1)
-            else
+            else:
                 display.lcd_backlight(0)
             doAngle(close_angle)
             display.lcd_display_string("No connection", 1)
