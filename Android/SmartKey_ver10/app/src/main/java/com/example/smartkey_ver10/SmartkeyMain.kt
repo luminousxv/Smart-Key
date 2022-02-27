@@ -4,6 +4,7 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.widget.Button
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import retrofit2.Call
@@ -12,6 +13,7 @@ import retrofit2.Response
 
 class SmartkeyMain : AppCompatActivity() {
 
+    //쿠키세팅
     val GetService = Retrofit_service.service
     val cookie = CookieHandler().setCookie()
 
@@ -19,7 +21,11 @@ class SmartkeyMain : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_smartkey_main)
 
-        //쿠키세팅
+        val addkey_intent = Intent(this, SmartkeyAddKey::class.java)
+        val btn_addKey = findViewById<Button>(R.id.btn_addkey)
+
+        //기기이동 버튼
+        btn_addKey.setOnClickListener { startActivity(addkey_intent)}
 
         //리사이클러뷰
         val vlist = ArrayList<ViewItem>()
