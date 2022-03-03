@@ -215,7 +215,7 @@
 
 ### Key Control
 
-<img src = "images/control_smart_key.jpg">
+<img src = "images/control_smart_key.png">
 
 앱에서 이메일/비밀번호 입력 후 서버로 전송.
 
