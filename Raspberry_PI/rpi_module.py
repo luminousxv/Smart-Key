@@ -31,9 +31,9 @@ display = drivers.Lcd()         # Lcd
 try:
 
     while True:
-        msg = '{"serialNum": "0000001"}'        # json에 저장되어 있는 rpi 시리얼 넘버
-        j = json.loads(msg)                     # msg를 불러옴
-        r = requests.get('http://20.194.28.30:80/Smart-Key/rpi/remote/', json=j)    # 서버 주소
+                
+        a = serial.msg                     # serial.py에 저장된 시리얼넘버 불러옴
+        r = requests.get('http://20.194.28.30:80/Smart-Key/rpi/remote/', json = a)    # 서버 주소
         res = r.json()
         res_code = res["code"]                  # 서버에 저장되어 있는 code
         res_message = res["message"]            # 서버에 저장되어 있는 rpi 상태
@@ -52,11 +52,8 @@ try:
 
         period = endTime - startTime
         distance = round(period * 17241, 2)         # 속도 = 거리/시간, 속도 = 340m/s, 거리 = distance, 시간 = period/2
-
-        print(distance)
         display.lcd_backlight(0)
         if res_code == 200:
-            print("정상적으로 연결되었습니다.")
             if res_message == state:            # 현재 키 상태 비교
                 if distance <= 100:
                     display.lcd_backlight(1)
