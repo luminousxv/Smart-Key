@@ -15,7 +15,7 @@
         <EditText
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="4"
+            android:layout_weight="3"
             android:id="@+id/edit_search"
             android:hint="검색하기"/>
 
@@ -35,6 +35,11 @@
         android:id="@+id/recycleView"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         tools:listitem="@layout/item_view"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="공유된 스마트키"/>
 
 
 </LinearLayout>

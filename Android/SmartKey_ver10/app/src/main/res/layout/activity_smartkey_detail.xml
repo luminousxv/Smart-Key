@@ -54,19 +54,18 @@
         android:text="스마트키 사용내역"
         android:backgroundTint="#0000ff" />
 
-<!--
+
     <Button
         android:id="@+id/btn_Sharing"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="2"
-        android:layout_margintop="30dp"
+        android:layout_marginTop="30dp"
         android:layout_marginRight="50dp"
         android:layout_marginLeft="50dp"
         android:layout_gravity="center"
         android:text="스마트키 공유하기"
         android:backgroundTint="#0000ff" />
--->
     <Button
         android:id="@+id/btn_Delete"
         android:layout_width="match_parent"
