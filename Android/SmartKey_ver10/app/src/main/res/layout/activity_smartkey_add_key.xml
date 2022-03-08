@@ -13,7 +13,7 @@
         android:layout_weight="1"
         android:layout_marginTop="30dp"
         android:text="스마트키 등록하기"
-        android:textSize="24dp"
+        android:textSize="18dp"
         android:layout_gravity="center"/>
 
     <LinearLayout
@@ -36,7 +36,6 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="기기 찾기"
-            android:backgroundTint="#E6E6E6"
             android:id="@+id/btn_findDvice"/>
     </LinearLayout>
 
@@ -89,14 +88,12 @@
             android:layout_weight="1"
             android:text="취소"
             android:layout_marginRight="30dp"
-            android:backgroundTint="#E6E6E6"
             android:id="@+id/btn_addCancel"/>
         <Button
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="등록"
-            android:backgroundTint="#E6E6E6"
             android:id="@+id/btn_addCheck"/>
 
     </LinearLayout>
