@@ -11,7 +11,7 @@
         android:id="@+id/edit_id"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="100dp"
+        android:layout_marginTop="50dp"
         android:ems="10"
         android:layout_gravity="center"
         android:hint="이메일"
@@ -38,7 +38,6 @@
         android:id="@+id/edit_pw"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
         android:ems="10"
         android:layout_gravity="center"
         android:hint="비밀번호"
@@ -48,7 +47,6 @@
         android:id="@+id/edit_pw_re"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
         android:ems="10"
         android:layout_gravity="center"
         android:hint="비밀번호 확인"
@@ -65,19 +63,18 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginLeft="100dp"
-        android:layout_marginRight="100dp">
+        android:layout_marginTop="30dp"
+        android:gravity="center">
         <EditText
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="5"
+            android:layout_marginRight="20dp"
             android:ems="6"
             android:hint="인증번호"
             android:id="@+id/edit_AuthNum"/>
         <Button
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="2"
             android:id="@+id/btn_check"
             android:text="인증"/>
     </LinearLayout>
