@@ -15,6 +15,9 @@
         android:theme="@style/Theme.SmartKey_ver10"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".SmartkeySharingAct"
+            android:exported="false" />
+        <activity
             android:name=".SmartkeyAddKey"
             android:exported="false" />
         <activity

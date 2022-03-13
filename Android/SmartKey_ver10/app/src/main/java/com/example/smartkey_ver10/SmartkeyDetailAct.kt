@@ -24,7 +24,7 @@ class SmartkeyDetailAct : AppCompatActivity() {
         val btn_lock = findViewById<Button>(R.id.btn_Lock)
         val btn_unlock = findViewById<Button>(R.id.btn_Unlock)
         val btn_log = findViewById<Button>(R.id.btn_Log)
-        //val btn_sharing = findViewById<Button>(R.id.btn_Sharing)
+        val btn_sharing = findViewById<Button>(R.id.btn_Sharing)
         val btn_Delete = findViewById<Button>(R.id.btn_Delete)
 
         //쿠키세팅
@@ -87,11 +87,12 @@ class SmartkeyDetailAct : AppCompatActivity() {
             startActivity(log_intent)
         }
 
-        /*//공유하기
+        //공유하기
         btn_sharing.setOnClickListener {
-            val sharing_intent = Intent(this, SharingAct::class.java)
+            val sharing_intent = Intent(this, SmartkeySharingAct::class.java)
+            sharing_intent.putExtra("serialnum", keynum)
             startActivity(sharing_intent)
-        }*/
+        }
 
         //키 삭제하기
         btn_Delete.setOnClickListener {

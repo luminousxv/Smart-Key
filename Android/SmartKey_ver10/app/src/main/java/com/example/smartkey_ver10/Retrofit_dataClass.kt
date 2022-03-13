@@ -51,7 +51,7 @@ data class PostSmartPw(
     var serialNum: String,
     var smartPwd: String
 )
-//키 삭제
+//키 삭제(공유삭제 포함)
 data class PostserialNum(
     var serialNum: String
 )
@@ -68,6 +68,12 @@ data class KeyLog(
     var GPSLat: String,
     var GPSLong: String,
     var Method: String
+)
+
+//키 공유
+data class PostSharedInfo(
+    var serialNum: String,
+    var shareEmail: String
 )
 
 //리사이클러뷰 아이템

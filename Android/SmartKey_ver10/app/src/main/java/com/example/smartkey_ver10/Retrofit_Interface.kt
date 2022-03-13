@@ -44,6 +44,10 @@ interface Retrofit_Interface {
     fun postDelserialNum(@Header("Cookie") cookieid: String,
                   @FieldMap fields: HashMap<String, String>): Call<PostserialNum>
 
+    @FormUrlEncoded
+    @POST("main/share_key/register/")
+    fun postSharedinfo(@Header("Cookie") cookieid: String,
+                       @FieldMap fields: HashMap<String, String>): Call<PostSharedInfo>
 
     /*-----------------------------Get-----------------------*/
     @GET("main/view_keylist/")
