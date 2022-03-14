@@ -41,7 +41,8 @@ class MainActivity : AppCompatActivity() {
                     if(response.isSuccessful()){
                         var L_code =response.raw()
                         if(L_code.code == 200){
-                            Log.d("Test","Post 성공")
+                            goMain.putExtra("userEmail", id) //공유키 구분위함
+                            Log.d("로그인","로그인 post 성공")
                             CookieHandler().getCookie(response.headers().toMap())
                             startActivity(goMain)
                             finish()
@@ -50,11 +51,10 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 override fun onFailure(call: Call<LoginInfo>, t: Throwable) {
-                    Log.d("Test실패","t"+t.message)
+                    Log.d("로그인","t"+t.message)
                     //dialog("fail")
                 }
             })
-            Log.d("Test","Test종료")
         }
 
 

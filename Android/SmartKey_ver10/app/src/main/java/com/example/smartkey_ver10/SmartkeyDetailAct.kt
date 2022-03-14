@@ -4,6 +4,7 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
@@ -18,6 +19,7 @@ class SmartkeyDetailAct : AppCompatActivity() {
 
         val keynum = intent.getStringExtra("serialnum") //선택한 key의 serialnum
         val keyname = intent.getStringExtra("keyname") // 선택한 key의 이름
+        val shared = intent.getStringExtra("shared") //공유가 가능한지 불가능한지 판단
 
         findViewById<TextView>(R.id.nameSmartkey).text = keyname
 
@@ -26,6 +28,12 @@ class SmartkeyDetailAct : AppCompatActivity() {
         val btn_log = findViewById<Button>(R.id.btn_Log)
         val btn_sharing = findViewById<Button>(R.id.btn_Sharing)
         val btn_Delete = findViewById<Button>(R.id.btn_Delete)
+
+        if(shared=="1"){ //공유 스마트키로 접근 시 버튼 없애기
+            btn_log.visibility = View.INVISIBLE
+            btn_sharing.visibility = View.INVISIBLE
+            btn_Delete.visibility = View.INVISIBLE
+        }
 
         //쿠키세팅
         var cookie = CookieHandler().setCookie()
@@ -142,7 +150,7 @@ class SmartkeyDetailAct : AppCompatActivity() {
 
                             }
                             else {Log.d("SmartPwd","인증실패")
-                                Toast.makeText(this@SmartkeyDetailAct, "비밀번호가 틀렸습니다.",Toast.LENGTH_SHORT).show()}
+                                Toast.makeText(this@SmartkeyDetailAct, "비밀번호를 다시 확인하세요.",Toast.LENGTH_SHORT).show()}
                         }
 
                         override fun onFailure(call: Call<PostSmartPw>, t: Throwable) {

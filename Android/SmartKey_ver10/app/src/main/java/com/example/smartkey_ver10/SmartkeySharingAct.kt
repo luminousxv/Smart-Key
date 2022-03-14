@@ -1,5 +1,6 @@
 package com.example.smartkey_ver10
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -28,33 +29,74 @@ class SmartkeySharingAct : AppCompatActivity() {
 
         //ok시
         btn_OK.setOnClickListener {
-            var edit_email = findViewById<EditText>(R.id.edit_toshareEmail).text.toString()
 
-            var input = HashMap<String,String>()
-            input.put("serialNum", keynum!!)
-            input.put("shareEmail", edit_email)
+            //다이얼로그 띄우기
+            val dialog = SmartkeyPwDialog(this)
+            dialog.Checkdialog()
 
-            postservice.postSharedinfo(cookieid = cookie, input).enqueue(object : Callback<PostSharedInfo> {
-                override fun onResponse(call: Call<PostSharedInfo>, response: Response<PostSharedInfo>) {
-                    var rescode = response.raw().code
-                    if(rescode == 200){
-                        Log.d("sharePost","공유 성공")
-                        Log.d("response", response.raw().toString())
-                        Toast.makeText(this@SmartkeySharingAct, "$keyname 의 공유가 완료되었습니다.",
-                            Toast.LENGTH_SHORT).show()
-                        finish()
+            //다이얼로그 입력후 클릭 시
+            dialog.setOnClickListener(object : SmartkeyPwDialog.OnDialogClickListener{
+                override fun onClicked(smartpw: String) {
 
-                    } else {
-                        Log.d("sharePost","공유 실패")
-                        Log.d("response", response.raw().toString())
-                        Toast.makeText(this@SmartkeySharingAct, "이미 공유가 되어있거나 이메일이 올바르지 않습니다.",
-                            Toast.LENGTH_SHORT).show()
-                    }
+                    var inputkey = HashMap<String, String>()
+                    inputkey.put("smartPwd", smartpw)
+                    inputkey.put("serialNum", keynum!!)
+
+                    //공유 전 smartpw 인증
+                    postservice.postSmartPw(cookieid = cookie, inputkey).enqueue(object : Callback<PostSmartPw> {
+                        override fun onResponse(call: Call<PostSmartPw>, response: Response<PostSmartPw>) {
+                            var rescode = response.raw().code
+                            if(rescode == 200){
+                                Log.d("SmartPwd인증(공유)","인증 성공")
+                                Log.d("response", response.raw().toString())
+
+                                var edit_email = findViewById<EditText>(R.id.edit_toshareEmail).text.toString()
+
+                                var input = HashMap<String,String>()
+                                input.put("serialNum", keynum!!)
+                                input.put("shareEmail", edit_email)
+
+                                //공유정보 포스트
+                                postservice.postSharedinfo(cookieid = cookie, input).enqueue(object : Callback<PostSharedInfo> {
+                                    override fun onResponse(call: Call<PostSharedInfo>, response: Response<PostSharedInfo>) {
+                                        var rescode = response.raw().code
+                                        if(rescode == 200){
+                                            Log.d("sharePost","공유 성공")
+                                            Log.d("response", response.raw().toString())
+                                            Toast.makeText(this@SmartkeySharingAct,
+                                                "$keyname 이 $edit_email 에게 공유 되었습니다.",
+                                                Toast.LENGTH_SHORT).show()
+                                            finish()
+
+                                        } else {
+                                            Log.d("sharePost","공유 실패")
+                                            Log.d("response", response.raw().toString())
+                                            Toast.makeText(this@SmartkeySharingAct,
+                                                "이미 공유가 되어있거나 이메일이 올바르지 않습니다.",
+                                                Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
+                                    override fun onFailure(call: Call<PostSharedInfo>, t: Throwable) {
+                                        Log.d("LockPost","t"+t.message)
+                                    }
+                                })//공유 포스트 끝
+
+                            }
+                            else {Log.d("SmartPwd인증(공유)","인증실패")
+                                Toast.makeText(this@SmartkeySharingAct,
+                                    "비밀번호를 확인하세요.", Toast.LENGTH_SHORT).show()}
+                        }
+
+                        override fun onFailure(call: Call<PostSmartPw>, t: Throwable) {
+                            Log.d("SmartPwd실패","t"+t.message)
+                        }
+                    })//postSmartPw 끝
                 }
-                override fun onFailure(call: Call<PostSharedInfo>, t: Throwable) {
-                    Log.d("LockPost","t"+t.message)
-                }
-            })
+            })//다이얼로그 클릭이벤트 끝
+
         }
     }
 }
+
+
+
