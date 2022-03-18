@@ -16,6 +16,7 @@ import json                     # 서버 통신을 위한 json 라이브러리
 import requests                 # 서버 요청 라이브러리
 import os
 import drivers                  # lcd 조작을 위한 라이브러리
+import serial, close_state, open_state   #시리얼 번호와 키 잠금 상태 전송하기 위한 .py파일
 from time import sleep
 
 servo_pin = 18                        # servo모터 18번 핀 사용
@@ -43,14 +44,14 @@ display = drivers.Lcd()         # Lcd
 try:
 
     while True:
-        msg = '{"serialNum": "0000001"}'        # json에 저장되어 있는 rpi 시리얼 넘버
-        j = json.loads(msg)                     # msg를 불러옴
-        r = requests.get('http://20.194.28.30:80/Smart-Key/rpi/remote/', json=j)    # 서버 주소
+                
+        a = serial.msg                     # serial.py에 저장된 시리얼넘버 불러옴
+        r = requests.get('http://20.194.28.30:80/Smart-Key/rpi/remote/', json = a)    # 서버 주소
         res = r.json()
-        res_code = res["code"]                  # 서버에서 보내는 errorcode
-        res_message = res["message"]            # 서버에 기록되어 있는 상태값
+        res_code = res["code"]                  # 서버에 저장되어 있는 code
+        res_message = res["message"]            # 서버에 저장되어 있는 rpi 상태
 
-        GPIO.output(GPIO_TRIGGER, False)        # 초음파 센서
+        GPIO.output(GPIO_TRIGGER, False)
         sleep(0.5)
         GPIO.output(GPIO_TRIGGER, True)
         sleep(0.00001)
@@ -64,22 +65,19 @@ try:
 
         period = endTime - startTime
         distance = round(period * 17241, 2)         # 속도 = 거리/시간, 속도 = 340m/s, 거리 = distance, 시간 = period/2
-
-        print(distance)
         display.lcd_backlight(0)
         if res_code == 200:
-            print("정상적으로 연결되었습니다.")
             if res_message == state:            # 현재 키 상태 비교
                 if distance <= 100:
                     display.lcd_backlight(1)
-                else
+                else:
                     display.lcd_backlight(0)
                 continue                        # 동일하면 if문 탈출
             elif res_message == 'open':         # 현재 키 상태가 open 일때
                 state = res_message
                 if distance <= 100:
                     display.lcd_backlight(1)
-                else
+                else:
                     display.lcd_backlight(0)
                 doAngle(open_angle)
                 display.lcd_clear()
@@ -89,7 +87,7 @@ try:
                 state = res_message
                 if distance <= 100:
                     display.lcd_backlight(1)
-                else
+                else:
                     display.lcd_backlight(0)
                 doAngle(close_angle)
                 display.lcd_clear()
@@ -99,7 +97,7 @@ try:
             print("존재하지 않는 스마트키입니다.")
             if distance <= 100:
                 display.lcd_backlight(1)
-            else
+            else:
                 display.lcd_backlight(0)
             doAngle(close_angle)
             display.lcd_display_string("This is a non-", 1)
@@ -109,7 +107,7 @@ try:
             print("DB 오류가 발생했습니다.")
             if distance <= 100:
                 display.lcd_backlight(1)
-            else
+            else:
                 display.lcd_backlight(0)
             doAngle(close_angle)
             display.lcd_display_string("DB error", 1)
@@ -119,7 +117,7 @@ try:
             print("서버와 연결이 되지 않았습니다.")
             if distance <= 100:
                 display.lcd_backlight(1)
-            else
+            else:
                 display.lcd_backlight(0)
             doAngle(close_angle)
             display.lcd_display_string("No connection", 1)
@@ -138,6 +136,12 @@ GPIO.cleanup()                                  # GPIO 핀 초기화
 상태 변화를 인지하고 해당 기능을 수행해준다. LCD는 초음파 센서를 이용해 거리값의 변화를 감지해서
 
 가까워지면 LCD화면이 켜지고, 멀어지면 LCD화면이 꺼지는 방식으로 한다. 
+
+serial.py를 만들어 만약 키를 대량 생산하였을때 번호를 각자 저장하는 식으로 설계하였다.
+
+open_state.py와 close_state.py는 블루투스 통신을 할때 안드로이드 앱으로 키 상태를 전송하고, 앱에서 
+
+서버로 전송을 하여 블루투스 제어도 이력을 갱신할 수 있는 방식으로 사용하였다. 
 
 ## RPI Flowchart
 <img src = "../images/rpi_control.png">
