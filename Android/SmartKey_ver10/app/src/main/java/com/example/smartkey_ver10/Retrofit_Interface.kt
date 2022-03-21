@@ -49,6 +49,21 @@ interface Retrofit_Interface {
     fun postSharedinfo(@Header("Cookie") cookieid: String,
                        @FieldMap fields: HashMap<String, String>): Call<PostSharedInfo>
 
+    @FormUrlEncoded
+    @POST("main/user/reset/email/")
+    fun postForResetUserinfo(@Header("Cookie") cookieid: String,
+                       @FieldMap fields: HashMap<String, String>): Call<PostForResetInfo>
+
+    @FormUrlEncoded
+    @POST("main/user/reset/verification/")
+    fun postForResetAuthNum(@Header("Cookie") cookieid: String,
+                       @FieldMap fields: HashMap<String, String>): Call<CheckAuth>
+
+    @FormUrlEncoded
+    @POST("main/user/reset/change_pw/")
+    fun postResetPw(@Header("Cookie") cookieid: String,
+                            @FieldMap fields: HashMap<String, String>): Call<PostResetPW>
+
     /*-----------------------------Get-----------------------*/
     @GET("main/view_keylist/")
     fun GetKeyList(@Header("Cookie") cookieid: String): Call<GetKeyInfo>

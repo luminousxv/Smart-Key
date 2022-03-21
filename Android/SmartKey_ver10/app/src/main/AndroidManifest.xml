@@ -15,6 +15,9 @@
         android:theme="@style/Theme.SmartKey_ver10"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".Register_resetPw"
+            android:exported="false" />
+        <activity
             android:name=".SmartkeySharingAct"
             android:exported="false" />
         <activity

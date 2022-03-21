@@ -76,6 +76,16 @@ data class PostSharedInfo(
     var shareEmail: String
 )
 
+//비밀번호 초기화
+data class PostForResetInfo(
+    var userEmail: String,
+    var userName: String,
+    var userBirth: String
+)
+data class PostResetPW(
+    var userPwd: String
+)
+
 //리사이클러뷰 아이템
 data class ViewItem(
     var img : String,
