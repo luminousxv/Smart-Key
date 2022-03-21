@@ -6,6 +6,8 @@ import os
 import drivers                  # lcd 조작을 위한 라이브러리
 import serial, close_state, open_state   #시리얼 번호와 키 잠금 상태 전송하기 위한 .py파일
 from time import sleep
+import bluetooth
+
 
 servo_pin = 18                        # servo모터 18번 핀 사용
 GPIO.setmode(GPIO.BCM)          # GPIO 핀들의 번호 지정 규칙
