@@ -32,7 +32,7 @@ class SmartkeySharingAct : AppCompatActivity() {
 
             //다이얼로그 띄우기
             val dialog = SmartkeyPwDialog(this)
-            dialog.Checkdialog()
+            dialog.Checkdialog_smpw()
 
             //다이얼로그 입력후 클릭 시
             dialog.setOnClickListener(object : SmartkeyPwDialog.OnDialogClickListener{

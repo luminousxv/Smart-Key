@@ -18,7 +18,7 @@
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:hint="이메일"
+        android:hint="이름"
         android:ems="10"
         android:id="@+id/edt_username"
         android:inputType="textPersonName"/>
@@ -26,7 +26,7 @@
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:hint="이메일"
+        android:hint="생년월일"
         android:ems="10"
         android:id="@+id/edt_userbirth"
         android:inputType=""/>
@@ -50,11 +50,13 @@
             android:layout_marginRight="20dp"
             android:ems="6"
             android:hint="인증번호"
+            android:visibility="invisible"
             android:id="@+id/edt_authNum"/>
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/btn_authCheck"
+            android:visibility="invisible"
             android:text="인증"/>
     </LinearLayout>
 

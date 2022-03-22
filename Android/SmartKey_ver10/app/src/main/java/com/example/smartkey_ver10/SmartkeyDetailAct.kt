@@ -107,7 +107,7 @@ class SmartkeyDetailAct : AppCompatActivity() {
             //다이얼로그 띄우기
             val main_intent = Intent(this, SmartkeyMain::class.java)
             val dialog = SmartkeyPwDialog(this)
-            dialog.Checkdialog()
+            dialog.Checkdialog_smpw()
 
             //다이얼로그 입력후 클릭 시
             dialog.setOnClickListener(object : SmartkeyPwDialog.OnDialogClickListener{

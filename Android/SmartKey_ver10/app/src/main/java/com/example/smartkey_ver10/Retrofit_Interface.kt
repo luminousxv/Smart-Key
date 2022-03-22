@@ -54,10 +54,6 @@ interface Retrofit_Interface {
     fun postForResetUserinfo(@Header("Cookie") cookieid: String,
                        @FieldMap fields: HashMap<String, String>): Call<PostForResetInfo>
 
-    @FormUrlEncoded
-    @POST("main/user/reset/verification/")
-    fun postForResetAuthNum(@Header("Cookie") cookieid: String,
-                       @FieldMap fields: HashMap<String, String>): Call<CheckAuth>
 
     @FormUrlEncoded
     @POST("main/user/reset/change_pw/")
