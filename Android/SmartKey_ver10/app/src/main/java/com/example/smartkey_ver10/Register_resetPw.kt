@@ -13,15 +13,12 @@ import retrofit2.Callback
 import retrofit2.Response
 
 class Register_resetPw : AppCompatActivity() {
-
     val PostService = Retrofit_service.service
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_register_reset_pw)
 
-        //쿠키세팅
-        var cookie = CookieHandler().setCookie()
 
 
         val btn_postAuthNum = findViewById<Button>(R.id.btn_authCheck)
@@ -31,9 +28,9 @@ class Register_resetPw : AppCompatActivity() {
 
         btn_postInfo.setOnClickListener {
 
-            val userEmail = findViewById<EditText>(R.id.edt_useremail).text.toString()
-            val userName = findViewById<EditText>(R.id.edt_username).text.toString()
-            val userBirth = findViewById<EditText>(R.id.edt_userbirth).text.toString()
+            var userEmail = findViewById<EditText>(R.id.edt_useremail).text.toString()
+            var userName = findViewById<EditText>(R.id.edt_username).text.toString()
+            var userBirth = findViewById<EditText>(R.id.edt_userbirth).text.toString()
 
 
             var InputInfo = HashMap<String,String>()
@@ -42,26 +39,28 @@ class Register_resetPw : AppCompatActivity() {
             InputInfo.put("userName", userName)
             InputInfo.put("userBirth", userBirth)
 
-            PostService.postForResetUserinfo(cookieid = cookie, InputInfo).enqueue(object : Callback<PostForResetInfo> {
+            PostService.postForResetUserinfo(InputInfo).enqueue(object : Callback<PostForResetInfo> {
                 override fun onResponse(call: Call<PostForResetInfo>, response: Response<PostForResetInfo>) {
-                    if(response.isSuccessful()){
-                        var L_code =response.raw()
-                        if(L_code.code == 200){
 
-                            findViewById<EditText>(R.id.edt_authNum).visibility = View.VISIBLE
-                            btn_postAuthNum.visibility = View.VISIBLE
+                    if(response.code() == 200){
+                        CookieHandler().getCookie(response.headers().toMap()) //쿠키 받기
+                        Log.d("유저정보","전송성공"+response.raw())
+                        findViewById<EditText>(R.id.edt_authNum).visibility = View.VISIBLE
+                        btn_postAuthNum.visibility = View.VISIBLE
+                        btn_postAuthNum.setOnClickListener {
+                            var cookie = CookieHandler().setCookie()
 
-                            btn_postAuthNum.setOnClickListener {
-                                var authNum = findViewById<EditText>(R.id.edt_authNum).text.toString()
-                                var InputAuthNum = HashMap<String,String>()
-                                InputAuthNum.put("inputAuth", authNum)
-                                postAuthNum(cookie, InputAuthNum) //인증번호 전송, 전송 후 비밀번호 변경 다이얼로그까지
-                            }//버튼끝
+                            var authNum = findViewById<EditText>(R.id.edt_authNum).text.toString()
+                            Log.d("인증번호",authNum)
 
+                            var InputAuthNum = HashMap<String,String>()
+                            InputAuthNum.put("inputAuth", authNum)
+                            postAuthNum(cookie, InputAuthNum) //인증번호 전송, 전송 후 비밀번호 변경 다이얼로그까지
+                        }//버튼끝
                             Log.d("유저정보","전송완료")
                         }
-                    }
-                    else Log.d("유저정보","전송실패")
+
+                    else Log.d("유저정보","전송실패"+response.raw())
                 }
                 override fun onFailure(call: Call<PostForResetInfo>, t: Throwable) {
                     Log.d("로그인","t"+t.message)
@@ -75,25 +74,23 @@ class Register_resetPw : AppCompatActivity() {
 //*****다이얼로그 pw, pw_re 다르게 써도 똑같이 되는데 이거 고치기 필요함 ********
     fun postAuthNum(cookie : String, Input : HashMap<String, String>){
 
-        PostService.postCheckAuth(cookieid = cookie, Input).enqueue(object : Callback<CheckAuth> {
+        PostService.postForResetCheckAuth(cookieid = cookie, Input).enqueue(object : Callback<CheckAuth> {
             override fun onResponse(call: Call<CheckAuth>, response: Response<CheckAuth>) {
-                if(response.isSuccessful()){
-                    var L_code =response.raw()
-                    if(L_code.code == 200){
-                        resetPw(cookie) //비밀번호 변경, 포스트 다이얼로그
-                    }
+                if(response.code() == 200){
+                    Log.d("인증번호","전송성공"+response.raw())
+                    resetPw(cookie) //비밀번호 변경, 포스트 다이얼로그
                 }
-                else Log.d("유저정보","전송실패")
+                else Log.d("인증번호","전송실패"+response.raw())
             }
             override fun onFailure(call: Call<CheckAuth>, t: Throwable) {
-                Log.d("로그인","t"+t.message)
-                //dialog("fail")
+                Log.d("인증번호","t"+t.message)
             }
         })
     }//fun postAuthNum 끝
 
 
     fun resetPw(cookie : String){
+
 
         //다이얼로그 띄우기
         val dialog = SmartkeyPwDialog(this)
@@ -126,7 +123,7 @@ class Register_resetPw : AppCompatActivity() {
                         }
 
                         override fun onFailure(call: Call<PostResetPW>, t: Throwable) {
-                            Log.d("SmartPwd실패","t"+t.message)
+                            Log.d("resetpw","t"+t.message)
                         }
                     })//postSmartPw 끝
                 }

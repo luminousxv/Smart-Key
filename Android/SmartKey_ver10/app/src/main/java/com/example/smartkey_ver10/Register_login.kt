@@ -54,7 +54,7 @@ class Register_login : AppCompatActivity() {
                         if(response.isSuccessful()){
                             var R_data =response.raw()
                             if(R_data.code == 200){
-                                CookieHandler().getCookie(response.headers().toMap())
+                                CookieHandler().getCookie(response.headers().toMap()) //쿠키 받기
                                 //put log
                                 Log.d("Test실패","success")
                             }

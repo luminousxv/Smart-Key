@@ -13,6 +13,7 @@
         android:layout_height="wrap_content"
         android:hint="이메일"
         android:ems="10"
+        android:inputType="textPersonName"
         android:id="@+id/edt_useremail" />
 
     <EditText
@@ -28,8 +29,7 @@
         android:layout_height="wrap_content"
         android:hint="생년월일"
         android:ems="10"
-        android:id="@+id/edt_userbirth"
-        android:inputType=""/>
+        android:id="@+id/edt_userbirth"/>
 
     <Button
         android:layout_width="wrap_content"

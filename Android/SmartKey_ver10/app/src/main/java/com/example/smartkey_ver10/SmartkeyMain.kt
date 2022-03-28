@@ -1,5 +1,7 @@
 package com.example.smartkey_ver10
 
+import android.app.AlertDialog
+import android.content.DialogInterface
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -21,6 +23,8 @@ class SmartkeyMain : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_smartkey_main)
+
+
 
         val userEmail = intent.getStringExtra("userEmail") //공유키 구분
 
@@ -78,12 +82,33 @@ class SmartkeyMain : AppCompatActivity() {
         findViewById<RecyclerView>(R.id.shared_recycleView).adapter = shared_adapter
     }
 
-    //클릭 이벤트
+
+
+    //클릭 이벤트 함수
     private fun adapterOnClick(data: ViewItem, shared: String){
 
-        val nexintent = Intent(this, SmartkeyDetailAct::class.java)
+        val BluOrHttpSelect = AlertDialog.Builder(this)
+        BluOrHttpSelect.setTitle("작동 선택")
+        var seleclist : MutableList<String> = ArrayList()
+        seleclist.add("원격 접속")
+        seleclist.add("블루투스 접속")
+        val items = seleclist!!.toTypedArray<CharSequence>()
+        BluOrHttpSelect.setItems(items,
+            DialogInterface.OnClickListener { dialog, item ->
+                smartPwPost(data, shared, items[item].toString()) })
+        //블루투스 접속 누르면 블루투스 연결해야함.
 
-        //다이얼로그 띄우기
+        val alert: AlertDialog = BluOrHttpSelect.create()
+        alert.show()
+
+    }//클릭이벤트 함수 끝
+
+
+    //스마트키 비밀번호 포스트함수
+    fun smartPwPost(data:ViewItem,shared: String, selection:String){
+
+        //스마트키 비밀번호 다이얼로그 띄우기
+        val nexintent = Intent(this, SmartkeyDetailAct::class.java)
         val dialog = SmartkeyPwDialog(this)
         dialog.Checkdialog_smpw()
 
@@ -102,6 +127,7 @@ class SmartkeyMain : AppCompatActivity() {
                         if (rescode == 200) {
                             Log.d("SmartPwd인증", "인증 성공")
                             Log.d("response", response.raw().toString())
+                            nexintent.putExtra("method", selection)//원격 or 블투
                             nexintent.putExtra("shared", shared)
                             nexintent.putExtra("serialnum", data.id)
                             nexintent.putExtra("keyname", data.name)
@@ -117,5 +143,6 @@ class SmartkeyMain : AppCompatActivity() {
                 })//postSmartPw 끝
             }
         })//다이얼로그 클릭이벤트 끝
-    }
+
+    }//스마트키 비밀번호 포스트함수 끝
 }
