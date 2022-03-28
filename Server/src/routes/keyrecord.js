@@ -16,7 +16,7 @@ router.get('/main/view_keyrecord', function(req, res) {
     let sql1 = 'select SerialNum, Time, KeyState, GPSLat, GPSLong, Method, Email from KeyRecord where serialNum = ?';
     let sql2 = 'select OwnerID from Key_Authority where SerialNum = ?';
     let sql3 = 'select * from KeyInfo where SerialNum = ?';
-
+    //check login session
     if (req.session.login === undefined) {
         res.status(404).json ({
             'code': 404,
@@ -24,6 +24,7 @@ router.get('/main/view_keyrecord', function(req, res) {
         })
     }
     else{
+        //select data from KeyInfo DB
         connection.query(sql3, serialNum, function (err, result3){
             if (err) {
                 console.log(err);
@@ -39,6 +40,7 @@ router.get('/main/view_keyrecord', function(req, res) {
                 })
             }
             else{
+                //check key's authority(whether the login email is the owner)
                 connection.query(sql2, serialNum, function(err, result2){
                     if (err) {
                         console.log(err);
@@ -54,6 +56,8 @@ router.get('/main/view_keyrecord', function(req, res) {
                         })
                     }
                     else{
+                        //select serial number, time, key's state, GPS data, 
+                        //control method, controlled email from KeyRecord DB table
                         connection.query(sql1, serialNum, function(err, result) {
                             if (err) {
                                 console.log(err)

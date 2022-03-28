@@ -14,6 +14,7 @@ router.post('/main/key_pw', function(req, res){
     let smartPwd = req.body.smartPwd;
 
     let sql1 = 'select * from KeyInfo where SerialNum = ?';
+    //check login session
     if (req.session.login === undefined) {
         let resultCode = 404;
         let message = '세션이 만료되었습니다. 다시 로그인 해주세요';
@@ -24,6 +25,7 @@ router.post('/main/key_pw', function(req, res){
         });
     }
     else{
+        //select data from KeyInfo DB table
         connection.query(sql1, serialNum, function(err, result1){
             if (err) {
                 res.status(500).json ({
@@ -38,6 +40,7 @@ router.post('/main/key_pw', function(req, res){
                 })
             }
             else{
+                //encrypt input pw with salt save in KeyInfo DB table
                 const hashedPw = crypto.pbkdf2Sync(smartPwd, result1[0].Salt, 1, 32, 'sha512').toString('base64');
                 if (err) {
                     res.status(500).json ({

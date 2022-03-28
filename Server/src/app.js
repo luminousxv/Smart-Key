@@ -35,8 +35,6 @@ let shareRouter = require('./routes/keyshare');
 app.use('/Smart-Key', shareRouter);
 
 //Server
-let server = app.listen(8080,'localhost', function(){
-    let host = server.address().address;
-    let port = server.address().port;
-    console.log("start at http:// %s:%s", host, port);
+let server = app.listen(80, function(){
+    console.log('Server on...')
 })

@@ -8,7 +8,7 @@ router.use(cookieParser());
 router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 
-
+//Smart Key Delete API
 router.post('/main/delete_key', function (req, res) {
     let serialNum = req.body.serialNum;
 
@@ -18,6 +18,7 @@ router.post('/main/delete_key', function (req, res) {
     let sql5 = 'select OwnerID from Key_Authority where SerialNum = ?';
     let sql6 = 'delete from Key_Authority where SerialNum = ?';
 
+    //check login session
     if (req.session.login === undefined) {
         let resultCode = 404;
         let message = '세션이 만료되었습니다. 다시 로그인 하세요.';
@@ -28,6 +29,7 @@ router.post('/main/delete_key', function (req, res) {
         });
     }
     else{
+        //check authority
         connection.query(sql5, serialNum, function(err, result4){
             if (err) {
                 res.status(500).json ({
@@ -42,6 +44,7 @@ router.post('/main/delete_key', function (req, res) {
                 })
             }
             else{
+                //get Smart Key from KeyInfo DB table
                 connection.query(sql4, serialNum, function(err, result3) {
                     if (err) {
                         res.status(500).json ({
@@ -56,6 +59,7 @@ router.post('/main/delete_key', function (req, res) {
                         })
                     }
                     else {
+                        //delete Smart Key from KeyInfo DB table
                         connection.query(sql2, serialNum, function (err, result) {
                             if (err) {
                                 res.status(500).json ({
@@ -64,6 +68,7 @@ router.post('/main/delete_key', function (req, res) {
                                 })
                             }
                             else{
+                                //delete Smart Key's records from KeyRecord DB table
                                 connection.query(sql3, serialNum, function (err, result2){
                                     if (err) {
                                         res.status(500).json ({
@@ -72,6 +77,7 @@ router.post('/main/delete_key', function (req, res) {
                                         })
                                     }
                                     else{
+                                        //delete Smart Key's authority from Key_Authority DB table
                                         connection.query(sql6, serialNum, function (err, result6){
                                             if (err) {
                                                 res.status(500).json ({
