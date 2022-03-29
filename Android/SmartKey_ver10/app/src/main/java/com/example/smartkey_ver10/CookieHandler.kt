@@ -23,4 +23,13 @@ class CookieHandler {
         return cookieid
     }
 
+    fun putUserEmail(Email: String){
+        SharedPrefApp.storj.setString("UserEmail", Email)
+    }
+
+    fun setUserEmail():String{
+        var email = SharedPrefApp.storj.getString("UserEmail","")
+        return email
+    }
+
 }

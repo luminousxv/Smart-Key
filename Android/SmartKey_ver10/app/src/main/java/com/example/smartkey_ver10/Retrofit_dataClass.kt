@@ -33,7 +33,7 @@ data class KeyInfo(
 )
 
 //등록키 post
-data class RegiserKeyInfo(
+data class RegisterKeyInfo(
     var serialNum: String,
     var keyName: String,
     var smartPwd: String,

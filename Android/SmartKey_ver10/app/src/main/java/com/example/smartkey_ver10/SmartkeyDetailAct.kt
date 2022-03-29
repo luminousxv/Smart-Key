@@ -23,9 +23,11 @@ class SmartkeyDetailAct : AppCompatActivity() {
         val keynum = intent.getStringExtra("serialnum") //선택한 key의 serialnum
         val keyname = intent.getStringExtra("keyname") // 선택한 key의 이름
         val shared = intent.getStringExtra("shared") //공유가 가능한지 불가능한지 판단
+        val goMain = Intent(this, SmartkeyMain::class.java)
 
         findViewById<TextView>(R.id.nameSmartkey).text = keyname
 
+        val btn_back = findViewById<Button>(R.id.btn_back)
         val btn_lock = findViewById<Button>(R.id.btn_Lock)
         val btn_unlock = findViewById<Button>(R.id.btn_Unlock)
         val btn_log = findViewById<Button>(R.id.btn_Log)
@@ -120,6 +122,7 @@ class SmartkeyDetailAct : AppCompatActivity() {
             btn_sharing.setOnClickListener {
                 val sharing_intent = Intent(this, SmartkeySharingAct::class.java)
                 sharing_intent.putExtra("serialnum", keynum)
+                sharing_intent.putExtra("keyname", keynum)
                 startActivity(sharing_intent)
             }
 
@@ -185,6 +188,11 @@ class SmartkeyDetailAct : AppCompatActivity() {
                     }
                 })//다이얼로그 클릭이벤트 끝
             }//키 삭제버튼 끝
+
+            btn_back.setOnClickListener {
+                startActivity(goMain)
+                finish()
+            }
         }
     }
 

@@ -38,19 +38,14 @@ class MainActivity : AppCompatActivity() {
 
             PostLogin.postLogin(loginInput).enqueue(object : Callback<LoginInfo> {
                 override fun onResponse(call: Call<LoginInfo>, response: Response<LoginInfo>) {
-
-                    if(response.isSuccessful()){
-                        var L_code =response.raw()
-                        if(L_code.code == 200){
-                            goMain.putExtra("userEmail", id) //공유키 구분위함
-                            Log.d("로그인","로그인 post 성공")
-                            CookieHandler().getCookie(response.headers().toMap())
-                            startActivity(goMain)
-                            finish()
-                        }
+                    if(response.code() == 200){
+                        CookieHandler().putUserEmail(id) //공유키 구분위함
+                        Log.d("로그인","로그인 post 성공")
+                        CookieHandler().getCookie(response.headers().toMap())
+                        startActivity(goMain)
+                        finish()
                     }
                 }
-
                 override fun onFailure(call: Call<LoginInfo>, t: Throwable) {
                     Log.d("로그인","t"+t.message)
                     //dialog("fail")

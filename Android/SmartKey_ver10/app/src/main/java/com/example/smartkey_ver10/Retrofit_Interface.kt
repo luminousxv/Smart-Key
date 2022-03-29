@@ -22,7 +22,7 @@ interface Retrofit_Interface {
     @FormUrlEncoded
     @POST("main/register_key")
     fun postKeyInfo(@Header("Cookie") cookieid: String,
-                  @FieldMap fields: HashMap<String, String>): Call<RegiserKeyInfo>
+                  @FieldMap fields: HashMap<String, String>): Call<RegisterKeyInfo>
 
     @FormUrlEncoded
     @POST("main/open_key/")

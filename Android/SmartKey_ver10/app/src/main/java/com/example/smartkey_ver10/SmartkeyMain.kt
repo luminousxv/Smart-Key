@@ -18,15 +18,13 @@ class SmartkeyMain : AppCompatActivity() {
     //쿠키세팅
     val GetService = Retrofit_service.service
     val cookie = CookieHandler().setCookie()
+    val UserEmail = CookieHandler().setUserEmail()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_smartkey_main)
 
-
-
-        val userEmail = intent.getStringExtra("userEmail") //공유키 구분
 
         val addkey_intent = Intent(this, SmartkeyAddKey::class.java)
         val btn_addKey = findViewById<Button>(R.id.btn_addkey)
@@ -50,12 +48,10 @@ class SmartkeyMain : AppCompatActivity() {
                     keyList = response.body()!!.message
                     listSize = keyList.size-1
                     Log.d("SmartkeyGet","Get 성공" + response.raw().toString())
-                    Log.d("sss",response.body().toString())
-                    Log.d("id",userEmail.toString())
 
                     //리사이클러뷰 아이템 생성
                     for(i in 0..listSize){
-                        if(keyList[i].UserID == userEmail.toString()){ //직접 등록한 스마트키
+                        if(keyList[i].UserID == UserEmail){ //직접 등록한 스마트키
                             var keynum = keyList[i].SerialNum
                             var keyname = keyList[i].KeyName
                             registered_list.add(ViewItem("","$keynum" , "$keyname"))
@@ -81,7 +77,6 @@ class SmartkeyMain : AppCompatActivity() {
             {data->adapterOnClick(data,"1")})
         findViewById<RecyclerView>(R.id.shared_recycleView).adapter = shared_adapter
     }
-
 
 
     //클릭 이벤트 함수
@@ -132,6 +127,7 @@ class SmartkeyMain : AppCompatActivity() {
                             nexintent.putExtra("serialnum", data.id)
                             nexintent.putExtra("keyname", data.name)
                             startActivity(nexintent)
+                            finish()
                         }
                         else {
                             Log.d("response", response.raw().toString())

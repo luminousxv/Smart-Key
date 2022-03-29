@@ -14,9 +14,15 @@
         android:gravity="center"
         android:text="스마트키 이름"
         android:textSize="20dp"
-        android:layout_marginBottom="20dp"
         android:background="#E6E6E6"
         android:id="@+id/nameSmartkey"/>
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="뒤로가기"
+        android:textSize="8dp"
+        android:layout_marginBottom="20dp"
+        android:id="@+id/btn_back"/>
 
     <Button
         android:id="@+id/btn_Lock"
