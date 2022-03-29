@@ -9,13 +9,14 @@ router.use(cookieParser());
 router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 
+//Register Key API
 router.post('/main/register_key', function (req, res) {
     let serialNum = req.body.serialNum;
     let keyName = req.body.keyName;
     let smartPwd = req.body.smartPwd;
 
     let sql1 = 'select * from KeyInfo where SerialNum = ?';
-
+    //check login session
     if (req.session.login === undefined) {
         let resultCode = 404;
         let message = '세션이 만료되었습니다. 다시 로그인 하세요.';
@@ -26,6 +27,7 @@ router.post('/main/register_key', function (req, res) {
         });
     }
     else {
+        //check KeyInfo DB table if key is registered
         connection.query(sql1, serialNum, function(err, result) {
             if (err) {
                 res.status(500).json ({
@@ -54,6 +56,7 @@ router.post('/main/register_key', function (req, res) {
                 let sql4 = 'insert into Key_Authority(SerialNum, OwnerID) values (?, ?)';
                 let parmas3 = [serialNum, req.session.login.Email];
 
+                //insert key's data to KeyInfo DB table
                 connection.query(sql2, params, function (err, result) {
                     if (err) {
                         res.status(500).json ({
@@ -62,6 +65,7 @@ router.post('/main/register_key', function (req, res) {
                         })
                     }
                     else{
+                        //insert key record to KeyRecord DB table
                         connection.query(sql3, params2, function (err, result2) {
                             if (err) {
                                 res.status(500).json ({
@@ -70,6 +74,7 @@ router.post('/main/register_key', function (req, res) {
                                 })
                             }
                             else{
+                                //insert owner's email to Key_Authority DB table
                                 connection.query(sql4, parmas3, function (err, result3){
                                     if (err) {
                                         res.status(500).json ({

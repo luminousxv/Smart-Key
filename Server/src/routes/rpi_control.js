@@ -6,10 +6,11 @@ let bodyParser = require("body-parser");
 router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 
+//RPI Remote API
 router.get('/rpi/remote', function(req, res){
     let serialNum = req.body.serialNum;
     let sql1 = 'select KeyState from KeyInfo where SerialNum = ?';
-
+    //get KeyState from KeyInfo DB table
     connection.query(sql1, serialNum, function(err, result1){
         if (err) {
             res.status(500).json ({
@@ -33,7 +34,7 @@ router.get('/rpi/remote', function(req, res){
         }
     })
 })
-
+//RPI Bluetooth API
 router.post('/rpi/bluetooth', function(req, res){
     let serialNum = req.body.serialNum;
     let keyState = req.body.keyState;

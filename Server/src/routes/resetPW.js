@@ -29,7 +29,7 @@ const smtpTransport = nodemailer.createTransport({
         pass: "****"
     }
 });
-
+//Reset API(Email)
 router.post('/user/reset/email', function(req, res) {
     let userEmail = req.body.userEmail;
     let userName = req.body.userName;
@@ -39,7 +39,8 @@ router.post('/user/reset/email', function(req, res) {
 
     let sql1 = 'select * from Users where UserEmail = ? and UserName = ? and UserBirth = ?';
     let params = [userEmail, userName, userBirth];
-
+    
+    //check whether input data is valid in Users DB table
     connection.query(sql1, params, function(err, result) {
         if (err) {
             let resultCode = 404;
@@ -67,19 +68,21 @@ router.post('/user/reset/email', function(req, res) {
             let message = '이메일 인증을 위해 ' + result[0].UserEmail + ' 으로 이메일을 보냈습니다.';
             
             let authNum = Math.random().toString().substr(2, 6);
-
+            
+            //reset session
             req.session.reset = {
                 Email: userEmail,
                 Auth: authNum
             };
 
+            //verification number email setup
             const mailOptions = {
                 from: "Smart_Key_KPU <noreply.drgvyhn@gmail.com>",
                 to: req.session.reset.Email,
                 subject: "Smart Key 비밀번호 초기화 인증 번호 메일입니다.",
                 text: "인증번호는 " + authNum + " 입니다."
-            };
-
+            }; 
+            //send email
             smtpTransport.sendMail(mailOptions, (err, res) => {
                 if(err) {
                     console.log(err);
@@ -98,12 +101,14 @@ router.post('/user/reset/email', function(req, res) {
     })
 })
 
+//Reset API(Verification)
 router.post('/user/reset/verification', function (req, res) {
     let inputAuth = req.body.inputAuth;
     console.log('입력값: ' + inputAuth);
     console.log('----reset 세션----');
     console.log(req.session.reset);
 
+    //check reset session
     if (req.session.reset === undefined) {
         let resultCode = 404;
         let message = '인증번호가 만료 되었습니다. 처음부터 다시 해주세요.';
@@ -113,7 +118,7 @@ router.post('/user/reset/verification', function (req, res) {
             'message': message
         });
     }
-
+    //check input verification number
     else if (inputAuth !== req.session.reset.Auth) {
         let resultCode = 400;
         let message = '인증번호가 틀렸습니다. 다시 입력해 주세요.';
@@ -137,10 +142,11 @@ router.post('/user/reset/verification', function (req, res) {
     }
 })
 
+//Reset API(Change Password)
 router.post('/user/reset/change_pw', function (req, res) {
     let userPwd = req.body.userPwd;
     console.log('입력값: ' + userPwd);
-
+    //check if input pw is 9 digits or more
     if (formSearch(userPwd)) {
         let resultCode = 400;
         let message = '비밀번호는 9자리 이상이어야 합니다. 다시 입력해주세요.';
