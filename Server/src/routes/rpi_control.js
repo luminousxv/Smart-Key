@@ -25,6 +25,47 @@ router.get('/rpi/remote', function(req, res){
                 'message': '존재하지 않는 스마트키입니다.'
             })
         }
+        //delete key
+        else if (result1[0].KeyState === 'delete'){
+            let sql2 = 'delete from KeyInfo where SerialNum = ?';
+            let sql3 = 'delete from KeyRecord where SerialNum = ?';
+            let sql4 = 'delete from Key_Authority where SerialNum = ?';
+
+            connection.query(sql2, serialNum, function(err, result2){
+                if (err) {
+                    res.status(500).json ({
+                        'code': 500,
+                        'message': 'DB 오류가 발생했습니다.'
+                    })
+                }
+                else{
+                    connection.query(sql3, serialNum, function(err, result3){
+                        if (err) {
+                            res.status(500).json ({
+                                'code': 500,
+                                'message': 'DB 오류가 발생했습니다.'
+                            })
+                        }
+                        else{
+                            connection.query(sql4, serialNum, function(err, result4){
+                                if (err) {
+                                    res.status(500).json ({
+                                        'code': 500,
+                                        'message': 'DB 오류가 발생했습니다.'
+                                    })
+                                }
+                                else{
+                                    res.status(200).json ({
+                                        'code': 200,
+                                        'message': result1[0].KeyState
+                                    })
+                                }
+                            })
+                        }
+                    })
+                }
+            })
+        }
 
         else{
             res.status(200).json ({
