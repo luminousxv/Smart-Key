@@ -7,22 +7,32 @@ import android.widget.Button
 import android.widget.EditText
 
 //액티비티 없이 비밀번호 간단 인증을 위한 다이얼로그 클래스
-class SmartkeyPwDialog(context: Context) {
+class SmartkeyDialog(context: Context) {
 
     private val dialog = Dialog(context)
     private lateinit var onClickListener: OnDialogClickListener
     private lateinit var onClickListener_re: OnDialogClickListener_repw
+    private lateinit var onClickListener_BT: OnDialogClickListener_BT
 
+    //스마트키 비밀번호 인증에 사용
     fun setOnClickListener(listener: OnDialogClickListener)
     {
         onClickListener = listener
     }
 
+    //비밀번호 초기화에 사용
     fun setOnClickListener_re(listener: OnDialogClickListener_repw)
     {
         onClickListener_re = listener
     }
 
+    //블루투스 제어로 사용
+    fun setOnClickListener_BT(listener: OnDialogClickListener_BT)
+    {
+        onClickListener_BT = listener
+    }
+
+    //스마트키 비밀번호 인증에 사용
     fun Checkdialog_userpw(){
         dialog.setContentView(R.layout.dialog_register_reset_pw)
         dialog.window!!.setLayout(WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.WRAP_CONTENT)
@@ -44,7 +54,7 @@ class SmartkeyPwDialog(context: Context) {
         }
     }
 
-
+    //비밀번호 초기화에 사용
     fun Checkdialog_smpw(){
         dialog.setContentView(R.layout.dialog_smartkey_pw)
         dialog.window!!.setLayout(WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.WRAP_CONTENT)
@@ -63,14 +73,47 @@ class SmartkeyPwDialog(context: Context) {
             onClickListener.onClicked(smartpw)
             dialog.dismiss()
         }
-
     }
+
+    //블루투스 제어로 사용
+    fun Controldialog_BT(){
+        dialog.setContentView(R.layout.dialog_bluetoothcontrol)
+        dialog.window!!.setLayout(WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.WRAP_CONTENT)
+        dialog.setCanceledOnTouchOutside(false)
+        dialog.setCancelable(true)
+        dialog.show()
+
+
+        val btn_bt_open = dialog.findViewById<Button>(R.id.btn_bt_open)
+        val btn_bt_close = dialog.findViewById<Button>(R.id.btn_bt_close)
+        val btn_bt_finish = dialog.findViewById<Button>(R.id.btn_bt_finish)
+
+        btn_bt_finish.setOnClickListener { dialog.dismiss() }
+
+        btn_bt_open.setOnClickListener {
+            val OPEN = 1
+            onClickListener_BT.onClicked_BT(OPEN)
+        }
+
+        btn_bt_close.setOnClickListener {
+            val CLOSE = 0
+            onClickListener_BT.onClicked_BT(CLOSE)
+        }
+    }
+
+    //스마트키 비밀번호 인증에 사용
     interface OnDialogClickListener{
          fun onClicked(smartpw: String)
     }
 
+    //비밀번호 초기화에 사용
     interface OnDialogClickListener_repw{
         fun onClicked_repw(reset_pw: String, reset_pw_re: String)
+    }
+
+    //블루투스 제어로 사용
+    interface OnDialogClickListener_BT{
+        fun onClicked_BT(openOrClose: Int)
     }
 
 

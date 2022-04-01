@@ -24,35 +24,27 @@ class SmartkeyAddKey : AppCompatActivity() {
         val btn_post = findViewById<Button>(R.id.btn_addCheck)
         val btn_addCancel = findViewById<Button>(R.id.btn_addCancel)
         var text_serialNum = findViewById<TextView>(R.id.text_serialnum)
-        var serial_Num : String = "22"
+        var serial_Num : String? = null
+
+        //작업 후 메인으로 이동
         val goMain = Intent(this, SmartkeyMain::class.java)
 
 
+        //블루투스 다룰 객체 생성
         val bluetoothService = SmartkeyBluetoothSetting(this@SmartkeyAddKey)
+        //http 통신 생성
         val postService = Retrofit_service.service
         var cookie = CookieHandler().setCookie()
 
-
+        //블루투스 세팅(페어링 된 기기만 표시 -> 연결할 기기 선택 -> 연결과 동시에 기기에 연결코드 '100' 전송)
         btn_findDivice.setOnClickListener {
             bluetoothService.bluetoothOn()
-
-            bluetoothService.mBluetoothHandler = object : Handler() {
-                override fun handleMessage(msg: Message) {
-                    if (msg.what == SmartkeyBluetoothSetting.BT_MESSAGE_READ) {
-                        var readMessage: String? = null
-                        try {
-                            readMessage = String(msg.obj as ByteArray)
-                        } catch (e: UnsupportedEncodingException) {
-                            e.printStackTrace()
-                        }
-                        serial_Num = readMessage.toString()
-                        text_serialNum!!.text = readMessage
-                    }
-                }
-            }
         }
 
         btn_post.setOnClickListener {
+
+            Toast.makeText(this@SmartkeyAddKey,
+                "serialNum $serial_Num", Toast.LENGTH_SHORT).show()
 
             var Smartkeyname = findViewById<EditText>(R.id.edit_keyName).text.toString()
             var SmartkeyPw = findViewById<EditText>(R.id.edit_smartPw).text.toString()
@@ -60,7 +52,7 @@ class SmartkeyAddKey : AppCompatActivity() {
 
             if(SmartkeyPw == SmartkeyPwRe){
                 var keyInfoInput = HashMap<String, String>()
-                keyInfoInput.put("serialNum",serial_Num)
+                keyInfoInput.put("serialNum", serial_Num.toString())
                 keyInfoInput.put("keyName",Smartkeyname)
                 keyInfoInput.put("smartPwd",SmartkeyPw)
 
@@ -75,7 +67,7 @@ class SmartkeyAddKey : AppCompatActivity() {
                         } else {
                             Log.d("키등록", "실패"+response.raw().toString())
                             Toast.makeText(this@SmartkeyAddKey,
-                                "키 등록 정보를 다시 확인하세요", Toast.LENGTH_SHORT).show()
+                                "키 등록 정보를 다시 확인하세요 ${response.message()}", Toast.LENGTH_SHORT).show()
                         }
                     }
                     override fun onFailure(call: Call<RegisterKeyInfo>, t: Throwable) {
@@ -92,9 +84,24 @@ class SmartkeyAddKey : AppCompatActivity() {
             finish()
         }
 
-
-
-
+        if(serial_Num == null){ //이거 안되면 6자리만 짤라서 사용하기
+            if(bluetoothService.mBluetoothAdapter != null){
+                bluetoothService.mBluetoothHandler = object : Handler() {
+                    override fun handleMessage(msg: Message) {
+                        if (msg.what == SmartkeyBluetoothSetting.BT_MESSAGE_READ) {
+                            var readMessage: String? = null
+                            try {
+                                readMessage = String(msg.obj as ByteArray)
+                            } catch (e: UnsupportedEncodingException) {
+                                e.printStackTrace()
+                            }
+                            serial_Num = readMessage
+                            text_serialNum!!.text = readMessage
+                        }
+                    }
+                }
+            }
+        }
 
     }
 }

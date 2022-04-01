@@ -1,6 +1,5 @@
 package com.example.smartkey_ver10
 
-import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -93,11 +92,11 @@ class Register_resetPw : AppCompatActivity() {
 
 
         //다이얼로그 띄우기
-        val dialog = SmartkeyPwDialog(this)
+        val dialog = SmartkeyDialog(this)
         dialog.Checkdialog_userpw()
 
         //다이얼로그 입력후 클릭 시
-        dialog.setOnClickListener_re(object : SmartkeyPwDialog.OnDialogClickListener_repw{
+        dialog.setOnClickListener_re(object : SmartkeyDialog.OnDialogClickListener_repw{
             override fun onClicked_repw(reset_pw: String, reset_pw_re: String) {
 
                 if(reset_pw == reset_pw_re && reset_pw.length>8){ //비밀번호 9자, 비번 같을때

@@ -1,6 +1,5 @@
 package com.example.smartkey_ver10
 
-import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -31,11 +30,11 @@ class SmartkeySharingAct : AppCompatActivity() {
         btn_OK.setOnClickListener {
 
             //다이얼로그 띄우기
-            val dialog = SmartkeyPwDialog(this)
+            val dialog = SmartkeyDialog(this)
             dialog.Checkdialog_smpw()
 
             //다이얼로그 입력후 클릭 시
-            dialog.setOnClickListener(object : SmartkeyPwDialog.OnDialogClickListener{
+            dialog.setOnClickListener(object : SmartkeyDialog.OnDialogClickListener{
                 override fun onClicked(smartpw: String) {
 
                     var inputkey = HashMap<String, String>()
