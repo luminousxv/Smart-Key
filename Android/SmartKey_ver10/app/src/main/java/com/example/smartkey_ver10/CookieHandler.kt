@@ -9,7 +9,7 @@ class CookieHandler {
         if(header != null){
             var cookielist = header.get("Set-Cookie").toString()
             var cookstring: List<String> = cookielist.split(";")
-            var sessionid: String = cookstring[0].toString()
+            var sessionid: String = cookstring[0]
 
             SharedPrefApp.storj.setString("cookie",sessionid)
             Log.d("getCookie","getcookie성공")

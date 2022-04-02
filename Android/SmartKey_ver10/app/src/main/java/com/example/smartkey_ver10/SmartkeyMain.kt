@@ -22,12 +22,10 @@ class SmartkeyMain : AppCompatActivity() {
     val GetService = Retrofit_service.service
     val cookie = CookieHandler().setCookie()
     val UserEmail = CookieHandler().setUserEmail()
-    val Smartkeydialog = SmartkeyDialog(this)
 
     //블루투스 셋팅
     val bluetoothService = SmartkeyBluetoothSetting(this@SmartkeyMain)
     //블루투스로 이용시에는 그냥 다이얼로그로 설정하자
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,9 +40,10 @@ class SmartkeyMain : AppCompatActivity() {
         val registered_list = ArrayList<ViewItem>()
         val shared_list = ArrayList<ViewItem>()
 
-        //키리스트 저장
+        //키리스트
         lateinit var keyList : List<KeyInfo>
         var listSize: Int = 0
+        var keyshared = HashMap<String, String>()//키 이름, 공유여부
 
         //키 받아오기
         GetService.GetKeyList(cookieid = cookie).enqueue(object : Callback<GetKeyInfo> {
@@ -59,10 +58,12 @@ class SmartkeyMain : AppCompatActivity() {
                         if(keyList[i].UserID == UserEmail){ //직접 등록한 스마트키
                             var keynum = keyList[i].SerialNum
                             var keyname = keyList[i].KeyName
+                            keyshared.put(keyList[i].KeyName, keyList[i].Shared)
                             registered_list.add(ViewItem("","$keynum" , "$keyname"))
                         } else{                             //공유받은 스마트키
                             var keynum = keyList[i].SerialNum
                             var keyname = keyList[i].KeyName
+                            keyshared.put(keyList[i].KeyName, keyList[i].Shared)
                             shared_list.add(ViewItem("","$keynum" , "$keyname"))
                         }
                     }
@@ -76,17 +77,18 @@ class SmartkeyMain : AppCompatActivity() {
 
         //등록 키 클릭 이벤트
         val reg_adapter = RecyclerUserAdapter(registered_list,
-            {data->adapterOnClick(data,"0")})
+            {data->adapterOnClick(data, keyshared.get(data.name) ,"0")})
         findViewById<RecyclerView>(R.id.registered_recycleView).adapter = reg_adapter
 
         //공유 키 클릭 이벤트
         val shared_adapter = RecyclerUserAdapter(shared_list,
-            {data->adapterOnClick(data,"1")})
+            {data->adapterOnClick(data, keyshared.get(data.name),"1")})
         findViewById<RecyclerView>(R.id.shared_recycleView).adapter = shared_adapter
     }
 
 
     private fun bluetoothControl(serialNum: String){
+        val Smartkeydialog = SmartkeyDialog(this)
         Smartkeydialog.Controldialog_BT()
         Smartkeydialog.setOnClickListener_BT(object : SmartkeyDialog.OnDialogClickListener_BT{
             override fun onClicked_BT(openclose:Int) {
@@ -102,36 +104,43 @@ class SmartkeyMain : AppCompatActivity() {
 
     }
 
-
     //클릭 이벤트 함수
-    private fun adapterOnClick(data: ViewItem, shared: String){
+    private fun adapterOnClick(data: ViewItem, keyshared:String? ,registerd: String){
+        if(registerd=="0"){
+            val BluOrHttpSelect = AlertDialog.Builder(this)
+            BluOrHttpSelect.setTitle("연결 선택")
+            var seleclist : MutableList<String> = ArrayList()
+            seleclist.add("원격 접속")
+            seleclist.add("블루투스 접속")
+            val items = seleclist!!.toTypedArray<CharSequence>()
 
-        val BluOrHttpSelect = AlertDialog.Builder(this)
-        BluOrHttpSelect.setTitle("연결 선택")
-        var seleclist : MutableList<String> = ArrayList()
-        seleclist.add("원격 접속")
-        seleclist.add("블루투스 접속")
-        val items = seleclist!!.toTypedArray<CharSequence>()
+            BluOrHttpSelect.setItems(items,
+                DialogInterface.OnClickListener { dialog, item ->
+                    if(item == 0){smartPwPost(data, keyshared, registerd, items[item].toString())}//원격접속일 떄
+                    if(item == 1){//블루투스 접속일 때
+                        bluetoothService.bluetoothOn() //블루투스 연결
+                        //블루투스 연결 되면 기기 확인(시리얼번호 대조해야함 다음에 하자) 핸들러 사용
+                        //스마트키 비밀번호 실행
+                        //smartPwPost(data, keyshared, registerd, items[item].toString())
+                    }
+                })
+            //블루투스 접속 누르면 블루투스 연결해야함.
 
-        BluOrHttpSelect.setItems(items,
-            DialogInterface.OnClickListener { dialog, item ->
-                if(item == 0){smartPwPost(data, shared, items[item].toString())}//원격접속일 떄
-                if(item == 1){//블루투스 접속일 때
-                    bluetoothService.bluetoothOn() //블루투스 연결
-                    //블루투스 연결 되면 기기 확인(시리얼번호 대조해야함 다음에 하자)
-                    //스마트키 비밀번호 실행
-                    smartPwPost(data, shared, items[item].toString())
-                }
-            })
-        //블루투스 접속 누르면 블루투스 연결해야함.
+            val alert: AlertDialog = BluOrHttpSelect.create()
+            alert.show()
+        }
+        else if(registerd=="1"){ //공유키 클릭 시
+            smartPwPost(data, keyshared, registerd, "원격 접속")
+        }
 
-        val alert: AlertDialog = BluOrHttpSelect.create()
-        alert.show()
+
     }//클릭이벤트 함수 끝
 
 
     //스마트키 비밀번호 포스트함수
-    fun smartPwPost(data:ViewItem,shared: String, selection:String){
+    fun smartPwPost(data:ViewItem, keyshared: String? ,registerd: String, selection:String){
+
+        val Smartkeydialog = SmartkeyDialog(this)
 
         //스마트키 비밀번호 다이얼로그 띄우기
         val nexintent = Intent(this, SmartkeyDetailAct::class.java)
@@ -153,7 +162,8 @@ class SmartkeyMain : AppCompatActivity() {
                             Log.d("response", response.raw().toString())
 
                             if(selection == "원격 접속"){
-                                nexintent.putExtra("shared", shared)
+                                nexintent.putExtra("shared", keyshared)
+                                nexintent.putExtra("registerd", registerd)
                                 nexintent.putExtra("serialnum", data.id)
                                 nexintent.putExtra("keyname", data.name)
                                 startActivity(nexintent)
