@@ -87,6 +87,10 @@ class SmartkeyMain : AppCompatActivity() {
     }
 
 
+
+
+
+
     private fun bluetoothControl(serialNum: String){
         val Smartkeydialog = SmartkeyDialog(this)
         Smartkeydialog.Controldialog_BT()
@@ -99,14 +103,20 @@ class SmartkeyMain : AppCompatActivity() {
                 else if(openclose == 0){ // 클로즈
                     bluetoothService.close()
                 }
+                else if(openclose == 2){ // 닫기
+                    bluetoothService.bluetoothOff()
+                }
             }
         })
 
     }
 
+
+
     //클릭 이벤트 함수
     private fun adapterOnClick(data: ViewItem, keyshared:String? ,registerd: String){
         if(registerd=="0"){
+            var serial_Num :String? = null
             val BluOrHttpSelect = AlertDialog.Builder(this)
             BluOrHttpSelect.setTitle("연결 선택")
             var seleclist : MutableList<String> = ArrayList()
@@ -116,12 +126,40 @@ class SmartkeyMain : AppCompatActivity() {
 
             BluOrHttpSelect.setItems(items,
                 DialogInterface.OnClickListener { dialog, item ->
-                    if(item == 0){smartPwPost(data, keyshared, registerd, items[item].toString())}//원격접속일 떄
-                    if(item == 1){//블루투스 접속일 때
+                    //원격접속일 떄
+                    if(item == 0){smartPwPost(data, keyshared, registerd, items[item].toString())}
+
+                    //---------------블루투스 접속일 때-----------------------
+                    if(item == 1){
                         bluetoothService.bluetoothOn() //블루투스 연결
-                        //블루투스 연결 되면 기기 확인(시리얼번호 대조해야함 다음에 하자) 핸들러 사용
+
+
+                        //블루투스 연결 되면 기기 확인(시리얼번호 대조)
+                        if(serial_Num == null){ //이거 안되면 6자리만 짤라서 사용하기
+                            if(bluetoothService.mBluetoothAdapter != null){
+                                bluetoothService.mBluetoothHandler = object : Handler() {
+                                    override fun handleMessage(msg: Message) {
+                                        if (msg.what == SmartkeyBluetoothSetting.BT_MESSAGE_READ) {
+                                            var readMessage: String? = null
+                                            try {
+                                                readMessage = String(msg.obj as ByteArray)
+                                            } catch (e: UnsupportedEncodingException) {
+                                                e.printStackTrace()
+                                            }
+                                            serial_Num = readMessage.toString()
+                                        }
+                                    }
+                                }
+                            }
+                        }//시리얼 번호 확인 끝
+
+
                         //스마트키 비밀번호 실행
-                        //smartPwPost(data, keyshared, registerd, items[item].toString())
+                        if(serial_Num == data.id){
+                            smartPwPost(data, keyshared, registerd, items[item].toString())
+                        }
+                        else Toast.makeText(this, "선택한 스마트키와 블루투스 스마트키와 다릅니다",
+                            Toast.LENGTH_SHORT).show()
                     }
                 })
             //블루투스 접속 누르면 블루투스 연결해야함.
@@ -129,12 +167,14 @@ class SmartkeyMain : AppCompatActivity() {
             val alert: AlertDialog = BluOrHttpSelect.create()
             alert.show()
         }
-        else if(registerd=="1"){ //공유키 클릭 시
+        //공유키 클릭 시
+        else if(registerd=="1"){
             smartPwPost(data, keyshared, registerd, "원격 접속")
         }
 
 
     }//클릭이벤트 함수 끝
+
 
 
     //스마트키 비밀번호 포스트함수

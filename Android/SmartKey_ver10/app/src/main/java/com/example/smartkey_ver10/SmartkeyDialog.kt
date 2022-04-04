@@ -88,7 +88,10 @@ class SmartkeyDialog(context: Context) {
         val btn_bt_close = dialog.findViewById<Button>(R.id.btn_bt_close)
         val btn_bt_finish = dialog.findViewById<Button>(R.id.btn_bt_finish)
 
-        btn_bt_finish.setOnClickListener { dialog.dismiss() }
+        btn_bt_finish.setOnClickListener {
+            val CANCEL = 2
+            onClickListener_BT.onClicked_BT((CANCEL))
+            dialog.dismiss() }
 
         btn_bt_open.setOnClickListener {
             val OPEN = 1
