@@ -10,14 +10,15 @@
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^5.0.1",
-    "body-parser": "^1.19.1",
+    "body-parser": "^1.20.0",
     "cookie-parser": "^1.4.6",
     "crypto": "^1.0.1",
     "date-utils": "^1.2.21",
-    "express": "^4.17.2",
+    "express": "^4.17.3",
     "express-session": "^1.17.2",
+    "http": "^0.0.1-security",
     "mysql": "^2.18.1",
-    "nodemailer": "^6.7.2",
+    "nodemailer": "^6.7.3",
     "nodemon": "^2.0.15",
     "session-file-store": "^1.5.0"
   }
