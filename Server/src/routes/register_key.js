@@ -15,6 +15,10 @@ router.post('/main/register_key', function (req, res) {
     let keyName = req.body.keyName;
     let smartPwd = req.body.smartPwd;
 
+    console.log(serialNum);
+    console.log(keyName);
+    console.log(smartPwd);
+
     let sql1 = 'select * from KeyInfo where SerialNum = ?';
     //check login session
     if (req.session.login === undefined) {
@@ -34,6 +38,7 @@ router.post('/main/register_key', function (req, res) {
                     'code': 500,
                     'message': 'DB 오류가 발생했습니다.'
                 })
+                console.log('select error');
             }
             else if (result.length !== 0) {
                 res.status(400).json ({
@@ -63,6 +68,8 @@ router.post('/main/register_key', function (req, res) {
                             'code': 500,
                             'message': 'DB 오류가 발생했습니다.'
                         })
+                        console.log('insert error');
+                        console.log(err);
                     }
                     else{
                         //insert key record to KeyRecord DB table
