@@ -20,7 +20,7 @@ router.get('/main/view_keylist', function (req, res) {
         });
     }
     else{
-        let sql1 = 'select SerialNum, KeyName, KeyState, UserID, Shared from KeyInfo where UserID = ? or SharedID = ?';
+        let sql1 = 'select SerialNum, KeyName, KeyState, UserID, Shared, Mode from KeyInfo where UserID = ? or SharedID = ?';
         let params1 = [req.session.login.Email, req.session.login.Email];
         //get serial number, key name, key's state(open/close), owner email, shared pending value from KeyInfo DB
         connection.query(sql1, params1, function (err, result1) {
