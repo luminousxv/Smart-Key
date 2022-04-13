@@ -7,13 +7,16 @@ let cookieParser = require("cookie-parser");
 
 router.use(cookieParser());
 router.use(bodyParser.json());
-router.use(bodyParser.urlencoded({ extended: true }));
+router.use(bodyParser.urlencoded({ 
+    extended: true
+}));
 
 //Register Key API
 router.post('/main/register_key', function (req, res) {
     let serialNum = req.body.serialNum;
     let keyName = req.body.keyName;
     let smartPwd = req.body.smartPwd;
+    let keyImage = req.body.keyImage;
 
     console.log(serialNum);
     console.log(keyName);
@@ -50,8 +53,8 @@ router.post('/main/register_key', function (req, res) {
                 const salt = crypto.randomBytes(32).toString('base64');
                 const hashedPw = crypto.pbkdf2Sync(smartPwd, salt, 1, 32, 'sha512').toString('base64');
                 
-                let sql2 = 'insert into KeyInfo (SerialNum, KeyName, KeyState, UserID, SmartPwd, Salt, Shared) values (?, ?, ?, ?, ?, ?, ?)';
-                let params = [serialNum, keyName, 'open', req.session.login.Email, hashedPw, salt, 0];
+                let sql2 = 'insert into KeyInfo (SerialNum, KeyName, KeyState, UserID, SmartPwd, Salt, Shared, Image, Mode) values (?, ?, ?, ?, ?, ?, ?, ?, ?)';
+                let params = [serialNum, keyName, 'open', req.session.login.Email, hashedPw, salt, 0, keyImage, 0];
 
                 let time  = new Date(+new Date() + 3240 * 10000).toISOString().replace("T", " ").replace(/\..*/, '');
 
@@ -68,7 +71,7 @@ router.post('/main/register_key', function (req, res) {
                             'code': 500,
                             'message': 'DB 오류가 발생했습니다.'
                         })
-                        console.log('insert error');
+                        console.log('insert into KeyInfo error');
                         console.log(err);
                     }
                     else{
@@ -79,6 +82,8 @@ router.post('/main/register_key', function (req, res) {
                                     'code': 500,
                                     'message': 'DB 오류가 발생했습니다.'
                                 })
+                                console.log('insert into KeyRecord error');
+                                console.log(err);
                             }
                             else{
                                 //insert owner's email to Key_Authority DB table
@@ -88,6 +93,8 @@ router.post('/main/register_key', function (req, res) {
                                             'code': 500,
                                             'message': 'DB 오류가 발생했습니다.'
                                         })
+                                        console.log('insert into Key_Authority error');
+                                        console.log(err);
                                     }
                                     else{
                                         res.status(200).json ({
