@@ -1,5 +1,14 @@
 const express  = require('express');
 const app = express();
+let bodyParser = require("body-parser");
+
+app.use(bodyParser.json({
+    limit: "50mb"
+}));
+app.use(bodyParser.urlencoded({ 
+    limit: "50mb",
+    extended: true
+}));
 
 let joinRouter = require('./routes/join');
 app.use('/Smart-Key', joinRouter);
@@ -33,6 +42,9 @@ app.use('/Smart-Key', rpiRouter);
 
 let shareRouter = require('./routes/keyshare');
 app.use('/Smart-Key', shareRouter);
+
+let rpiImageRouter = require('./routes/rpi_image');
+app.use('/Smart-Key', rpiImageRouter);
 
 //Server
 let server = app.listen(80, function(){
