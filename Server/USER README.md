@@ -306,7 +306,7 @@ Client가 보내는 JSON파일 양식은
 }
 ```
 
-이런 형태로 보낸다. (Back-End 테스트 용으로 바뀔수 있다)
+이런 형태로 보낸다.
 
 ```jsx
 const express = require("express");
@@ -663,6 +663,15 @@ module.exports = router;
 ```jsx
 const express  = require('express');
 const app = express();
+let bodyParser = require("body-parser");
+
+app.use(bodyParser.json({
+    limit: "50mb"
+}));
+app.use(bodyParser.urlencoded({ 
+    limit: "50mb",
+    extended: true
+}));
 
 let joinRouter = require('./routes/join');
 app.use('/Smart-Key', joinRouter);
@@ -694,10 +703,14 @@ app.use('/Smart-Key', keyPwdRouter);
 let rpiRouter = require('./routes/rpi_control');
 app.use('/Smart-Key', rpiRouter);
 
+let shareRouter = require('./routes/keyshare');
+app.use('/Smart-Key', shareRouter);
+
+let rpiImageRouter = require('./routes/rpi_image');
+app.use('/Smart-Key', rpiImageRouter);
+
 //Server
-let server = app.listen(8080,'localhost', function(){
-    let host = server.address().address;
-    let port = server.address().port;
-    console.log("start at http:// %s:%s", host, port);
+let server = app.listen(80, function(){
+    console.log('Server on...')
 })
 ```
