@@ -21,6 +21,8 @@ DB에서 KeyInfo라는 테이블을 이용해 테이블을 등록, 조회, 삭�
 
 /Smart-Key/main/close_key
 
+/Smart-Key/main/mode
+
 ## keylist API
 
 사용자의 키 리스트를 DB에서 가져와 주는 API이다. 사용자의 로그인 세션이 만료가 안되었다면 DB에서 가져와서 리스폰스를 보내주는 방식이다.
@@ -802,4 +804,116 @@ router.post('/main/close_key', function(req, res){
 })
 
 module.exports = router;
+```
+
+## Key Mode API
+
+보안모드/일반모드로 스마트키의 모드를 변경하는 API이다. 보안모드 시, 자이로 센서의 값에 따라 움직임이 감지되면 사진을 찍어 서버로 전송하는 모드이다.
+
+```jsx
+{
+    "serialNum: "0000001"
+}
+```
+
+해당 시리얼 번호의 Mode값이 0 이면 1로, 1이면 0으로 바꿔주고, KeyRecord 테이블에 이력을 남긴다.
+
+Key Mode API의 코드이다.
+
+```jsx
+router.post('/main/mode', function(req, res){
+    let serialNum = req.body.serialNum;
+
+    let sql1 = 'select KeyState, Mode from KeyInfo where SerialNum = ?'
+    let sql2 = 'update KeyInfo set Mode = ? where SerialNum = ?';
+    let time  = new Date(+new Date() + 3240 * 10000).toISOString().replace("T", " ").replace(/\..*/, '');
+    let sql3 = 'insert into KeyRecord (SerialNum, Time, KeyState, Method, Email) values (?, ?, ?, ?, ?)';
+
+    //check login session
+    if (req.session.login === undefined) {
+        let resultCode = 404;
+        let message = '세션이 만료되었습니다. 다시 로그인 해주세요';
+
+        res.status(resultCode).json ({
+            'code': resultCode,
+            'message': message
+        });
+    }
+
+    connection.query(sql1, serialNum, function(err, result1){
+        if (err) {
+            res.status(500).json ({
+                'code': 500,
+                'message': 'DB 오류가 발생했습니다.'
+            })
+            console.log('select KeyState, Mode from KeyInfo error');
+            console.log(err);
+        }
+        else if (result1[0].Mode === 0){
+            let params2 = [1, serialNum];
+            connection.query(sql2, params2, function(err, result2){
+                if (err) {
+                    res.status(500).json ({
+                        'code': 500,
+                        'message': 'DB 오류가 발생했습니다.'
+                    })
+                    console.log('update Mode from KeyInfo error');
+                    console.log(err);
+                }
+                else{
+                    let params3 = [serialNum, time, result1[0].KeyState, '보안모드로 변경', req.session.login.Email]
+                    connection.query(sql3, params3, function(err, result3){
+                        if (err) {
+                            res.status(500).json ({
+                                'code': 500,
+                                'message': 'DB 오류가 발생했습니다.'
+                            })
+                            console.log('insert into KeyRecord error');
+                            console.log(err);
+                        }
+                        else{
+                            res.status(200).json ({
+                                'code': 200,
+                                'message': '스마트키가 보안모드로 변경되었습니다.'
+                            })
+                        }
+                    })
+                }
+            })
+        }
+        else{
+            let params2 = [0, serialNum];
+            connection.query(sql2, params2, function(err, result2){
+                if (err) {
+                    res.status(500).json ({
+                        'code': 500,
+                        'message': 'DB 오류가 발생했습니다.'
+                    })
+                    console.log('update Mode from KeyInfo error');
+                    console.log(err);
+                }
+                else{
+                    let params3 = [serialNum, time, result1[0].KeyState, '일반모드로 변경', req.session.login.Email]
+                    connection.query(sql3, params3, function(err, result3){
+                        if (err) {
+                            res.status(500).json ({
+                                'code': 500,
+                                'message': 'DB 오류가 발생했습니다.'
+                            })
+                            console.log('insert into KeyRecord error');
+                            console.log(err);
+                        }
+                        else{
+                            res.status(200).json ({
+                                'code': 200,
+                                'message': '스마트키가 일반모드로 변경되었습니다.'
+                            })
+                        }
+                    })
+                }
+            })
+        }
+    })
+})
+
 ```
