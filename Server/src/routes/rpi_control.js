@@ -9,7 +9,7 @@ router.use(bodyParser.urlencoded({ extended: true }));
 //RPI Remote API
 router.get('/rpi/remote', function(req, res){
     let serialNum = req.body.serialNum;
-    let sql1 = 'select KeyState from KeyInfo where SerialNum = ?';
+    let sql1 = 'select KeyState, Mode from KeyInfo where SerialNum = ?';
     //get KeyState from KeyInfo DB table
     connection.query(sql1, serialNum, function(err, result1){
         if (err) {
@@ -57,7 +57,7 @@ router.get('/rpi/remote', function(req, res){
                                 else{
                                     res.status(200).json ({
                                         'code': 200,
-                                        'message': result1[0].KeyState
+                                        'state': result1[0].KeyState
                                     })
                                 }
                             })
@@ -70,7 +70,8 @@ router.get('/rpi/remote', function(req, res){
         else{
             res.status(200).json ({
                 'code': 200,
-                'message': result1[0].KeyState
+                'state': result1[0].KeyState,
+                'mode': result1[0].Mode
             })
         }
     })
