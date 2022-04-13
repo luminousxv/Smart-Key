@@ -31,7 +31,7 @@
     [Raspberry PI README](https://github.com/luminousxv/Smart-Key/blob/main/Raspberry_PI/RPI_README.md)
 
 
-## File Structure (2022.02.25 수정)
+## File Structure (2022.04.13 수정)
 
 - Server
     - src
@@ -61,6 +61,8 @@
             keyshare.js (Key Share API)
 
             rpi_control.js (Raspberry Pi control API)
+
+            rpi_image.js (Raspberry Pi Image API)
             
         - database
             
