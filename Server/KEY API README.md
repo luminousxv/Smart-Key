@@ -15,6 +15,8 @@ DB에서 KeyInfo라는 테이블을 이용해 테이블을 등록, 조회, 삭�
 
 /Smart-Key/main/view_keyrecord
 
+/Smart-Key/main/view_keyrecord/image
+
 /Smart-Key/main/key_pw
 
 /Smart-Key/main/open_key
@@ -460,6 +462,70 @@ router.get('/main/view_keyrecord', function(req, res) {
 })
 
 module.exports = router;
+```
+
+## Key Record Image API
+
+해당 스마트키가 보안 모드일 시, 사진을 찍고 이력에 남긴다. 어플리케이션에서 해당 이미지를 불러오는 API이다.
+
+GET Method이기 때문에 JSON 포맷이 아닌 쿼리로 보내야된다.
+
+'http://서버IP:80/Smart-Key/main/view_keylist/image/?serialNum=0000001&time=2022-04-13 22:21:51'
+
+그럼 서버는 해당 쿼리를 가지고 사진을 불러온다.
+
+```jsx
+{
+    "code": 200,
+    "message" : "base64로 인코딩된 사진"
+}
+```
+
+다음은 Key Record Image API의 코드이다.
+
+```jsx
+router.get('/main/view_keyrecord/image', function (req, res){
+    let serialNum = req.query.serialNum;
+    let time = req.query.time;
+
+    let sql1 = 'select Image from KeyRecord where SerialNum = ? and Time = ?';
+    let params1 = [serialNum, time];
+    //check login session
+    if (req.session.login === undefined) {
+        let resultCode = 404;
+        let message = '세션이 만료되었습니다. 다시 로그인 해주세요';
+        res.status(resultCode).json ({
+            'code': resultCode,
+            'message': message
+        });
+    }
+
+    else{
+        connection.query(sql1, params1, function(err, result1){
+            if (err) {
+                res.status(500).json ({
+                    'code': 500,
+                    'message': 'DB 오류가 발생했습니다.'
+                })
+                console.log('select from KeyRecord error');
+                console.log(err);
+            }
+
+            else if (result1.length === 0 ){
+                res.status(400).json ({
+                    'code': 400,
+                    'message': '존재하지 않는 스마트키입니다'
+                })
+            }
+            else{
+                res.status(200).json ({
+                    'code': 200,
+                    'message': result1[0].Image
+                })
+            }
+        })
+    }
+})
 ```
 
 ## Key PW API
