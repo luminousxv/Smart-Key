@@ -112,6 +112,13 @@ router.get('/main/view_keyrecord/image', function (req, res){
                 console.log('select from KeyRecord error');
                 console.log(err);
             }
+
+            else if (result1.length === 0 ){
+                res.status(400).json ({
+                    'code': 400,
+                    'message': '존재하지 않는 스마트키입니다'
+                })
+            }
             else{
                 res.status(200).json ({
                     'code': 200,
