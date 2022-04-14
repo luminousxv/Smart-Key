@@ -86,4 +86,40 @@ router.get('/main/view_keyrecord', function(req, res) {
     }
 })
 
+router.get('/main/view_keyrecord/image', function (req, res){
+    let serialNum = req.query.serialNum;
+    let time = req.query.time;
+
+    let sql1 = 'select Image from KeyRecord where SerialNum = ? and Time = ?';
+    let params1 = [serialNum, time];
+    //check login session
+    if (req.session.login === undefined) {
+        let resultCode = 404;
+        let message = '세션이 만료되었습니다. 다시 로그인 해주세요';
+        res.status(resultCode).json ({
+            'code': resultCode,
+            'message': message
+        });
+    }
+
+    else{
+        connection.query(sql1, params1, function(err, result1){
+            if (err) {
+                res.status(500).json ({
+                    'code': 500,
+                    'message': 'DB 오류가 발생했습니다.'
+                })
+                console.log('select from KeyRecord error');
+                console.log(err);
+            }
+            else{
+                res.status(200).json ({
+                    'code': 200,
+                    'message': result1[0].Image
+                })
+            }
+        })
+    }
+})
+
 module.exports = router;
