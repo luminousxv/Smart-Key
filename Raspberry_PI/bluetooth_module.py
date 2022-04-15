@@ -21,9 +21,10 @@ GPIO_ECHO = 23                  # 초음파 거리 센서 에코
 GPIO.setup(GPIO_TRIGGER, GPIO.OUT)  # 트리거는 초음파를 내보내므로 출력 모드
 GPIO.setup(GPIO_ECHO, GPIO.IN)       # 에코는 초음파를 수신하므로 입력 모드
 startTime = time.time()               # 초음파 센서의 시작시간과 도착시간 체크
-serialNum = b'0000001'                 # 앱에 시리얼 넘버 전송하기 위한 숫자
-open_Num = b'open'
-close_Num = b'close'
+serialNum = b'001001'                 # 앱에 시리얼 넘버 전송하기 위한 숫자
+receive_Num = b'100'
+open_Num = b'200'
+close_Num = b'300'
 def doAngle(angle):
     GPIO.setup(servo_pin, GPIO.OUT)      # 서보핀을 출력으로 설정
     servo.ChangeDutyCycle(angle)
@@ -55,7 +56,6 @@ def receiveMsg():
         GPIO.output(GPIO_TRIGGER, True)
         sleep(0.00001)
         GPIO.output(GPIO_TRIGGER, False)
-        display.lcd_backlight(1)
         while GPIO.input(GPIO_ECHO) == GPIO.LOW:  # 시작시간
             startTime = time.time()
 
@@ -64,7 +64,7 @@ def receiveMsg():
 
         period = endTime - startTime
         distance = round(period * 17241, 2)  # 속도 = 거리/시간, 속도 = 340m/s, 거리 = distance, 시간 = period/2
-        display.lcd_backlight(0)
+        display.lcd_backlight(1)
         try:
             data = client_sock.recv(1024)                           # 앱을 통해 정보를 수신
             print("received [%s]" % data)

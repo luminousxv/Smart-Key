@@ -1,2 +1,2 @@
 import json
-msg = {"serialNum": "0000001", "keyState" : "open"}
+msg = {"serialNum": "001001", "keyState" : "open"}

@@ -1,2 +1,2 @@
 import json
-msg = {"serialNum": "0000001"}
+msg = {"serialNum": "001001"}
