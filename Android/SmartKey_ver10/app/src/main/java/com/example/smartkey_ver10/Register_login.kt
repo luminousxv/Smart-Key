@@ -51,17 +51,15 @@ class Register_login : AppCompatActivity() {
 
                 PostRegister.postUserInfo(input).enqueue(object : Callback<RegisterUserInfo> {
                     override fun onResponse(call: Call<RegisterUserInfo>, response: Response<RegisterUserInfo>) {
-                        if(response.isSuccessful()){
-                            var R_data =response.raw()
-                            if(R_data.code == 200){
-                                CookieHandler().getCookie(response.headers().toMap()) //쿠키 받기
-                                //put log
-                                Log.d("Test실패","success")
-                            }
+
+                        if(response.code() == 200){
+                            CookieHandler().getCookie(response.headers().toMap()) //쿠키 받기
+                            //put log
+                            Log.d("회원가입post","success")
                         }
                     }
                     override fun onFailure(call: Call<RegisterUserInfo>, t: Throwable) {
-                        Log.d("Test실패","t"+t.message)
+                        Log.d("회원가입post","t"+t.message)
                     }
                 })
             }
@@ -78,16 +76,13 @@ class Register_login : AppCompatActivity() {
             PostRegister.postCheckAuth(cookieid = cookie, AuthNumInput).enqueue(object:
                 Callback<CheckAuth> {
                 override fun onResponse(Call: Call<CheckAuth>, response: Response<CheckAuth>) { //통신성공시
-                    if(response.isSuccessful()) {
-                        var R_code = response.raw().code
-                        if(R_code==200){
-                            Log.d("EmailTest","success")
-                            startActivity(Login_intent)
-                            finish()
-                            //test finish
-                        }
-                        else Log.d("EmailTest","fail")
+
+                    if(response.code()==200){
+                        Log.d("인증키post","success")
+                        startActivity(Login_intent)
+                        finish()
                     }
+                    else Log.d("인증키post","fail")
                 }
                 override fun onFailure(call: Call<CheckAuth>, t: Throwable) {  //아예 통신도 안될 때
                     Log.d("EmailTest","t"+t.message)

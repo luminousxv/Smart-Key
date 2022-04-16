@@ -44,6 +44,7 @@ class SmartkeyMain : AppCompatActivity() {
         lateinit var keyList : List<KeyInfo>
         var listSize: Int = 0
         var keyshared = HashMap<String, String>()//키 이름, 공유여부
+        var keymode = HashMap<String, String>()//키 이름, 모드
 
         //키 받아오기
         GetService.GetKeyList(cookieid = cookie).enqueue(object : Callback<GetKeyInfo> {
@@ -59,11 +60,13 @@ class SmartkeyMain : AppCompatActivity() {
                             var keynum = keyList[i].SerialNum
                             var keyname = keyList[i].KeyName
                             keyshared.put(keyList[i].KeyName, keyList[i].Shared)
+                            keymode.put(keyList[i].KeyName, keyList[i].Mode)
                             registered_list.add(ViewItem("","$keynum" , "$keyname"))
                         } else{                             //공유받은 스마트키
                             var keynum = keyList[i].SerialNum
                             var keyname = keyList[i].KeyName
                             keyshared.put(keyList[i].KeyName, keyList[i].Shared)
+                            keymode.put(keyList[i].KeyName, keyList[i].Mode)
                             shared_list.add(ViewItem("","$keynum" , "$keyname"))
                         }
                     }
@@ -77,44 +80,46 @@ class SmartkeyMain : AppCompatActivity() {
 
         //등록 키 클릭 이벤트
         val reg_adapter = RecyclerUserAdapter(registered_list,
-            {data->adapterOnClick(data, keyshared.get(data.name) ,"0")})
+            {data->adapterOnClick(data, keyshared.get(data.name), keymode.get(data.name) ,"0")})
         findViewById<RecyclerView>(R.id.registered_recycleView).adapter = reg_adapter
 
         //공유 키 클릭 이벤트
         val shared_adapter = RecyclerUserAdapter(shared_list,
-            {data->adapterOnClick(data, keyshared.get(data.name),"1")})
+            {data->adapterOnClick(data, keyshared.get(data.name), keymode.get(data.name),"1")})
         findViewById<RecyclerView>(R.id.shared_recycleView).adapter = shared_adapter
     }
 
+    //-----------------------------------블루투스 조작--------------------------------------//
 
+    private fun bluetoothControl(DeviceName: String){
 
+        SmartkeyBluetoothSetting.IsRunning = false //메시지 읽기 쓰레드 일시 정지
 
-
-
-    private fun bluetoothControl(serialNum: String){
         val Smartkeydialog = SmartkeyDialog(this)
-        Smartkeydialog.Controldialog_BT()
+        Smartkeydialog.Controldialog_BT(DeviceName)
         Smartkeydialog.setOnClickListener_BT(object : SmartkeyDialog.OnDialogClickListener_BT{
             override fun onClicked_BT(openclose:Int) {
-                if(openclose == 1){ //오픈
-                    bluetoothService.open()
-                    //+서버에 상태 업테이트 고고
-                }
-                else if(openclose == 0){ // 클로즈
+                if(openclose == 0){ // 클로즈
                     bluetoothService.close()
+                }
+                else if(openclose == 1){ //오픈
+                    bluetoothService.open()
                 }
                 else if(openclose == 2){ // 닫기
                     bluetoothService.bluetoothOff()
                 }
             }
         })
-
     }
 
-
+    fun blueElse(){
+        Toast.makeText(this, "선택한 키와 블루투스 키와 정보가 다릅니다",
+            Toast.LENGTH_SHORT).show()
+    }
 
     //클릭 이벤트 함수
-    private fun adapterOnClick(data: ViewItem, keyshared:String? ,registerd: String){
+    private fun adapterOnClick(data: ViewItem, keyshared:String?, keymode:String? ,registerd: String){
+        //등록키 클릭 시
         if(registerd=="0"){
             var serial_Num :String? = null
             val BluOrHttpSelect = AlertDialog.Builder(this)
@@ -127,16 +132,15 @@ class SmartkeyMain : AppCompatActivity() {
             BluOrHttpSelect.setItems(items,
                 DialogInterface.OnClickListener { dialog, item ->
                     //원격접속일 떄
-                    if(item == 0){smartPwPost(data, keyshared, registerd, items[item].toString())}
+                    if(item == 0){smartPwPost(data, keyshared, registerd, keymode, items[item].toString())}
 
                     //---------------블루투스 접속일 때-----------------------
                     if(item == 1){
                         bluetoothService.bluetoothOn() //블루투스 연결
 
-
                         //블루투스 연결 되면 기기 확인(시리얼번호 대조)
-                        if(serial_Num == null){ //이거 안되면 6자리만 짤라서 사용하기
-                            if(bluetoothService.mBluetoothAdapter != null){
+                        if(serial_Num == null) {
+                            if (bluetoothService.mBluetoothAdapter != null) {
                                 bluetoothService.mBluetoothHandler = object : Handler() {
                                     override fun handleMessage(msg: Message) {
                                         if (msg.what == SmartkeyBluetoothSetting.BT_MESSAGE_READ) {
@@ -146,44 +150,45 @@ class SmartkeyMain : AppCompatActivity() {
                                             } catch (e: UnsupportedEncodingException) {
                                                 e.printStackTrace()
                                             }
-                                            serial_Num = readMessage.toString()
+                                            var temp_serial_num = readMessage.toString().chunked(6)
+                                            serial_Num = temp_serial_num[0]
+                                            //시리얼 번호 확인
+                                            if(serial_Num != null){
+                                                if (serial_Num == data.id) {
+                                                smartPwPost(data, keyshared, registerd, keymode, items[item].toString())
+                                                }
+                                                else blueElse()
+                                            }
                                         }
                                     }
                                 }
                             }
-                        }//시리얼 번호 확인 끝
-
-
-                        //스마트키 비밀번호 실행
-                        if(serial_Num == data.id){
-                            smartPwPost(data, keyshared, registerd, items[item].toString())
                         }
-                        else Toast.makeText(this, "선택한 스마트키와 블루투스 스마트키와 다릅니다",
-                            Toast.LENGTH_SHORT).show()
                     }
                 })
-            //블루투스 접속 누르면 블루투스 연결해야함.
-
             val alert: AlertDialog = BluOrHttpSelect.create()
             alert.show()
         }
         //공유키 클릭 시
         else if(registerd=="1"){
-            smartPwPost(data, keyshared, registerd, "원격 접속")
+            if(keymode=="0"){//일반 모드 일때
+                smartPwPost(data, keyshared, registerd, keymode, "원격 접속")
+            }
+            else if(keymode == "1"){//보안모드일 때 접근 불가
+                Toast.makeText(this, "보안모드 작동중이므로 접근할 수 없습니다.",Toast.LENGTH_SHORT).show()
+            }
         }
-
 
     }//클릭이벤트 함수 끝
 
 
-
     //스마트키 비밀번호 포스트함수
-    fun smartPwPost(data:ViewItem, keyshared: String? ,registerd: String, selection:String){
+    fun smartPwPost(data:ViewItem, keyshared: String? ,registerd: String, keymode: String?, selection:String){
 
         val Smartkeydialog = SmartkeyDialog(this)
 
         //스마트키 비밀번호 다이얼로그 띄우기
-        val nexintent = Intent(this, SmartkeyDetailAct::class.java)
+        val Detialintent = Intent(this, SmartkeyDetailAct::class.java)
         Smartkeydialog.Checkdialog_smpw()
 
         //다이얼로그 입력후 클릭 시
@@ -194,7 +199,6 @@ class SmartkeyMain : AppCompatActivity() {
                 inputkey.put("smartPwd", smartpw)
                 inputkey.put("serialNum", data.id)
 
-
                 GetService.postSmartPw(cookieid = cookie, inputkey).enqueue(object : Callback<PostSmartPw> {
                     override fun onResponse(call: Call<PostSmartPw>, response: Response<PostSmartPw>) {
                         if (response.code() == 200) {
@@ -202,15 +206,16 @@ class SmartkeyMain : AppCompatActivity() {
                             Log.d("response", response.raw().toString())
 
                             if(selection == "원격 접속"){
-                                nexintent.putExtra("shared", keyshared)
-                                nexintent.putExtra("registerd", registerd)
-                                nexintent.putExtra("serialnum", data.id)
-                                nexintent.putExtra("keyname", data.name)
-                                startActivity(nexintent)
+                                Detialintent.putExtra("shared", keyshared)
+                                Detialintent.putExtra("registerd", registerd)
+                                Detialintent.putExtra("serialnum", data.id)
+                                Detialintent.putExtra("keyname", data.name)
+                                Detialintent.putExtra("keymode", keymode)
+                                startActivity(Detialintent)
                                 finish()
                             }
                             else if(selection == "블루투스 접속"){
-                                bluetoothControl(data.id)} // 블루투스 제어 다이얼로그
+                                bluetoothControl(data.name)} // 블루투스 제어 다이얼로그
                         }
                         else {
                             Log.d("response", response.raw().toString())
@@ -219,9 +224,7 @@ class SmartkeyMain : AppCompatActivity() {
                     override fun onFailure(call: Call<PostSmartPw>, t: Throwable) {
                         Log.d("SmartPwd인증","t"+t.message)
                     }
-
                 })//postSmartPw 끝
             } })//다이얼로그 클릭이벤트 끝
     }//스마트키 비밀번호 포스트함수 끝
-
 }

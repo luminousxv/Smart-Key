@@ -11,14 +11,17 @@ import retrofit2.Callback
 import retrofit2.Response
 
 class SmartkeySharingAct : AppCompatActivity() {
+
+    //쿠키, 레트로핏 세팅
+    val postservice = Retrofit_service.service
+    var cookie = CookieHandler().setCookie()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_smartkey_sharing)
 
         val keynum = intent.getStringExtra("serialnum")
         val keyname = intent.getStringExtra("keyname")
-        val postservice = Retrofit_service.service
-        var cookie = CookieHandler().setCookie()
 
         val btn_cancel = findViewById<Button>(R.id.btn_sharingCancel)
         val btn_OK = findViewById<Button>(R.id.btn_sharingOK)
@@ -44,8 +47,8 @@ class SmartkeySharingAct : AppCompatActivity() {
                     //공유 전 smartpw 인증
                     postservice.postSmartPw(cookieid = cookie, inputkey).enqueue(object : Callback<PostSmartPw> {
                         override fun onResponse(call: Call<PostSmartPw>, response: Response<PostSmartPw>) {
-                            var rescode = response.raw().code
-                            if(rescode == 200){
+
+                            if(response.raw().code == 200){
                                 Log.d("SmartPwd인증(공유)","인증 성공")
                                 Log.d("response", response.raw().toString())
 
@@ -58,21 +61,19 @@ class SmartkeySharingAct : AppCompatActivity() {
                                 //공유정보 포스트
                                 postservice.postSharedinfo(cookieid = cookie, input).enqueue(object : Callback<PostSharedInfo> {
                                     override fun onResponse(call: Call<PostSharedInfo>, response: Response<PostSharedInfo>) {
-                                        var rescode = response.raw().code
-                                        if(rescode == 200){
+
+                                        if(response.raw().code == 200){
                                             Log.d("sharePost","공유 성공")
                                             Log.d("response", response.raw().toString())
                                             Toast.makeText(this@SmartkeySharingAct,
-                                                "$keyname 이 $edit_email 에게 공유 되었습니다.",
-                                                Toast.LENGTH_SHORT).show()
+                                                "$keyname 이 $edit_email 에게 공유 되었습니다.", Toast.LENGTH_SHORT).show()
                                             finish()
 
                                         } else {
                                             Log.d("sharePost","공유 실패")
                                             Log.d("response", response.raw().toString())
                                             Toast.makeText(this@SmartkeySharingAct,
-                                                "이미 공유가 되어있거나 이메일이 올바르지 않습니다.",
-                                                Toast.LENGTH_SHORT).show()
+                                                "이메일을 다시 확인하세요", Toast.LENGTH_SHORT).show()
                                         }
                                     }
                                     override fun onFailure(call: Call<PostSharedInfo>, t: Throwable) {

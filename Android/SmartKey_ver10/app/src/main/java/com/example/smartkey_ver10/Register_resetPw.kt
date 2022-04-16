@@ -18,19 +18,14 @@ class Register_resetPw : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_register_reset_pw)
 
-
-
         val btn_postAuthNum = findViewById<Button>(R.id.btn_authCheck)
         val btn_postInfo = findViewById<Button>(R.id.btn_postInfo)
-
-
 
         btn_postInfo.setOnClickListener {
 
             var userEmail = findViewById<EditText>(R.id.edt_useremail).text.toString()
             var userName = findViewById<EditText>(R.id.edt_username).text.toString()
             var userBirth = findViewById<EditText>(R.id.edt_userbirth).text.toString()
-
 
             var InputInfo = HashMap<String,String>()
 
@@ -90,7 +85,6 @@ class Register_resetPw : AppCompatActivity() {
 
     fun resetPw(cookie : String){
 
-
         //다이얼로그 띄우기
         val dialog = SmartkeyDialog(this)
         dialog.Checkdialog_userpw()
@@ -109,8 +103,8 @@ class Register_resetPw : AppCompatActivity() {
                     //resetpw 보내기
                     PostService.postResetPw(cookie, inputkey).enqueue(object : Callback<PostResetPW> {
                         override fun onResponse(call: Call<PostResetPW>, response: Response<PostResetPW>) {
-                            var rescode = response.raw().code
-                            if(rescode == 200){
+
+                            if(response.code() == 200){
                                 Log.d("resetpw","리셋 성공")
                                 Toast.makeText(this@Register_resetPw, "비밀번호 변경이 완료되었습니다."
                                     , Toast.LENGTH_SHORT).show()

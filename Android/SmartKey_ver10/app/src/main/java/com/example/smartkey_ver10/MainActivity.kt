@@ -57,7 +57,6 @@ class MainActivity : AppCompatActivity() {
             startActivity(goResetpage)
         }
 
-
         btn_register.setOnClickListener{
             startActivity(Register_intent)
         }

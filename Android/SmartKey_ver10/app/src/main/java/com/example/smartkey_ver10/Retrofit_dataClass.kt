@@ -29,7 +29,8 @@ data class KeyInfo(
     var KeyName: String,
     var KeyState: String,
     var UserID: String,
-    var Shared: String
+    var Shared: String,
+    var Mode: String
 )
 
 //등록키 post
@@ -42,8 +43,8 @@ data class RegisterKeyInfo(
 //키 open, close
 data class P_op_cl(
     var serialNum: String,
-    var GPSLong:String,
-    var GPSLat:String
+    var GPSLong: String,
+    var GPSLat: String
 )
 
 //키 인증
@@ -51,9 +52,10 @@ data class PostSmartPw(
     var serialNum: String,
     var smartPwd: String
 )
-//키 삭제(공유삭제 포함)
+//키 삭제, 공유삭제, 보안모드
 data class PostserialNum(
-    var serialNum: String
+    var serialNum: String,
+    var message: String
 )
 
 //키 이력관리 갯
@@ -65,8 +67,8 @@ data class KeyLog(
     var SerialNum: String,
     var Time: String,
     var KeyState: String,
-    var GPSLat: String,
-    var GPSLong: String,
+    var GPSLat: Double,
+    var GPSLong: Double,
     var Method: String
 )
 

@@ -22,29 +22,36 @@
     <TableLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:layout_marginRight="20dp"
-        android:layout_marginLeft="20dp"
+        android:layout_marginTop="10dp"
         android:id="@+id/table_layout"
         android:stretchColumns="*">
 
 
         <TableRow>
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:gravity="center"
+                android:layout_weight="5"
+                android:gravity="left"
                 android:text="일시"/>
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:gravity="center"
+                android:layout_weight="3"
+                android:gravity="right"
                 android:text="상태"/>
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="5"
                 android:gravity="center"
                 android:text="메소드"/>
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="4"
+                android:gravity="center"
+                android:text="위치"/>
 
         </TableRow>
 

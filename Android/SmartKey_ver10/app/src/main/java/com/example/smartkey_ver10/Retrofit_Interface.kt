@@ -5,7 +5,7 @@ import retrofit2.http.*
 
 interface Retrofit_Interface {
 
-    /*---------------------Post---------------------------*/
+    /*--------------------------------Post--------------------------------------*/
     @FormUrlEncoded
     @POST("user/login/")
     fun postLogin(@FieldMap fields: HashMap<String, String>): Call<LoginInfo>
@@ -33,6 +33,11 @@ interface Retrofit_Interface {
     @POST("main/close_key/")
     fun postClose(@Header("Cookie") cookieid: String,
                   @FieldMap fields: HashMap<String, String>): Call<P_op_cl>
+
+    @FormUrlEncoded
+    @POST("main/mode/")
+    fun postMode(@Header("Cookie") cookieid: String,
+                  @FieldMap fields: HashMap<String, String>): Call<PostserialNum>
 
     @FormUrlEncoded
     @POST("main/key_pw/")
@@ -68,7 +73,7 @@ interface Retrofit_Interface {
     fun postResetPw(@Header("Cookie") cookieid: String,
                             @FieldMap fields: HashMap<String, String>): Call<PostResetPW>
 
-    /*-----------------------------Get-----------------------*/
+    /*-----------------------------------Get------------------------------------*/
     @GET("main/view_keylist/")
     fun GetKeyList(@Header("Cookie") cookieid: String): Call<GetKeyInfo>
 

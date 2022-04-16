@@ -52,14 +52,14 @@ class SmartkeyAddKey : AppCompatActivity() {
 
             if(SmartkeyPw == SmartkeyPwRe){
                 var keyInfoInput = HashMap<String, String>()
-                keyInfoInput.put("serialNum", serial_Num.toString())
+                keyInfoInput.put("serialNum", "11"/*serial_Num.toString()*/)
                 keyInfoInput.put("keyName",Smartkeyname)
                 keyInfoInput.put("smartPwd",SmartkeyPw)
 
                 postService.postKeyInfo(cookieid = cookie, keyInfoInput).enqueue(object : Callback<RegisterKeyInfo> {
                     override fun onResponse(call: Call<RegisterKeyInfo>, response: Response<RegisterKeyInfo>) {
                         if (response.code() == 200) {
-                            Log.d("키등록", "등록 성공"+response.raw().toString())
+                            Log.d("키등록", "등록 성공")
                             Toast.makeText(this@SmartkeyAddKey,
                                 "키 등록을 완료하였습니다.", Toast.LENGTH_SHORT).show()
                             startActivity(goMain)
@@ -95,8 +95,13 @@ class SmartkeyAddKey : AppCompatActivity() {
                             } catch (e: UnsupportedEncodingException) {
                                 e.printStackTrace()
                             }
-                            serial_Num = readMessage
+                            var serial_num_temp = readMessage.toString().chunked(6)
+                            serial_Num = serial_num_temp[0]
+
                             text_serialNum!!.text = readMessage
+                            if(serial_Num != null){
+                                SmartkeyBluetoothSetting.IsRunning = false //메시지 읽기 쓰레드 일시 정지
+                            }
                         }
                     }
                 }

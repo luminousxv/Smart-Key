@@ -5,6 +5,7 @@ import android.content.Context
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 
 //액티비티 없이 비밀번호 간단 인증을 위한 다이얼로그 클래스
 class SmartkeyDialog(context: Context) {
@@ -76,21 +77,22 @@ class SmartkeyDialog(context: Context) {
     }
 
     //블루투스 제어로 사용
-    fun Controldialog_BT(){
+    fun Controldialog_BT(DeviceName : String){
         dialog.setContentView(R.layout.dialog_bluetoothcontrol)
         dialog.window!!.setLayout(WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.WRAP_CONTENT)
         dialog.setCanceledOnTouchOutside(false)
         dialog.setCancelable(true)
         dialog.show()
 
-
+        var devicename = dialog.findViewById<TextView>(R.id.txt_diviceName)
+        devicename.text = DeviceName
         val btn_bt_open = dialog.findViewById<Button>(R.id.btn_bt_open)
         val btn_bt_close = dialog.findViewById<Button>(R.id.btn_bt_close)
         val btn_bt_finish = dialog.findViewById<Button>(R.id.btn_bt_finish)
 
         btn_bt_finish.setOnClickListener {
             val CANCEL = 2
-            onClickListener_BT.onClicked_BT((CANCEL))
+            onClickListener_BT.onClicked_BT(CANCEL)
             dialog.dismiss() }
 
         btn_bt_open.setOnClickListener {

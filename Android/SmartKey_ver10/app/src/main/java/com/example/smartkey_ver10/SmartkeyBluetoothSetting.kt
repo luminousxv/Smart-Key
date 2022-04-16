@@ -105,6 +105,7 @@ class SmartkeyBluetoothSetting(context: Context) {
         }
     }
 
+    //여기 고쳐야됨
     inner class ConnectedBluetoothThread(val mmSocket: BluetoothSocket) :
         Thread() {
         private val mmInStream: InputStream?
@@ -113,17 +114,19 @@ class SmartkeyBluetoothSetting(context: Context) {
             val buffer = ByteArray(1024)
             var bytes: Int
             while (true) {
-                try {
-                    bytes = mmInStream!!.available()
-                    if (bytes != 0) {
-                        SystemClock.sleep(100)
-                        bytes = mmInStream.available()
-                        bytes = mmInStream.read(buffer, 0, bytes)
-                        mBluetoothHandler!!.obtainMessage(BT_MESSAGE_READ, bytes, -1, buffer)
-                            .sendToTarget()
+                while(IsRunning){
+                    try {
+                        bytes = mmInStream!!.available()
+                        if (bytes != 0) {
+                            SystemClock.sleep(1000)
+                            bytes = mmInStream.available()
+                            bytes = mmInStream.read(buffer, 0, bytes)
+                            mBluetoothHandler!!.obtainMessage(BT_MESSAGE_READ, bytes, -1, buffer)
+                                .sendToTarget()
+                        }
+                    } catch (e: InterruptedException) {
+                        break
                     }
-                } catch (e: IOException) {
-                    break
                 }
             }
         }
@@ -164,10 +167,11 @@ class SmartkeyBluetoothSetting(context: Context) {
         const val BT_MESSAGE_READ = 2
         const val BT_CONNECTING_STATUS = 3
         val BT_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
-        val BT_CONNECT = "100"
-        val BT_OPEN = "200"
-        val BT_CLOSE = "300"
-        val BT_DISCONNECT = "400"
+        const val BT_CONNECT = "100"
+        const val BT_OPEN = "200"
+        const val BT_CLOSE = "300"
+        const val BT_DISCONNECT = "400"
+        var IsRunning = true
     }
 
 }
