@@ -9,7 +9,7 @@ class CookieHandler {
         if(header != null){
             var cookielist = header.get("Set-Cookie").toString()
             var cookstring: List<String> = cookielist.split(";")
-            var sessionid: String = cookstring[0].toString()
+            var sessionid: String = cookstring[0]
 
             SharedPrefApp.storj.setString("cookie",sessionid)
             Log.d("getCookie","getcookie성공")
@@ -21,6 +21,15 @@ class CookieHandler {
         var cookieid: String = SharedPrefApp.storj.getString("cookie","")
         Log.d("setCookie","setcookie성공"+cookieid)
         return cookieid
+    }
+
+    fun putUserEmail(Email: String){
+        SharedPrefApp.storj.setString("UserEmail", Email)
+    }
+
+    fun setUserEmail():String{
+        var email = SharedPrefApp.storj.getString("UserEmail","")
+        return email
     }
 
 }

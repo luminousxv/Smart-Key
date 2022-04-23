@@ -5,7 +5,7 @@ import retrofit2.http.*
 
 interface Retrofit_Interface {
 
-    /*---------------------Post---------------------------*/
+    /*--------------------------------Post--------------------------------------*/
     @FormUrlEncoded
     @POST("user/login/")
     fun postLogin(@FieldMap fields: HashMap<String, String>): Call<LoginInfo>
@@ -22,7 +22,7 @@ interface Retrofit_Interface {
     @FormUrlEncoded
     @POST("main/register_key")
     fun postKeyInfo(@Header("Cookie") cookieid: String,
-                  @FieldMap fields: HashMap<String, String>): Call<RegiserKeyInfo>
+                  @FieldMap fields: HashMap<String, String>): Call<RegisterKeyInfo>
 
     @FormUrlEncoded
     @POST("main/open_key/")
@@ -35,6 +35,11 @@ interface Retrofit_Interface {
                   @FieldMap fields: HashMap<String, String>): Call<P_op_cl>
 
     @FormUrlEncoded
+    @POST("main/mode/")
+    fun postMode(@Header("Cookie") cookieid: String,
+                  @FieldMap fields: HashMap<String, String>): Call<PostserialNum>
+
+    @FormUrlEncoded
     @POST("main/key_pw/")
     fun postSmartPw(@Header("Cookie") cookieid: String,
                   @FieldMap fields: HashMap<String, String>): Call<PostSmartPw>
@@ -44,8 +49,31 @@ interface Retrofit_Interface {
     fun postDelserialNum(@Header("Cookie") cookieid: String,
                   @FieldMap fields: HashMap<String, String>): Call<PostserialNum>
 
+    @FormUrlEncoded
+    @POST("main/share_key/register/")
+    fun postSharedinfo(@Header("Cookie") cookieid: String,
+                       @FieldMap fields: HashMap<String, String>): Call<PostSharedInfo>
 
-    /*-----------------------------Get-----------------------*/
+    @FormUrlEncoded
+    @POST("main/share_key/delete/")
+    fun postDeleteShared(@Header("Cookie") cookieid: String,
+                       @FieldMap fields: HashMap<String, String>): Call<PostserialNum>
+
+    @FormUrlEncoded
+    @POST("user/reset/email/")
+    fun postForResetUserinfo(@FieldMap fields: HashMap<String, String>): Call<PostForResetInfo>
+
+    @FormUrlEncoded
+    @POST("user/reset/verification/")
+    fun postForResetCheckAuth(@Header("Cookie") cookieid: String,
+                      @FieldMap fields: HashMap<String, String>): Call<CheckAuth>
+
+    @FormUrlEncoded
+    @POST("user/reset/change_pw/")
+    fun postResetPw(@Header("Cookie") cookieid: String,
+                            @FieldMap fields: HashMap<String, String>): Call<PostResetPW>
+
+    /*-----------------------------------Get------------------------------------*/
     @GET("main/view_keylist/")
     fun GetKeyList(@Header("Cookie") cookieid: String): Call<GetKeyInfo>
 
