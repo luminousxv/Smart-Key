@@ -32,7 +32,7 @@ class SmartkeyAddKey : AppCompatActivity() {
 
         //블루투스 다룰 객체 생성
         val bluetoothService = SmartkeyBluetoothSetting(this@SmartkeyAddKey)
-        //http 통신 생성
+        //http 통신
         val postService = Retrofit_service.service
         var cookie = CookieHandler().setCookie()
 
@@ -52,7 +52,7 @@ class SmartkeyAddKey : AppCompatActivity() {
 
             if(SmartkeyPw == SmartkeyPwRe){
                 var keyInfoInput = HashMap<String, String>()
-                keyInfoInput.put("serialNum", "11"/*serial_Num.toString()*/)
+                keyInfoInput.put("serialNum", serial_Num!!)
                 keyInfoInput.put("keyName",Smartkeyname)
                 keyInfoInput.put("smartPwd",SmartkeyPw)
 
@@ -62,6 +62,8 @@ class SmartkeyAddKey : AppCompatActivity() {
                             Log.d("키등록", "등록 성공")
                             Toast.makeText(this@SmartkeyAddKey,
                                 "키 등록을 완료하였습니다.", Toast.LENGTH_SHORT).show()
+                            bluetoothService.registSuccess()
+                            bluetoothService.bluetoothOff()
                             startActivity(goMain)
                             finish()
                         } else {

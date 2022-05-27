@@ -35,8 +35,8 @@ class RecyclerUserAdapter(private val items: ArrayList<ViewItem>
     class ViewHolder(v: View) : RecyclerView.ViewHolder(v) {
         private var view: View = v
         fun bind(listener: View.OnClickListener, item: ViewItem) {
-            view.findViewById<TextView>(R.id.txtUser_id).text = item.id
             view.findViewById<TextView>(R.id.txtUser_name).text = item.name
+            view.findViewById<TextView>(R.id.txtUser_id).text = item.id
             view.setOnClickListener(listener)
         }
     }

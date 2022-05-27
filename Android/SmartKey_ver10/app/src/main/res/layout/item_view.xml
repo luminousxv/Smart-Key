@@ -6,17 +6,7 @@
     android:layout_marginBottom="5dp"
     android:orientation="vertical">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#EAECEB"
-        android:orientation="horizontal"
-        android:padding="5dp">
-        <TextView
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_gravity="center"
-            android:id="@+id/textView1"/>
+
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -25,7 +15,7 @@
             android:background="#E6E6E6"
             android:orientation="vertical">
             <TextView
-                android:id="@+id/txtUser_id"
+                android:id="@+id/txtUser_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="#EEEEFA"
@@ -35,7 +25,7 @@
                 android:textSize="17dp"
                 android:textStyle="bold" />
             <TextView
-                android:id="@+id/txtUser_name"
+                android:id="@+id/txtUser_id"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
@@ -47,6 +37,5 @@
 
 
         </LinearLayout>
-    </LinearLayout>
 
 </LinearLayout>

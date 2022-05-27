@@ -25,7 +25,7 @@ class SmartkeyMain : AppCompatActivity() {
 
     //블루투스 셋팅
     val bluetoothService = SmartkeyBluetoothSetting(this@SmartkeyMain)
-    //블루투스로 이용시에는 그냥 다이얼로그로 설정하자
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,6 +45,7 @@ class SmartkeyMain : AppCompatActivity() {
         var listSize: Int = 0
         var keyshared = HashMap<String, String>()//키 이름, 공유여부
         var keymode = HashMap<String, String>()//키 이름, 모드
+        var keystate = HashMap<String, String>()//키 상태
 
         //키 받아오기
         GetService.GetKeyList(cookieid = cookie).enqueue(object : Callback<GetKeyInfo> {
@@ -61,12 +62,14 @@ class SmartkeyMain : AppCompatActivity() {
                             var keyname = keyList[i].KeyName
                             keyshared.put(keyList[i].KeyName, keyList[i].Shared)
                             keymode.put(keyList[i].KeyName, keyList[i].Mode)
+                            keystate.put(keyList[i].KeyName, keyList[i].KeyState)
                             registered_list.add(ViewItem("","$keynum" , "$keyname"))
                         } else{                             //공유받은 스마트키
                             var keynum = keyList[i].SerialNum
                             var keyname = keyList[i].KeyName
                             keyshared.put(keyList[i].KeyName, keyList[i].Shared)
                             keymode.put(keyList[i].KeyName, keyList[i].Mode)
+                            keystate.put(keyList[i].KeyName, keyList[i].KeyState)
                             shared_list.add(ViewItem("","$keynum" , "$keyname"))
                         }
                     }
@@ -80,12 +83,14 @@ class SmartkeyMain : AppCompatActivity() {
 
         //등록 키 클릭 이벤트
         val reg_adapter = RecyclerUserAdapter(registered_list,
-            {data->adapterOnClick(data, keyshared.get(data.name), keymode.get(data.name) ,"0")})
+            {data->adapterOnClick(data, keyshared.get(data.name), keymode.get(data.name),
+                keystate.get(data.name),"0")})
         findViewById<RecyclerView>(R.id.registered_recycleView).adapter = reg_adapter
 
         //공유 키 클릭 이벤트
         val shared_adapter = RecyclerUserAdapter(shared_list,
-            {data->adapterOnClick(data, keyshared.get(data.name), keymode.get(data.name),"1")})
+            {data->adapterOnClick(data, keyshared.get(data.name), keymode.get(data.name),
+                keystate.get(data.name), "1")})
         findViewById<RecyclerView>(R.id.shared_recycleView).adapter = shared_adapter
     }
 
@@ -118,7 +123,8 @@ class SmartkeyMain : AppCompatActivity() {
     }
 
     //클릭 이벤트 함수
-    private fun adapterOnClick(data: ViewItem, keyshared:String?, keymode:String? ,registerd: String){
+    private fun adapterOnClick(data: ViewItem, keyshared:String?, keymode:String?, keystate:String?
+                               ,registerd: String){
         //등록키 클릭 시
         if(registerd=="0"){
             var serial_Num :String? = null
@@ -132,7 +138,8 @@ class SmartkeyMain : AppCompatActivity() {
             BluOrHttpSelect.setItems(items,
                 DialogInterface.OnClickListener { dialog, item ->
                     //원격접속일 떄
-                    if(item == 0){smartPwPost(data, keyshared, registerd, keymode, items[item].toString())}
+                    if(item == 0){smartPwPost(data, keyshared, registerd, keymode,keystate,
+                        items[item].toString())}
 
                     //---------------블루투스 접속일 때-----------------------
                     if(item == 1){
@@ -153,12 +160,8 @@ class SmartkeyMain : AppCompatActivity() {
                                             var temp_serial_num = readMessage.toString().chunked(6)
                                             serial_Num = temp_serial_num[0]
                                             //시리얼 번호 확인
-                                            if(serial_Num != null){
-                                                if (serial_Num == data.id) {
-                                                smartPwPost(data, keyshared, registerd, keymode, items[item].toString())
-                                                }
-                                                else blueElse()
-                                            }
+                                            smartPwPost(data, keyshared, registerd, keymode, keystate,
+                                                items[item].toString())
                                         }
                                     }
                                 }
@@ -169,10 +172,17 @@ class SmartkeyMain : AppCompatActivity() {
             val alert: AlertDialog = BluOrHttpSelect.create()
             alert.show()
         }
-        //공유키 클릭 시
+        //공유키 클릭 시 스마트키 비밀번호 필요없음
         else if(registerd=="1"){
             if(keymode=="0"){//일반 모드 일때
-                smartPwPost(data, keyshared, registerd, keymode, "원격 접속")
+                val Detialintent = Intent(this, SmartkeyDetailAct::class.java)
+                Detialintent.putExtra("shared", keyshared)
+                Detialintent.putExtra("registerd", registerd)
+                Detialintent.putExtra("serialnum", data.id)
+                Detialintent.putExtra("keyname", data.name)
+                Detialintent.putExtra("keymode", keymode)
+                startActivity(Detialintent)
+                finish()
             }
             else if(keymode == "1"){//보안모드일 때 접근 불가
                 Toast.makeText(this, "보안모드 작동중이므로 접근할 수 없습니다.",Toast.LENGTH_SHORT).show()
@@ -183,12 +193,13 @@ class SmartkeyMain : AppCompatActivity() {
 
 
     //스마트키 비밀번호 포스트함수
-    fun smartPwPost(data:ViewItem, keyshared: String? ,registerd: String, keymode: String?, selection:String){
+    fun smartPwPost(data:ViewItem, keyshared: String? ,registerd: String, keymode: String?,
+                    keystate:String?, selection:String){
 
+        val Detialintent = Intent(this, SmartkeyDetailAct::class.java)
         val Smartkeydialog = SmartkeyDialog(this)
 
         //스마트키 비밀번호 다이얼로그 띄우기
-        val Detialintent = Intent(this, SmartkeyDetailAct::class.java)
         Smartkeydialog.Checkdialog_smpw()
 
         //다이얼로그 입력후 클릭 시
@@ -211,6 +222,7 @@ class SmartkeyMain : AppCompatActivity() {
                                 Detialintent.putExtra("serialnum", data.id)
                                 Detialintent.putExtra("keyname", data.name)
                                 Detialintent.putExtra("keymode", keymode)
+                                Detialintent.putExtra("keystate", keystate)
                                 startActivity(Detialintent)
                                 finish()
                             }
