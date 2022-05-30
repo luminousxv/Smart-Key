@@ -52,7 +52,7 @@ class Register_resetPw : AppCompatActivity() {
                             postAuthNum(cookie, InputAuthNum) //인증번호 전송, 전송 후 비밀번호 변경 다이얼로그까지
                         }//버튼끝
                             Log.d("유저정보","전송완료")
-                        }
+                    }
 
                     else Log.d("유저정보","전송실패"+response.raw())
                 }

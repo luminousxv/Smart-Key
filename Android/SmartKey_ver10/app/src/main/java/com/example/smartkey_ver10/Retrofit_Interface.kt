@@ -81,4 +81,9 @@ interface Retrofit_Interface {
     fun GetKeyLog(@Header("Cookie") cookieid: String,
                   @Query("serialNum", encoded = true) sernum:String): Call<GetKeyrecord>
 
+    @GET("main/view_keyrecord/image/")
+    fun GetSecurityImage(@Header("Cookie") cookieid: String,
+                        @Query("serialNum") sernum: String,
+                        @Query("time") time: String): Call<GetSecuImg>
+
 }

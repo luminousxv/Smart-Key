@@ -18,8 +18,9 @@
         android:id="@+id/nameSmartkey"/>
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:layout_height="0dp"
+        android:orientation="horizontal"
+        android:layout_weight="1">
         <Button
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -39,66 +40,77 @@
             android:text="보안 모드"
             android:id="@+id/switch_mode"/>
     </LinearLayout>
-
-
-    <Button
-        android:id="@+id/btn_Lock"
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="2"
-        android:layout_marginTop="30dp"
-        android:layout_marginRight="50dp"
-        android:layout_marginLeft="50dp"
-        android:layout_gravity="center"
-        android:text="스마트키 Lock"
-        android:backgroundTint="#0000ff" />
-
-    <Button
-        android:id="@+id/btn_Unlock"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="2"
-        android:layout_marginTop="30dp"
-        android:layout_marginRight="50dp"
-        android:layout_marginLeft="50dp"
-        android:layout_gravity="center"
-        android:text="스마트키 Unlock"
-        android:backgroundTint="#0000ff" />
-
-    <Button
-        android:id="@+id/btn_Log"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="2"
-        android:layout_marginTop="30dp"
-        android:layout_marginRight="50dp"
-        android:layout_marginLeft="50dp"
-        android:layout_gravity="center"
-        android:text="스마트키 사용내역"
-        android:backgroundTint="#0000ff" />
+        android:layout_weight="1"/>
 
 
-    <Button
-        android:id="@+id/btn_Sharing"
+    <ImageView
+        android:id="@+id/imv_Lock"
+        android:src="@drawable/smartkey_open"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="2"
-        android:layout_marginTop="30dp"
+        android:layout_weight="4"
+        android:layout_marginTop="60dp"
         android:layout_marginRight="50dp"
         android:layout_marginLeft="50dp"
-        android:layout_gravity="center"
-        android:text="스마트키 공유하기"
-        android:backgroundTint="#0000ff" />
-    <Button
-        android:id="@+id/btn_Delete"
+        android:visibility="gone"
+        android:layout_gravity="center" />
+
+    <ImageView
+        android:id="@+id/imv_Unlock"
+        android:src="@drawable/smartkey_close"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="2"
-        android:layout_marginTop="30dp"
+        android:layout_weight="4"
+        android:layout_marginTop="60dp"
         android:layout_marginRight="50dp"
         android:layout_marginLeft="50dp"
-        android:layout_gravity="center"
-        android:text="스마트키 삭제하기"
-        android:backgroundTint="#0000ff" />
+        android:visibility="gone"
+        android:layout_gravity="center" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="4"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btn_Sharing"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:layout_weight="2"
+            android:layout_gravity="center"
+            android:layout_marginLeft="20dp"
+            android:text="공유하기"
+            android:backgroundTint="#0000ff" />
+        <ImageView
+            android:id="@+id/imv_Log"
+            android:src="@drawable/list_640"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:layout_weight="1"
+            android:layout_gravity="center"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp" />
+        <Button
+            android:id="@+id/btn_Delete"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:layout_weight="2"
+            android:layout_gravity="center"
+            android:layout_marginRight="20dp"
+            android:text="삭제하기"
+            android:backgroundTint="#0000ff" />
+
+
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="4"/>
+
 
 </LinearLayout>

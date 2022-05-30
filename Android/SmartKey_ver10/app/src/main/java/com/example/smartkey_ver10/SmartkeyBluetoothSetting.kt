@@ -26,6 +26,9 @@ class SmartkeyBluetoothSetting(context: Context) {
     var mBluetoothDevice: BluetoothDevice? = null
     var mBluetoothSocket: BluetoothSocket? = null
 
+    fun registSuccess(){
+        mThreadConnectedBluetooth!!.write("150")
+    }
 
     fun open(){
         mThreadConnectedBluetooth!!.write(BT_OPEN)
@@ -118,7 +121,7 @@ class SmartkeyBluetoothSetting(context: Context) {
                     try {
                         bytes = mmInStream!!.available()
                         if (bytes != 0) {
-                            SystemClock.sleep(1000)
+                            SystemClock.sleep(500)
                             bytes = mmInStream.available()
                             bytes = mmInStream.read(buffer, 0, bytes)
                             mBluetoothHandler!!.obtainMessage(BT_MESSAGE_READ, bytes, -1, buffer)

@@ -11,11 +11,9 @@ import android.os.Bundle
 import android.os.Looper
 import android.util.Log
 import android.view.View
-import android.widget.Button
-import android.widget.Switch
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.core.app.ActivityCompat
+import com.google.android.gms.common.internal.Objects
 import com.google.android.gms.location.*
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
@@ -41,14 +39,9 @@ class SmartkeyDetailAct : AppCompatActivity() {
     var lat : Double = 0.0
     var long: Double = 0.0
 
-    //버튼
-    val btn_back = findViewById<Button>(R.id.btn_back)
-    val btn_lock = findViewById<Button>(R.id.btn_Lock)
-    val btn_unlock = findViewById<Button>(R.id.btn_Unlock)
-    val btn_log = findViewById<Button>(R.id.btn_Log)
-    val btn_sharing = findViewById<Button>(R.id.btn_Sharing)
-    val btn_Delete = findViewById<Button>(R.id.btn_Delete)
-    var switch_mode = findViewById<Switch>(R.id.switch_mode)
+    //같은 스마트키 다이얼로그를 쓰는 메서드에 공유해제인지 키 삭제인지 확인
+    private val SHARED_DEL = 1001
+    private val KEY_DEL = 1002
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -58,36 +51,54 @@ class SmartkeyDetailAct : AppCompatActivity() {
         mLocationRequest = LocationRequest.create().apply{
             priority = LocationRequest.PRIORITY_HIGH_ACCURACY
         }
+        /*if(checkPermissionForLocation(this)) { //위치 권한 동의
+            startLocationUpdates() //위치 업데이트
+        }
+        else { Toast.makeText(this, "위치 권한 사용에 동의 후 이용할 수 있습니다.", Toast.LENGTH_SHORT).show()
+            finish()
+        }*/
 
-        //제어할 키 정보 세팅
+        //SmartkeyMain에서 넘겨받은 키 정보
         val keynum = intent.getStringExtra("serialnum") //선택한 key의 serialnum
         val keyname = intent.getStringExtra("keyname") // 선택한 key의 이름
         val unregisterd = intent.getStringExtra("registerd") //등록키인지 공유키인지 확인
         val keyshared = intent.getStringExtra("shared")//공유가 가능한지 불가능한지 판단
         var keymode = intent.getStringExtra("keymode")//키 모드
+        var keystate = intent.getStringExtra("keystate")//키 상태
 
         val goMain = Intent(this, SmartkeyMain::class.java)
+
+        //버튼
+        val btn_back = findViewById<Button>(R.id.btn_back)
+        val imv_lock = findViewById<ImageView>(R.id.imv_Lock)
+        val imv_unlock = findViewById<ImageView>(R.id.imv_Unlock)
+        val imv_log = findViewById<ImageView>(R.id.imv_Log)
+        val btn_sharing = findViewById<Button>(R.id.btn_Sharing)
+        val btn_Delete = findViewById<Button>(R.id.btn_Delete)
+        var switch_mode = findViewById<Switch>(R.id.switch_mode)
 
         findViewById<TextView>(R.id.nameSmartkey).text = keyname //스마트키 이름 표시
 
         //공유키, 등록키, 공유가능여부, 키모드에 따라 다른 초기 UI
-        initialUI_set(unregisterd!!, keyshared!!, keymode!!)
+        init_UI_set(unregisterd!!, keyshared!!, keymode!!, keystate!!,
+            imv_log, btn_sharing, btn_Delete, imv_lock, imv_unlock, switch_mode)
+
 
         //보안모드
         switch_mode.setOnCheckedChangeListener { compoundButton, on ->
             if(on){
-                btn_lock.isEnabled = false
-                btn_unlock.isEnabled = false
-                btn_log.isEnabled = false
+                imv_lock.isEnabled = false
+                imv_unlock.isEnabled = false
+                imv_log.isEnabled = false
                 btn_sharing.isEnabled = false
                 btn_Delete.isEnabled = false
                 //모드 포스트
                 postMODE(keynum!!)
             }
             else{
-                btn_lock.isEnabled = true
-                btn_unlock.isEnabled = true
-                btn_log.isEnabled = true
+                imv_lock.isEnabled = true
+                imv_unlock.isEnabled = true
+                imv_log.isEnabled = true
                 btn_sharing.isEnabled = true
                 btn_Delete.isEnabled = true
                 //모드 포스트
@@ -97,65 +108,63 @@ class SmartkeyDetailAct : AppCompatActivity() {
 
         //------------------------버튼시작 --------------------//
         //잠금
-        btn_lock.setOnClickListener {
-            if(checkPermissionForLocation(this)) { //위치 권한 동의
-                startLocationUpdates() //위치 업데이트
+        imv_lock.setOnClickListener {
+            startLocationUpdates()
+            var Keyinput = HashMap<String, String>()
+            Keyinput.put("serialNum", keynum!!)
+            Keyinput.put("GPSLong", long.toString())
+            Keyinput.put("GPSLat", lat.toString())
 
-                var Keyinput = HashMap<String, String>()
-                Keyinput.put("serialNum", keynum!!)
-                Keyinput.put("GPSLong", long.toString())
-                Keyinput.put("GPSLat", lat.toString())
-
-                service.postClose(cookieid = cookie, Keyinput).enqueue(object : Callback<P_op_cl> {
-                    override fun onResponse(call: Call<P_op_cl>, response: Response<P_op_cl>) {
-                        if (response.code() == 200) {
-                            Log.d("LockPost", "클로즈 성공")
-                            Log.d("response", response.raw().toString())
-                            stopLocationUpdates() //위치 업데이트 멈추기
-                        } else {
-                            Log.d("LockPost", "이미닫혀있음")
-                            Toast.makeText(this@SmartkeyDetailAct,
-                                "이미 닫혀있습니다.", Toast.LENGTH_SHORT).show()
-                        }
+            service.postClose(cookieid = cookie, Keyinput).enqueue(object : Callback<P_op_cl> {
+                override fun onResponse(call: Call<P_op_cl>, response: Response<P_op_cl>) {
+                    if (response.code() == 200) {
+                        Log.d("LockPost", "클로즈 성공")
+                        Log.d("response", response.raw().toString())
+                        imv_lock.visibility = View.GONE
+                        imv_unlock.visibility = View.VISIBLE
+                        stopLocationUpdates() //위치 업데이트 멈추기
+                    } else {
+                        Log.d("LockPost", "오류가 발생했습니다.")
+                        Toast.makeText(this@SmartkeyDetailAct,
+                            "이미 닫혀있습니다.", Toast.LENGTH_SHORT).show()
                     }
-                    override fun onFailure(call: Call<P_op_cl>, t: Throwable) {
-                        Log.d("LockPost", "t" + t.message)
-                    }
-                })
-            }
+                }
+                override fun onFailure(call: Call<P_op_cl>, t: Throwable) {
+                    Log.d("LockPost", "t" + t.message)
+                }
+            })
         }//잠금 끝
 
         //열림
-        btn_unlock.setOnClickListener {
-            if(checkPermissionForLocation(this)){ //위치 권한 동의
-                startLocationUpdates() //위치 업데이트
+        imv_unlock.setOnClickListener {
+            startLocationUpdates()
+            var Keyinput = HashMap<String, String>()
+            Keyinput.put("serialNum", keynum!!)
+            Keyinput.put("GPSLong", long.toString())
+            Keyinput.put("GPSLat", lat.toString())
 
-                var Keyinput = HashMap<String, String>()
-                Keyinput.put("serialNum", keynum!!)
-                Keyinput.put("GPSLong", long.toString())
-                Keyinput.put("GPSLat", lat.toString())
-
-                service.postOpen(cookieid = cookie, Keyinput).enqueue(object : Callback<P_op_cl> {
-                    override fun onResponse(call: Call<P_op_cl>, response: Response<P_op_cl>) {
-                        if (response.code() == 200) {
-                            Log.d("UnlockPost", "오픈 성공")
-                            Log.d("response", response.raw().toString())
-                            stopLocationUpdates() //위치 업데이트 멈추기
-                        } else {
-                            Toast.makeText(this@SmartkeyDetailAct, "이미 열려있습니다.", Toast.LENGTH_SHORT)
-                                .show()
-                            Log.d("UnlockPost", "이미열려있음")
-                        }
+            service.postOpen(cookieid = cookie, Keyinput).enqueue(object : Callback<P_op_cl> {
+                override fun onResponse(call: Call<P_op_cl>, response: Response<P_op_cl>) {
+                    if (response.code() == 200) {
+                        Log.d("UnlockPost", "오픈 성공")
+                        Log.d("response", response.raw().toString())
+                        imv_unlock.visibility = View.GONE
+                        imv_lock.visibility = View.VISIBLE
+                        stopLocationUpdates() //위치 업데이트 멈추기
+                    } else {
+                        Toast.makeText(this@SmartkeyDetailAct, "오류가 발생했습니다.", Toast.LENGTH_SHORT)
+                            .show()
+                        Log.d("UnlockPost", "response badcode")
                     }
-                    override fun onFailure(call: Call<P_op_cl>, t: Throwable) {
-                        Log.d("UnlockPost", "t" + t.message)
-                    }
-                })
-            }
+                }
+                override fun onFailure(call: Call<P_op_cl>, t: Throwable) {
+                    Log.d("UnlockPost", "t" + t.message)
+                }
+            })
         }//열림 끝
 
         //이력
-        btn_log.setOnClickListener {
+        imv_log.setOnClickListener {
             val log_intent = Intent(this, SmartkeyLogAct::class.java)
             log_intent.putExtra("serialnum", keynum)
             log_intent.putExtra("keyname", keyname)
@@ -165,7 +174,7 @@ class SmartkeyDetailAct : AppCompatActivity() {
         //공유하기
         btn_sharing.setOnClickListener {
             if(keyshared == "1"){ //공유해제
-                postsmartkeypw(keynum!!,keyname!! ,0)
+                postsmartkeypw(keynum!!,keyname!! , SHARED_DEL)
             }
             else{
                 val sharing_intent = Intent(this, SmartkeySharingAct::class.java)
@@ -177,7 +186,7 @@ class SmartkeyDetailAct : AppCompatActivity() {
 
         //키 삭제하기
         btn_Delete.setOnClickListener {
-            postsmartkeypw(keynum!!,keyname!!, 1)
+            postsmartkeypw(keynum!!,keyname!!, KEY_DEL)
         }
 
         //뒤로가기
@@ -188,10 +197,16 @@ class SmartkeyDetailAct : AppCompatActivity() {
     }
 
     //----------------------------------초기 화면 띄우기-------------------------------------
-    fun initialUI_set(unregisterd: String, keyshared: String, keymode: String){
+    fun init_UI_set(unregisterd: String, keyshared: String, keymode: String, keystate: String, imv_log:ImageView,
+    btn_sharing: Button, btn_Delete: Button, imv_lock: ImageView, imv_unlock: ImageView, switch_mode: Switch){
+        if(keystate == "close"){
+            imv_unlock.visibility = View.VISIBLE
+        }
+        else imv_lock.visibility = View.VISIBLE
+
         //공유 스마트키로 접근 시 버튼 없애기
         if (unregisterd == "1") {
-            btn_log.visibility = View.INVISIBLE
+            imv_log.visibility = View.INVISIBLE
             btn_sharing.visibility = View.INVISIBLE
             btn_Delete.visibility = View.INVISIBLE
             switch_mode.visibility = View.INVISIBLE
@@ -203,17 +218,17 @@ class SmartkeyDetailAct : AppCompatActivity() {
         //초기 스위치 상태 확인
         if(keymode == "0"){//일반모드
             switch_mode.isChecked = false
-            btn_lock.isEnabled = true
-            btn_unlock.isEnabled = true
-            btn_log.isEnabled = true
+            imv_lock.isEnabled = true
+            imv_unlock.isEnabled = true
+            imv_log.isEnabled = true
             btn_sharing.isEnabled = true
             btn_Delete.isEnabled = true
         }
         else if(keymode == "1"){ //보안모드
             switch_mode.isChecked = true
-            btn_lock.isEnabled = false
-            btn_unlock.isEnabled = false
-            btn_log.isEnabled = false
+            imv_lock.isEnabled = false
+            imv_unlock.isEnabled = false
+            imv_log.isEnabled = false
             btn_sharing.isEnabled = false
             btn_Delete.isEnabled = false
         }
@@ -247,7 +262,7 @@ class SmartkeyDetailAct : AppCompatActivity() {
     }
 
     //스마트키 비밀번호 인증
-    fun postsmartkeypw(keynum:String, keyname: String, sharedCancelOrDeleteKey : Int){
+    fun postsmartkeypw(keynum:String, keyname: String, sharedDelOrKeyDel : Int){
         val dialog = SmartkeyDialog(this)
         dialog.Checkdialog_smpw()
 
@@ -265,10 +280,10 @@ class SmartkeyDetailAct : AppCompatActivity() {
                         if (response.code() == 200) {
                             Log.d("SmartPwd인증", "인증 성공")
                             Log.d("response", response.raw().toString())
-                            if(sharedCancelOrDeleteKey == 0){ //공유해제 시
+                            if(sharedDelOrKeyDel == SHARED_DEL){ //공유해제 시
                                 postdeleteshared(keynum, keyname)
                             }
-                            else if(sharedCancelOrDeleteKey == 1){ //키삭제 시
+                            else if(sharedDelOrKeyDel == KEY_DEL){ //키삭제 시
                                 postdeleteinfo(keynum, keyname)
                             }
                         } else {
@@ -288,7 +303,8 @@ class SmartkeyDetailAct : AppCompatActivity() {
     //키 삭제
     fun postdeleteinfo(keynum: String, keyname: String){
 
-        //인증 성공 시, 삭제 포스트
+        val go_main = Intent(this, SmartkeyMain::class.java)
+        // 삭제 포스트
         var inputserNum = HashMap<String, String>()
         inputserNum.put("serialNum", keynum!!)
 
@@ -299,6 +315,7 @@ class SmartkeyDetailAct : AppCompatActivity() {
                     Log.d("response", response.raw().toString())
                     Toast.makeText(this@SmartkeyDetailAct,
                         "$keyname 가 삭제되었습니다.", Toast.LENGTH_SHORT).show()
+                    startActivity(go_main)
                     finish()
                 } else Log.d("Delete키", "삭제 실패")
             }
@@ -310,7 +327,8 @@ class SmartkeyDetailAct : AppCompatActivity() {
 
     //공유정보 삭제
     fun postdeleteshared(keynum: String, keyname: String){
-        //인증 성공 시, 삭제 포스트
+        // 공유해제 포스트
+        val go_main = Intent(this, SmartkeyMain::class.java)
         var inputserNum = HashMap<String, String>()
         inputserNum.put("serialNum", keynum!!)
 
@@ -321,6 +339,7 @@ class SmartkeyDetailAct : AppCompatActivity() {
                     Log.d("response", response.raw().toString())
                     Toast.makeText(this@SmartkeyDetailAct,
                         "$keyname 의 공유가 해제되었습니다.", Toast.LENGTH_SHORT).show()
+                    startActivity(go_main)
                     finish()
                 } else Log.d("공유키", "공유해제 실패")
             }

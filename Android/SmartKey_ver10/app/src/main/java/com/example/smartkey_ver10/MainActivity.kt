@@ -3,6 +3,7 @@ package com.example.smartkey_ver10
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Base64
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
@@ -32,9 +33,12 @@ class MainActivity : AppCompatActivity() {
             var id = findViewById<EditText>(R.id.edit_id).text.toString()
             var pw = findViewById<EditText>(R.id.edit_pw).text.toString()
 
+            var idEnco = Base64.encodeToString(id.toByteArray(), Base64.NO_WRAP)
+            var pwEnco = Base64.encodeToString(pw.toByteArray(), Base64.NO_WRAP)
+
             var loginInput = HashMap<String, String>()
-            loginInput.put("userEmail", id)
-            loginInput.put("userPwd", pw)
+            loginInput.put("userEmail", idEnco)
+            loginInput.put("userPwd", pwEnco)
 
             PostLogin.postLogin(loginInput).enqueue(object : Callback<LoginInfo> {
                 override fun onResponse(call: Call<LoginInfo>, response: Response<LoginInfo>) {
