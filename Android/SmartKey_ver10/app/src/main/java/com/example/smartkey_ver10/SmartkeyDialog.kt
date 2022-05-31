@@ -2,9 +2,11 @@ package com.example.smartkey_ver10
 
 import android.app.Dialog
 import android.content.Context
+import android.graphics.Bitmap
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.TextView
 
 //액티비티 없이 비밀번호 간단 인증을 위한 다이얼로그 클래스
@@ -14,6 +16,7 @@ class SmartkeyDialog(context: Context) {
     private lateinit var onClickListener: OnDialogClickListener
     private lateinit var onClickListener_re: OnDialogClickListener_repw
     private lateinit var onClickListener_BT: OnDialogClickListener_BT
+    private lateinit var onClickListener_Secu: OnDialogClickListener_Secu
 
     //스마트키 비밀번호 인증에 사용
     fun setOnClickListener(listener: OnDialogClickListener)
@@ -33,6 +36,12 @@ class SmartkeyDialog(context: Context) {
         onClickListener_BT = listener
     }
 
+    //보안모드 사진 띄우기에 사용
+    fun setOnClickListener_Secu(listener: OnDialogClickListener_Secu)
+    {
+        onClickListener_Secu = listener
+    }
+
     //스마트키 비밀번호 인증에 사용
     fun Checkdialog_userpw(){
         dialog.setContentView(R.layout.dialog_register_reset_pw)
@@ -40,7 +49,6 @@ class SmartkeyDialog(context: Context) {
         dialog.setCanceledOnTouchOutside(true)
         dialog.setCancelable(true)
         dialog.show()
-
 
         val btn_check = dialog.findViewById<Button>(R.id.btn_resetpw_check)
         val btn_cancel = dialog.findViewById<Button>(R.id.btn_resetpw_cancel)
@@ -106,6 +114,29 @@ class SmartkeyDialog(context: Context) {
         }
     }
 
+    //보안모드 사진 띄우기에 사용
+    fun Security_Img_Open(down_img : Bitmap) {
+        dialog.setContentView(R.layout.dialog_security_img)
+        dialog.window!!.setLayout(WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.WRAP_CONTENT)
+        dialog.setCanceledOnTouchOutside(false)
+        dialog.setCancelable(true)
+        dialog.show()
+
+        val btn_img_close = dialog.findViewById<Button>(R.id.btn_secu_close)
+        val btn_img_save = dialog.findViewById<Button>(R.id.btn_secu_save)
+        var iv_secu_img = dialog.findViewById<ImageView>(R.id.iv_secu_img)
+
+        iv_secu_img.setImageBitmap(down_img)
+
+        btn_img_close.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        btn_img_save.setOnClickListener {
+            onClickListener_Secu.onClicked_Secu(btn_img_save)
+        }
+    }
+
     //스마트키 비밀번호 인증에 사용
     interface OnDialogClickListener{
          fun onClicked(smartpw: String)
@@ -119,6 +150,11 @@ class SmartkeyDialog(context: Context) {
     //블루투스 제어로 사용
     interface OnDialogClickListener_BT{
         fun onClicked_BT(openOrClose: Int)
+    }
+
+    //보안모드 사진 띄우기에 사용
+    interface OnDialogClickListener_Secu{
+        fun onClicked_Secu(button: Button)
     }
 
 

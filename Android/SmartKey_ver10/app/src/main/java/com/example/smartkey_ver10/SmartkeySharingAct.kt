@@ -1,5 +1,6 @@
 package com.example.smartkey_ver10
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -25,6 +26,8 @@ class SmartkeySharingAct : AppCompatActivity() {
 
         val btn_cancel = findViewById<Button>(R.id.btn_sharingCancel)
         val btn_OK = findViewById<Button>(R.id.btn_sharingOK)
+
+        val go_main = Intent(this, SmartkeyMain::class.java)
 
         //취소 닫기
         btn_cancel.setOnClickListener { finish() }
@@ -67,6 +70,7 @@ class SmartkeySharingAct : AppCompatActivity() {
                                             Log.d("response", response.raw().toString())
                                             Toast.makeText(this@SmartkeySharingAct,
                                                 "$keyname 이 $edit_email 에게 공유 되었습니다.", Toast.LENGTH_SHORT).show()
+                                            startActivity(go_main)
                                             finish()
 
                                         } else {

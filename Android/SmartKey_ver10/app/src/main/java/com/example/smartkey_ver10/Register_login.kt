@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
+import android.widget.NumberPicker
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -23,16 +24,35 @@ class Register_login : AppCompatActivity() {
         val PostRegister = Retrofit_service.service
         val btn_ForCheck = findViewById<Button>(R.id.btn_register)
         var btn_Check = findViewById<Button>(R.id.btn_check)
+        var naMe = findViewById<EditText>(R.id.edit_name).text.toString()
+        var num_year = findViewById<NumberPicker>(R.id.num_year)
+        var num_month = findViewById<NumberPicker>(R.id.num_month)
+        var num_day = findViewById<NumberPicker>(R.id.num_day)
+
+        //생년월일 조작
+        num_year.wrapSelectorWheel = false
+        num_month.wrapSelectorWheel = false
+        num_day.wrapSelectorWheel = false
+        num_year.descendantFocusability = NumberPicker.FOCUS_BLOCK_DESCENDANTS
+        num_month.descendantFocusability = NumberPicker.FOCUS_BLOCK_DESCENDANTS
+        num_day.descendantFocusability = NumberPicker.FOCUS_BLOCK_DESCENDANTS
+        num_year.minValue = 1950
+        num_month.minValue = 1
+        num_day.minValue = 1
+        num_year.maxValue = 2010
+        num_month.maxValue = 12
+        num_day.maxValue = 31
 
 
         //회원정보 입력 후 인증번호 받기위한 메서드
         btn_ForCheck.setOnClickListener {
 
-            val id = findViewById<EditText>(R.id.edit_id).text.toString()
-            val pw = findViewById<EditText>(R.id.edit_pw).text.toString()
-            val pw_re = findViewById<EditText>(R.id.edit_pw_re).text.toString()
-            val birth = findViewById<EditText>(R.id.edit_birth).text.toString()
-            val naMe = findViewById<EditText>(R.id.edit_name).text.toString()
+            var id = findViewById<EditText>(R.id.edit_id).text.toString()
+            var pw = findViewById<EditText>(R.id.edit_pw).text.toString()
+            var pw_re = findViewById<EditText>(R.id.edit_pw_re).text.toString()
+
+            var birth = num_year.value.toString() + "." + num_month.value.toString() + "." +
+                    num_day.value.toString()
 
             //유저가 항목을 다 채우지 않았을 경우
             if(id.isEmpty() || pw.isEmpty() || pw_re.isEmpty()){

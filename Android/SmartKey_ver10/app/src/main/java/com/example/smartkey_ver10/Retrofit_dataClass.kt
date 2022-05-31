@@ -88,6 +88,12 @@ data class PostResetPW(
     var userPwd: String
 )
 
+//보안모드사진
+data class GetSecuImg(
+    var code: String,
+    var message: String
+)
+
 //리사이클러뷰 아이템
 data class ViewItem(
     var img : String,
