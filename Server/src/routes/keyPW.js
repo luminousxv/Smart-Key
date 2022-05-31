@@ -13,6 +13,11 @@ router.post('/main/key_pw', function(req, res){
     let serialNum = req.body.serialNum;
     let smartPwd = req.body.smartPwd;
 
+    console.log('---입력값---');
+    console.log('시리얼번호: '+ serialNum);
+    console.log('스마트키 비밀번호: '+ smartPwd);
+    console.log('----------');
+
     let sql1 = 'select * from KeyInfo where SerialNum = ?';
     //check login session
     if (req.session.login === undefined) {
@@ -32,6 +37,8 @@ router.post('/main/key_pw', function(req, res){
                     'code': 500,
                     'message': 'DB 오류가 발생했습니다.'
                 })
+                console.log('select error from KeyInfo table');
+                console.log(err);
             }
             else if (result1.length === 0){
                 res.status(400).json ({
@@ -42,13 +49,7 @@ router.post('/main/key_pw', function(req, res){
             else{
                 //encrypt input pw with salt save in KeyInfo DB table
                 const hashedPw = crypto.pbkdf2Sync(smartPwd, result1[0].Salt, 1, 32, 'sha512').toString('base64');
-                if (err) {
-                    res.status(500).json ({
-                        'code': 500,
-                        'message': 'DB 오류가 발생했습니다.'
-                    })
-                }
-                else if (hashedPw !== result1[0].SmartPwd){
+                if (hashedPw !== result1[0].SmartPwd){
                     res.status(401).json ({
                         'code': 401,
                         'message': '스마트키 비밀번호가 틀렸습니다. 다시 입력해주세요'

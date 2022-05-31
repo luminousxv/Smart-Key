@@ -11,7 +11,9 @@ router.use(bodyParser.urlencoded({ extended: true }));
 router.get('/main/view_keyrecord', function(req, res) {
     let serialNum = req.query.serialNum;
 
-    console.log(serialNum);
+    console.log('---입력값---');
+    console.log('시리얼번호: '+ serialNum);
+    console.log('---------');
 
     let sql1 = 'select SerialNum, Time, KeyState, GPSLat, GPSLong, Method, Email from KeyRecord where serialNum = ?';
     let sql2 = 'select OwnerID from Key_Authority where SerialNum = ?';
@@ -32,6 +34,8 @@ router.get('/main/view_keyrecord', function(req, res) {
                     'code': 500,
                     'message': 'DB 오류가 발생했습니다.'
                 })
+                console.log('select error from KeyInfo table');
+                console.log(err);
             }
             else if(result3.length === 0){
                 res.status(400).json ({
@@ -48,6 +52,8 @@ router.get('/main/view_keyrecord', function(req, res) {
                             'code': 500,
                             'message': 'DB 오류가 발생했습니다.'
                         })
+                        console.log('select error from Key_Authority table');
+                        console.log(err);
                     }
                     else if (result2[0].OwnerID != req.session.login.Email){
                         res.status(401).json ({
@@ -65,6 +71,8 @@ router.get('/main/view_keyrecord', function(req, res) {
                                     'code': 500,
                                     'message': 'DB 오류가 발생했습니다.'
                                 })
+                                console.log('select error from KeyRecord table');
+                                console.log(err);
                             }
                             else if (result.length === 0) {
                                 res.status(400).json ({
@@ -90,6 +98,11 @@ router.get('/main/view_keyrecord/image', function (req, res){
     let serialNum = req.query.serialNum;
     let time = req.query.time;
 
+    console.log('---입력값---');
+    console.log('시리얼 번호: '+ serialNum);
+    console.log('시간 : '+  time);
+    console.log('----------');
+
     let sql1 = 'select Image from KeyRecord where SerialNum = ? and Time = ?';
     let params1 = [serialNum, time];
     //check login session
@@ -109,7 +122,7 @@ router.get('/main/view_keyrecord/image', function (req, res){
                     'code': 500,
                     'message': 'DB 오류가 발생했습니다.'
                 })
-                console.log('select from KeyRecord error');
+                console.log('select error from KeyRecord table');
                 console.log(err);
             }
 

@@ -1,2 +1,5 @@
 node_modules/
 sessions/
+config/
+home_app.js
+home_routes/

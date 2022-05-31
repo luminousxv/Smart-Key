@@ -2,6 +2,9 @@ const express = require("express");
 const router = express.Router();
 const connection = require("../database/dbconnection");
 let bodyParser = require("body-parser");
+let moment = require('moment');
+require('moment-timezone');
+moment.tz.setDefault("Asia/Seoul");
 
 router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: true }));
@@ -9,8 +12,11 @@ router.use(bodyParser.urlencoded({ extended: true }));
 router.post('/rpi/image', function(req, res) {
     let serialNum = req.body.serialNum;
     let image = req.body.image;
+    console.log('---입력값---');
+    console.log('시리얼 번호: '+ serialNum);
+    console.log('----------');
 
-    let time  = new Date(+new Date() + 3240 * 10000).toISOString().replace("T", " ").replace(/\..*/, '');
+    let time  = moment().format('YYYY-MM-DD HH:mm:ss');
     let sql1 = 'select KeyState from KeyInfo where SerialNum = ?';
     let sql2 = 'insert into KeyRecord (SerialNum, Time, KeyState, Method, Image) values (?, ?, ?, ?, ?)';
 

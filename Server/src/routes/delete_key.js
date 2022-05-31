@@ -15,6 +15,10 @@ router.post('/main/delete_key', function (req, res) {
     let sql2 = 'update KeyInfo set KeyState = ? where SerialNum = ?';
     let params2 = ['delete', serialNum];
 
+    console.log('---입력값---');
+    console.log('시리얼번호: '+ serialNum)
+    console.log('----------');
+
     //check login session
     if (req.session.login === undefined) {
         let resultCode = 404;
@@ -34,6 +38,8 @@ router.post('/main/delete_key', function (req, res) {
                     'code': 500,
                     'message': 'DB 오류가 발생했습니다.'
                 })
+                console.log('select error from Key_Authority table');
+                console.log(err);
             }
             else if (result1[0].OwnerID != req.session.login.Email){
                 res.status(401).json ({
@@ -54,6 +60,8 @@ router.post('/main/delete_key', function (req, res) {
                             'code': 500,
                             'message': 'DB 오류가 발생했습니다.'
                         })
+                        console.log('update error from KeyInfo table');
+                        console.log('err');
                     }
                     else{
                         res.status(200).json({

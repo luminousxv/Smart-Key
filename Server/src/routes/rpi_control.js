@@ -2,6 +2,9 @@ const express = require("express");
 const router = express.Router();
 const connection = require("../database/dbconnection");
 let bodyParser = require("body-parser");
+let moment = require('moment');
+require('moment-timezone');
+moment.tz.setDefault("Asia/Seoul");
 
 router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: true }));
@@ -9,6 +12,11 @@ router.use(bodyParser.urlencoded({ extended: true }));
 //RPI Remote API
 router.get('/rpi/remote', function(req, res){
     let serialNum = req.body.serialNum;
+
+    console.log('---입력값---');
+    console.log('시리얼 번호: '+ serialNum);
+    console.log('----------');
+
     let sql1 = 'select KeyState, Mode from KeyInfo where SerialNum = ?';
     //get KeyState from KeyInfo DB table
     connection.query(sql1, serialNum, function(err, result1){
@@ -17,6 +25,8 @@ router.get('/rpi/remote', function(req, res){
                 'code': 500,
                 'message': 'DB 오류가 발생했습니다.'
             })
+            console.log('select error from KeyInfo table');
+            console.log(err);
         }
 
         else if (result1.length === 0){
@@ -37,6 +47,8 @@ router.get('/rpi/remote', function(req, res){
                         'code': 500,
                         'message': 'DB 오류가 발생했습니다.'
                     })
+                    console.log('delete error from KeyInfo table');
+                    console.log(err);
                 }
                 else{
                     connection.query(sql3, serialNum, function(err, result3){
@@ -45,6 +57,8 @@ router.get('/rpi/remote', function(req, res){
                                 'code': 500,
                                 'message': 'DB 오류가 발생했습니다.'
                             })
+                            console.log('delete error from KeyRecord table');
+                            console.log(err);
                         }
                         else{
                             connection.query(sql4, serialNum, function(err, result4){
@@ -53,10 +67,12 @@ router.get('/rpi/remote', function(req, res){
                                         'code': 500,
                                         'message': 'DB 오류가 발생했습니다.'
                                     })
+                                    console.log('delete error from Key_Authority table');
+                                    console.log(err);
                                 }
                                 else{
                                     res.status(200).json ({
-                                        'code': 200,
+                                        'code': 300,
                                         'state': result1[0].KeyState
                                     })
                                 }
@@ -80,6 +96,10 @@ router.get('/rpi/remote', function(req, res){
 router.post('/rpi/bluetooth', function(req, res){
     let serialNum = req.body.serialNum;
     let keyState = req.body.keyState;
+    console.log('---입력값---');
+    console.log('시리얼 번호: '+ serialNum);
+    console.log('키 상태: '+keyState);
+    console.log('----------');
 
     let sql1 = 'select KeyState from KeyInfo where SerialNum = ?';
 
@@ -89,6 +109,8 @@ router.post('/rpi/bluetooth', function(req, res){
                 'code': 500,
                 'message': 'DB 오류가 발생했습니다.'
             })
+            console.log('select error from KeyInfo table');
+            console.log(err);
         }
         else if (result1.length === 0) {
             res.status(400).json ({
@@ -112,10 +134,12 @@ router.post('/rpi/bluetooth', function(req, res){
                         'code': 500,
                         'message': 'DB 오류가 발생했습니다.'
                     })
+                    console.log('update error from KeyInfo table');
+                    console.log(err);
                 }
         
                 else{
-                    let time  = new Date(+new Date() + 3240 * 10000).toISOString().replace("T", " ").replace(/\..*/, '');
+                    let time  = moment().format('YYYY-MM-DD HH:mm:ss');
                     let sql3 = 'insert into KeyRecord (SerialNum, Time, KeyState, Method) values (?, ?, ?, ?)';
                     let parmas3 = [serialNum, time, keyState, '블루투스'];
         
@@ -125,6 +149,8 @@ router.post('/rpi/bluetooth', function(req, res){
                                 'code': 500,
                                 'message': 'DB 오류가 발생했습니다.'
                             })
+                            console.log('insert error from KeyRecord table');
+                            console.log(err);
                         }
                         else{
                             res.status(200).json ({

@@ -4,6 +4,9 @@ const connection = require("../database/dbconnection");
 let bodyParser = require("body-parser");
 const crypto = require("crypto");
 let cookieParser = require("cookie-parser");
+let moment = require('moment');
+require('moment-timezone');
+moment.tz.setDefault("Asia/Seoul");
 
 router.use(cookieParser());
 router.use(bodyParser.json());
@@ -18,9 +21,11 @@ router.post('/main/register_key', function (req, res) {
     let smartPwd = req.body.smartPwd;
     let keyImage = req.body.keyImage;
 
-    console.log(serialNum);
-    console.log(keyName);
-    console.log(smartPwd);
+    console.log('---입력값---')
+    console.log('시리얼번호: '+ serialNum);
+    console.log('스마트키 이름: '+ keyName);
+    console.log('스마트키 비밀번호: '+ smartPwd);
+    console.log('----------');
 
     let sql1 = 'select * from KeyInfo where SerialNum = ?';
     //check login session
@@ -41,7 +46,8 @@ router.post('/main/register_key', function (req, res) {
                     'code': 500,
                     'message': 'DB 오류가 발생했습니다.'
                 })
-                console.log('select error');
+                console.log('select error from KeyInfo table');
+                console.log('err');
             }
             else if (result.length !== 0) {
                 res.status(400).json ({
@@ -56,7 +62,7 @@ router.post('/main/register_key', function (req, res) {
                 let sql2 = 'insert into KeyInfo (SerialNum, KeyName, KeyState, UserID, SmartPwd, Salt, Shared, Image, Mode) values (?, ?, ?, ?, ?, ?, ?, ?, ?)';
                 let params = [serialNum, keyName, 'open', req.session.login.Email, hashedPw, salt, 0, keyImage, 0];
 
-                let time  = new Date(+new Date() + 3240 * 10000).toISOString().replace("T", " ").replace(/\..*/, '');
+                let time  = moment().format('YYYY-MM-DD HH:mm:ss');
 
                 let sql3 = 'insert into KeyRecord (SerialNum, Time, KeyState, Method, Email) values (?, ?, ?, ?, ?)';
                 let params2 = [serialNum, time, 'open', '처음 등록', req.session.login.Email];
@@ -71,7 +77,7 @@ router.post('/main/register_key', function (req, res) {
                             'code': 500,
                             'message': 'DB 오류가 발생했습니다.'
                         })
-                        console.log('insert into KeyInfo error');
+                        console.log('insert error from KeyInfo table');
                         console.log(err);
                     }
                     else{
@@ -82,7 +88,7 @@ router.post('/main/register_key', function (req, res) {
                                     'code': 500,
                                     'message': 'DB 오류가 발생했습니다.'
                                 })
-                                console.log('insert into KeyRecord error');
+                                console.log('insert error from KeyRecord table');
                                 console.log(err);
                             }
                             else{
@@ -93,7 +99,7 @@ router.post('/main/register_key', function (req, res) {
                                             'code': 500,
                                             'message': 'DB 오류가 발생했습니다.'
                                         })
-                                        console.log('insert into Key_Authority error');
+                                        console.log('insert error from Key_Authority table');
                                         console.log(err);
                                     }
                                     else{

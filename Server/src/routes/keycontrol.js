@@ -3,6 +3,9 @@ const router = express.Router();
 const connection = require("../database/dbconnection");
 let bodyParser = require("body-parser");
 let cookieParser = require("cookie-parser");
+let moment = require('moment');
+require('moment-timezone');
+moment.tz.setDefault("Asia/Seoul");
 
 router.use(cookieParser());
 
@@ -14,6 +17,12 @@ router.post('/main/open_key', function(req, res){
     let serialNum = req.body.serialNum;
     let GPSLong = req.body.GPSLong;
     let GPSLat = req.body.GPSLat;
+
+    console.log('---입력값---');
+    console.log('시리얼번호: '+ serialNum);
+    console.log('GPS Longitude: '+ GPSLong);
+    console.log('GPS Latitude: '+ GPSLat)
+    console.log('----------');
 
     let sql5 = 'select * from Key_Authority where SerialNum = ?';
     let sql1 = 'select * from KeyInfo where SerialNum = ?';
@@ -37,8 +46,16 @@ router.post('/main/open_key', function(req, res){
                     'code': 400,
                     'message': '존재하지 않는 스마트키입니다.'
                 })
+                
             }
-
+            else if (err){
+                res.status(500).json ({
+                    'code': 500,
+                    'message': 'DB 오류가 발생했습니다.'
+                })
+                console.log('select error from Key_Authority table');
+                console.log(err);
+            }
             else if (result5[0].OwnerID === req.session.login.Email || result5[0].ShareID === req.session.login.Email) {
                 //get Smart Key from KeyInfo DB table
                 connection.query(sql1, serialNum, function (err, result1){
@@ -47,6 +64,8 @@ router.post('/main/open_key', function(req, res){
                             'code': 500,
                             'message': 'DB 오류가 발생했습니다.'
                         })
+                        console.log('select error from KeyInfo table');
+                        console.log(err);
                     }
                     else if (result1.length === 0){
                         res.status(400).json ({
@@ -63,6 +82,8 @@ router.post('/main/open_key', function(req, res){
                                     'code': 500,
                                     'message': 'DB 오류가 발생했습니다.'
                                 })
+                                console.log('select error from KeyInfo table');
+                                console.log(err);
                             }
                             else if (result4[0].KeyState === 'open'){
                                 res.status(400).json ({
@@ -80,9 +101,11 @@ router.post('/main/open_key', function(req, res){
                                             'code': 500,
                                             'message': 'DB 오류가 발생했습니다.'
                                         })
+                                        console.log('update error from KeyInfo table');
+                                        console.log(err);
                                     }
                                     else {
-                                        let time  = new Date(+new Date() + 3240 * 10000).toISOString().replace("T", " ").replace(/\..*/, '');
+                                        let time  = moment().format('YYYY-MM-DD HH:mm:ss');
                                         let sql3 = 'insert into KeyRecord (SerialNum, Time, KeyState, GPSLat, GPSLong, Method, Email) values (?, ?, ?, ?, ? ,?, ?)';
                                         let params2 = [serialNum, time, 'open', GPSLat, GPSLong, '원격', req.session.login.Email];
                                         //add Smart Key's record to KeyRecord DB table
@@ -92,6 +115,8 @@ router.post('/main/open_key', function(req, res){
                                                     'code': 500,
                                                     'message': 'DB 오류가 발생했습니다.'
                                                 })
+                                                console.log('insert error from KeyRecord table');
+                                                console.log(err);
                                             }
                                             else{
                                                 res.status(200).json ({
@@ -124,6 +149,12 @@ router.post('/main/close_key', function(req, res){
     let GPSLong = req.body.GPSLong;
     let GPSLat = req.body.GPSLat;
 
+    console.log('---입력값---');
+    console.log('시리얼번호: '+ serialNum);
+    console.log('GPS Longitude: '+ GPSLong);
+    console.log('GPS Latitude: '+ GPSLat)
+    console.log('----------');
+
     let sql5 = 'select * from Key_Authority where SerialNum = ?';
     let sql1 = 'select * from KeyInfo where SerialNum = ?';
 
@@ -146,6 +177,14 @@ router.post('/main/close_key', function(req, res){
                     'message': '존재하지 않는 스마트키입니다.'
                 })
             }
+            else if (err) {
+                res.status(500).json ({
+                    'code': 500,
+                    'message': 'DB 오류가 발생했습니다.'
+                })
+                console.log('select error from Key_Authority table');
+                console.log(err);
+            }
             else if (result5[0].OwnerID === req.session.login.Email || result5[0].ShareID === req.session.login.Email) {
                 //get Smart Key from KeyInfo DB table
                 connection.query(sql1, serialNum, function (err, result1){
@@ -154,6 +193,8 @@ router.post('/main/close_key', function(req, res){
                             'code': 500,
                             'message': 'DB 오류가 발생했습니다.'
                         })
+                        console.log('select error from KeyInfo table');
+                        console.log(err);
                     }
                     else if (result1.length === 0){
                         res.status(400).json ({
@@ -170,6 +211,8 @@ router.post('/main/close_key', function(req, res){
                                     'code': 500,
                                     'message': 'DB 오류가 발생했습니다.'
                                 })
+                                console.log('select error from KeyInfo table');
+                                console.log(err);
                             }
                             else if (result4[0].KeyState === 'close'){
                                 res.status(400).json ({
@@ -187,9 +230,11 @@ router.post('/main/close_key', function(req, res){
                                             'code': 500,
                                             'message': 'DB 오류가 발생했습니다.'
                                         })
+                                        console.log('update error from KeyInfo table');
+                                        console.log(err);
                                     }
                                     else {
-                                        let time  = new Date(+new Date() + 3240 * 10000).toISOString().replace("T", " ").replace(/\..*/, '');
+                                        let time  = moment().format('YYYY-MM-DD HH:mm:ss');
                                         let sql3 = 'insert into KeyRecord (SerialNum, Time, KeyState, GPSLat, GPSLong, Method, Email) values (?, ?, ?, ?, ? ,?, ?)';
                                         let params2 = [serialNum, time, 'close', GPSLat, GPSLong, '원격', req.session.login.Email];
                                         //add Smart Key's record to KeyRecord DB table
@@ -199,6 +244,8 @@ router.post('/main/close_key', function(req, res){
                                                     'code': 500,
                                                     'message': 'DB 오류가 발생했습니다.'
                                                 })
+                                                console.log('insert error from KeyRecord table');
+                                                console.log(err);
                                             }
                                             else{
                                                 res.status(200).json ({
@@ -226,6 +273,10 @@ router.post('/main/close_key', function(req, res){
 
 router.post('/main/mode', function(req, res){
     let serialNum = req.body.serialNum;
+
+    console.log('---입력값---');
+    console.log('시리얼번호: '+ serialNum);
+    console.log('----------');
 
     let sql1 = 'select KeyState, Mode from KeyInfo where SerialNum = ?'
     let sql2 = 'update KeyInfo set Mode = ? where SerialNum = ?';

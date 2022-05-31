@@ -3,6 +3,9 @@ const router = express.Router();
 const connection = require("../database/dbconnection");
 let bodyParser = require("body-parser");
 let cookieParser = require("cookie-parser");
+let moment = require('moment');
+require('moment-timezone');
+moment.tz.setDefault("Asia/Seoul");
 
 router.use(cookieParser());
 router.use(bodyParser.json());
@@ -11,6 +14,11 @@ router.use(bodyParser.urlencoded({ extended: true }));
 router.post('/main/share_key/register', function (req, res){
     let serialNum = req.body.serialNum;
     let shareEmail = req.body.shareEmail;
+
+    console.log('---입력값---');
+    console.log('시리얼번호: '+ serialNum);
+    console.log('공유할 이메일: '+ shareEmail);
+    console.log('---------');
 
     let sql1 = 'select * from Key_Authority where SerialNum = ?';
 
@@ -22,7 +30,7 @@ router.post('/main/share_key/register', function (req, res){
 
     let sql4 = 'select * from Users where UserEmail = ?';
 
-    let time  = new Date(+new Date() + 3240 * 10000).toISOString().replace("T", " ").replace(/\..*/, '');
+    let time  = moment().format('YYYY-MM-DD HH:mm:ss');
     let sql5 = 'insert into KeyRecord (SerialNum, Time, Method, Email) values (?, ?, ?, ?)';
     let params5 = [serialNum, time, shareEmail + ' 에게 공유', req.session.login.Email];
 
@@ -42,6 +50,8 @@ router.post('/main/share_key/register', function (req, res){
                     'code': 500,
                     'message': 'DB 오류가 발생했습니다.'
                 })
+                console.log('select error from Key_Authority table');
+                console.log(err);
             }
             else if (result1.length === 0){
                 res.status(404).json ({
@@ -68,6 +78,8 @@ router.post('/main/share_key/register', function (req, res){
                             'code': 500,
                             'message': 'DB 오류가 발생했습니다.'
                         })
+                        console.log('select error from User table');
+                        console.log(err);
                     }
                     else if (result4.length === 0){
                         res.status(400).json ({
@@ -82,6 +94,8 @@ router.post('/main/share_key/register', function (req, res){
                                     'code': 500,
                                     'message': 'DB 오류가 발생했습니다.'
                                 })
+                                console.log('update error from KeyInfo table');
+                                console.log(err);
                             }
                             else{
                                 connection.query(sql3, params3, function (err, result3){
@@ -90,6 +104,8 @@ router.post('/main/share_key/register', function (req, res){
                                             'code': 500,
                                             'message': 'DB 오류가 발생했습니다.'
                                         })
+                                        console.log('update error from Key_Authority table');
+                                        console.log(err);
                                     }
                                     else{
                                         connection.query(sql5, params5, function(err, result5){
@@ -98,6 +114,8 @@ router.post('/main/share_key/register', function (req, res){
                                                     'code': 500,
                                                     'message': 'DB 오류가 발생했습니다.'
                                                 })
+                                                console.log('insert error from KeyRecord table');
+                                                console.log(err);
                                             }
                                             else{
                                                 res.status(200).json ({
@@ -119,6 +137,9 @@ router.post('/main/share_key/register', function (req, res){
 
 router.post('/main/share_key/delete', function (req, res){
     let serialNum = req.body.serialNum;
+    console.log('---입력값---');
+    console.log('시리얼번호: '+ serialNum);
+    console.log('---------');
 
     let sql1 = 'select * from Key_Authority where SerialNum = ?';
 
@@ -128,7 +149,7 @@ router.post('/main/share_key/delete', function (req, res){
     let sql3 = 'update KeyInfo set Shared = ?, SharedID = ? where SerialNum = ?';
     let params3 = [0, null, serialNum];
 
-    let time  = new Date(+new Date() + 3240 * 10000).toISOString().replace("T", " ").replace(/\..*/, '');
+    let time  = moment().format('YYYY-MM-DD HH:mm:ss');
     let sql4 = 'insert into KeyRecord (SerialNum, Time, Method, Email) values (?, ?, ?, ?)';
     let params4 = [serialNum, time, '공유 삭제', req.session.login.Email];
 
@@ -149,6 +170,8 @@ router.post('/main/share_key/delete', function (req, res){
                     'code': 500,
                     'message': 'DB 오류가 발생했습니다.'
                 })
+                console.log('select error from Key_Authority table');
+                console.log(err);
             }
             else if (result1.length === 0){
                 res.status(400).json ({
@@ -176,6 +199,8 @@ router.post('/main/share_key/delete', function (req, res){
                             'code': 500,
                             'message': 'DB 오류가 발생했습니다.'
                         })
+                        console.log('update error from Key_Authority table');
+                        console.log(err);
                     }
                     else{
                         connection.query(sql3, params3, function (err, result3){
@@ -185,6 +210,8 @@ router.post('/main/share_key/delete', function (req, res){
                                     'code': 500,
                                     'message': 'DB 오류가 발생했습니다.'
                                 })
+                                console.log('update error from KeyInfo table');
+                                console.log(err);
                             }
                             else{
                                 connection.query(sql4, params4, function (err, result4){
@@ -194,6 +221,8 @@ router.post('/main/share_key/delete', function (req, res){
                                             'code': 500,
                                             'message': 'DB 오류가 발생했습니다.'
                                         })
+                                        console.log('insert error from KeyRecord table');
+                                        console.log(err);
                                     }
                                     else{
                                         res.status(200).json ({

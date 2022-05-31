@@ -11,6 +11,7 @@ router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 const app = express();
 let cookieParser = require("cookie-parser");
+const google_login = require('../config/google.json');
 
 router.use(cookieParser());
 
@@ -20,8 +21,8 @@ const smtpTransport = nodemailer.createTransport({
     port: 465,
     secure: true,
     auth : {
-        user: "drgvyhn@gmail.com",
-        pass: "****"
+        user : google_login.user,
+        pass : google_login.pass
     }
 });
 
@@ -41,7 +42,12 @@ router.post('/user/join/email-verification', function (req, res) {
     let userPwd = req.body.userPwd;
     let userName = req.body.userName;
     let userBirth = req.body.userBirth;
-    console.log('입력값: ' + userEmail + ' '+userPwd + ' ' + userName + ' ' + userBirth);
+    console.log('---입력값---');
+    console.log('이메일: '+ userEmail);
+    console.log('비밀번호: '+ userPwd);
+    console.log('이름: '+ userName);
+    console.log('생년월일: '+ userBirth);
+    console.log('----------')
 
     let resultCode;
     let message;
@@ -53,6 +59,7 @@ router.post('/user/join/email-verification', function (req, res) {
         if(err) {
             resultCode = 404;
             message = '에러가 발생했습니다.';
+            console.log('select error from Users table');
             console.log(err);
             res.status(resultCode).json({
                 'code': resultCode,
@@ -100,17 +107,19 @@ router.post('/user/join/email-verification', function (req, res) {
             //Send Email
             smtpTransport.sendMail(mailOptions, (err, res) => {
                 if(err) {
+                    console.log('Email not sent.');
                     console.log(err);
                 } else{
-                    console.log('success');
+                    console.log(' Email sent.');
                 }
             });
 
             resultCode = 200;
             message = req.session.user.Email + ' 로 인증 이메일을 보냈습니다. 확인해주세요!';
-            console.log('세션 아이디: ' + req.sessionID);
             console.log('----user 세션----');
+            console.log('세션 아이디: ' + req.sessionID);
             console.log(req.session.user);
+            console.log('----------');
             res.status(resultCode).json({
                 'code': resultCode,
                 'message': message
@@ -132,10 +141,13 @@ router.post('/user/join/email-verification', function (req, res) {
 //After verification
 router.post('/user/join/join_success', function (req, res) {
     let inputAuth = req.body.inputAuth;
-    console.log('입력값:' + inputAuth);
-    console.log('세션 아이디: ' + req.sessionID);
+    console.log('---입력값---');
+    console.log('인증번호: ' + inputAuth);
+    console.log('----------');
     console.log('----user 세션----');
+    console.log('세션 아이디: ' + req.sessionID);
     console.log(req.session.user);
+    console.log('----------');
 
     if (req.session.user === undefined) {
         let resultCode = 404;
@@ -163,7 +175,8 @@ router.post('/user/join/join_success', function (req, res) {
         
         connection.query(sql, params, function(err2, result2) {
             if (err2) {
-                console.log(err);
+                console.log('insert error from Users table');
+                console.log(err2);
                 let resultCode = 404;
                 let message = '에러가 발생했습니다.';
             } else{

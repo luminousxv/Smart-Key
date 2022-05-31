@@ -7,6 +7,7 @@ const session = require("express-session");
 const FileStore = require('session-file-store') (session);
 const nodemailer = require("nodemailer");
 let cookieParser = require("cookie-parser");
+const google_login = require("../config/google.json");
 
 router.use(cookieParser());
 router.use(bodyParser.json());
@@ -25,8 +26,8 @@ const smtpTransport = nodemailer.createTransport({
     port: 465,
     secure: true,
     auth : {
-        user: "drgvyhn@gmail.com",
-        pass: "****"
+        user : google_login.user,
+        pass : google_login.pass
     }
 });
 //Reset API(Email)
@@ -35,7 +36,12 @@ router.post('/user/reset/email', function(req, res) {
     let userName = req.body.userName;
     let userBirth = req.body.userBirth;
 
-    console.log('입력값: ' + userEmail + ' ' + userName + ' ' + userBirth);
+    console.log('---입력값---');
+    console.log('이메일: '+ userEmail);
+    console.log('이름: '+ userName);
+    console.log('생년월일: '+ userBirth);
+    console.log('-----------');
+    
 
     let sql1 = 'select * from Users where UserEmail = ? and UserName = ? and UserBirth = ?';
     let params = [userEmail, userName, userBirth];
@@ -45,6 +51,7 @@ router.post('/user/reset/email', function(req, res) {
         if (err) {
             let resultCode = 404;
             let message = '에러가 발생했습니다.';
+            console.log('select error from Users table');
             console.log(err);
 
             res.status(resultCode).json ({
@@ -85,14 +92,16 @@ router.post('/user/reset/email', function(req, res) {
             //send email
             smtpTransport.sendMail(mailOptions, (err, res) => {
                 if(err) {
+                    console.log('Email not sent.');
                     console.log(err);
                 } else{
-                    console.log('success');
+                    console.log('Email sent.');
                 }
             });
-            console.log('세션 아이디: ' + req.sessionID);
             console.log('----reset 세션----');
+            console.log('세션 아이디: ' + req.sessionID);
             console.log(req.session.reset);
+            console.log('----------');
             res.status(resultCode).json ({
                 'code': resultCode,
                 'message': message
@@ -104,9 +113,13 @@ router.post('/user/reset/email', function(req, res) {
 //Reset API(Verification)
 router.post('/user/reset/verification', function (req, res) {
     let inputAuth = req.body.inputAuth;
-    console.log('입력값: ' + inputAuth);
+
+    console.log('---입력값---');
+    console.log('인증번호: '+ inputAuth);
+    console.log('----------');
     console.log('----reset 세션----');
     console.log(req.session.reset);
+    console.log('----------');
 
     //check reset session
     if (req.session.reset === undefined) {
@@ -145,7 +158,9 @@ router.post('/user/reset/verification', function (req, res) {
 //Reset API(Change Password)
 router.post('/user/reset/change_pw', function (req, res) {
     let userPwd = req.body.userPwd;
-    console.log('입력값: ' + userPwd);
+
+    console.log('---입력값---');
+    console.log('바꿀 비밀번호: ' + userPwd);
     //check if input pw is 9 digits or more
     if (formSearch(userPwd)) {
         let resultCode = 400;
@@ -168,6 +183,7 @@ router.post('/user/reset/change_pw', function (req, res) {
             if (err) {
                 let resultCode = 404;
                 let message = '에러가 발생했습니다.'
+                console.log('update error from Users table');
                 console.log(err);
 
                 res.status(resultCode).json({

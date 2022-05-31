@@ -29,6 +29,8 @@ router.get('/main/view_keylist', function (req, res) {
                     'code': 500,
                     'message': 'DB 오류가 발생했습니다.'
                 })
+                console.log('select error from KeyInfo table');
+                console.log(err);
             }
             else{
                 let resultCode = 200

@@ -24,7 +24,7 @@ class SmartkeyMain : AppCompatActivity() {
     val UserEmail = CookieHandler().setUserEmail()
 
     //블루투스 셋팅
-    val bluetoothService = SmartkeyBluetoothSetting(this@SmartkeyMain)
+    //val bluetoothService = SmartkeyBluetoothSetting(this@SmartkeyMain)
     //블루투스로 이용시에는 그냥 다이얼로그로 설정하자
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -91,7 +91,7 @@ class SmartkeyMain : AppCompatActivity() {
 
     //-----------------------------------블루투스 조작--------------------------------------//
 
-    private fun bluetoothControl(DeviceName: String){
+    /*private fun bluetoothControl(DeviceName: String){
 
         SmartkeyBluetoothSetting.IsRunning = false //메시지 읽기 쓰레드 일시 정지
 
@@ -115,7 +115,7 @@ class SmartkeyMain : AppCompatActivity() {
     fun blueElse(){
         Toast.makeText(this, "선택한 키와 블루투스 키와 정보가 다릅니다",
             Toast.LENGTH_SHORT).show()
-    }
+    }*/
 
     //클릭 이벤트 함수
     private fun adapterOnClick(data: ViewItem, keyshared:String?, keymode:String? ,registerd: String){
@@ -136,7 +136,7 @@ class SmartkeyMain : AppCompatActivity() {
 
                     //---------------블루투스 접속일 때-----------------------
                     if(item == 1){
-                        bluetoothService.bluetoothOn() //블루투스 연결
+                        /*bluetoothService.bluetoothOn() //블루투스 연결
 
                         //블루투스 연결 되면 기기 확인(시리얼번호 대조)
                         if(serial_Num == null) {
@@ -163,7 +163,7 @@ class SmartkeyMain : AppCompatActivity() {
                                     }
                                 }
                             }
-                        }
+                        }*/
                     }
                 })
             val alert: AlertDialog = BluOrHttpSelect.create()
@@ -199,32 +199,42 @@ class SmartkeyMain : AppCompatActivity() {
                 inputkey.put("smartPwd", smartpw)
                 inputkey.put("serialNum", data.id)
 
-                GetService.postSmartPw(cookieid = cookie, inputkey).enqueue(object : Callback<PostSmartPw> {
-                    override fun onResponse(call: Call<PostSmartPw>, response: Response<PostSmartPw>) {
-                        if (response.code() == 200) {
-                            Log.d("SmartPwd인증", "인증 성공")
-                            Log.d("response", response.raw().toString())
+                GetService.postSmartPw(cookieid = cookie, inputkey)
+                    .enqueue(object : Callback<PostSmartPw> {
+                        override fun onResponse(
+                            call: Call<PostSmartPw>,
+                            response: Response<PostSmartPw>
+                        ) {
+                            if (response.code() == 200) {
+                                Log.d("SmartPwd인증", "인증 성공")
+                                Log.d("response", response.raw().toString())
 
-                            if(selection == "원격 접속"){
-                                Detialintent.putExtra("shared", keyshared)
-                                Detialintent.putExtra("registerd", registerd)
-                                Detialintent.putExtra("serialnum", data.id)
-                                Detialintent.putExtra("keyname", data.name)
-                                Detialintent.putExtra("keymode", keymode)
-                                startActivity(Detialintent)
-                                finish()
+                                if (selection == "원격 접속") {
+                                    Detialintent.putExtra("shared", keyshared)
+                                    Detialintent.putExtra("registerd", registerd)
+                                    Detialintent.putExtra("serialnum", data.id)
+                                    Detialintent.putExtra("keyname", data.name)
+                                    Detialintent.putExtra("keymode", keymode)
+                                    startActivity(Detialintent)
+                                    finish()
+                                } else if (selection == "블루투스 접속") {
+                                    //bluetoothControl(data.name)} // 블루투스 제어 다이얼로그
+                                } else {
+                                    Log.d("response", response.raw().toString())
+                                    Toast.makeText(
+                                        this@SmartkeyMain,
+                                        "비밀번호가 틀렸습니다.",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
                             }
-                            else if(selection == "블루투스 접속"){
-                                bluetoothControl(data.name)} // 블루투스 제어 다이얼로그
                         }
-                        else {
-                            Log.d("response", response.raw().toString())
-                            Toast.makeText(this@SmartkeyMain, "비밀번호가 틀렸습니다.",Toast.LENGTH_SHORT).show()}
-                    }
-                    override fun onFailure(call: Call<PostSmartPw>, t: Throwable) {
-                        Log.d("SmartPwd인증","t"+t.message)
-                    }
-                })//postSmartPw 끝
-            } })//다이얼로그 클릭이벤트 끝
+
+                        override fun onFailure(call: Call<PostSmartPw>, t: Throwable) {
+                            Log.d("SmartPwd인증", "t" + t.message)
+                        }
+                    })//postSmartPw 끝
+            }})//다이얼로그 클릭이벤트 끝
     }//스마트키 비밀번호 포스트함수 끝
 }
+
