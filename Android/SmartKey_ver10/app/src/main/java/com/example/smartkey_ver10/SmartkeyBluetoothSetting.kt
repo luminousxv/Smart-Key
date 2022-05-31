@@ -108,7 +108,6 @@ class SmartkeyBluetoothSetting(context: Context) {
         }
     }
 
-    //여기 고쳐야됨
     inner class ConnectedBluetoothThread(val mmSocket: BluetoothSocket) :
         Thread() {
         private val mmInStream: InputStream?
