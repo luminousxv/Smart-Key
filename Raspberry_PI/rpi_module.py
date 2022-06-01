@@ -158,40 +158,7 @@ while True:
                 display.lcd_clear()
                 display.lcd_display_string("Key_state: close", 1)
                 sleep(1.5)
-            elif res_state == 'delete': # 키 삭제를 했을 경우
-                display.lcd_backlight(1)
-                display.lcd_clear()
-                display.lcd_display_string("Delete Key", 1)
-                sleep(1.5)
-                uuid = "00001101-0000-1000-8000-00805F9B34FB"
-                server_sock = BluetoothSocket(RFCOMM)  # RFCOMM 포트를 통해 데이터 통신을 하기 위한 준비
-                server_sock.bind(('', PORT_ANY))
-                server_sock.listen(1)
 
-                port = server_sock.getsockname()[1]  # 연결된 소켓을 찾음
-                advertise_service(server_sock, "BtChat",
-                                  service_id=uuid,
-                                  service_classes=[uuid, SERIAL_PORT_CLASS],
-                                  profiles=[SERIAL_PORT_PROFILE])  # 블루투스 서비스를 Advertise
-                print("Waiting for connection : channel %d" % port)  # 클라이언트가 연결될 때까지 대기
-                client_sock, client_info = server_sock.accept()
-                print("accepted")
-                display.lcd_clear()
-                display.lcd_display_string("Please register", 1)
-                display.lcd_display_string("your Key", 2)
-                while True:
-                    data = client_sock.recv(1024)  # 블루투스로 데이터 받음
-                    print(data)
-                    if data == receive_Num:  # 받은 데이터가 100인 경우
-                        client_sock.send(serialNum)  # 시리얼 번호를 보냄
-                        continue
-                    elif data == b'150':  # 받은 데이터가 150인 경우
-                        client_sock.close()  # 블루투스 종료
-                        display.lcd_clear()
-                        display.lcd_display_string("Registration is ", 1)
-                        display.lcd_display_string("complete", 2)
-                        sleep(1)
-                        break
         elif res_mode == 1:  # 보안모드
 
             bus = SMBus(1)      # SMBus i2c를 이용
@@ -278,6 +245,41 @@ while True:
                     else:
                         sleep(1)
             bus.close()
+    elif res_code2 == 300:
+        display.lcd_backlight(1)
+        display.lcd_clear()
+        display.lcd_display_string("Delete Key", 1)
+        sleep(1.5)
+        uuid = "00001101-0000-1000-8000-00805F9B34FB"
+        server_sock = BluetoothSocket(RFCOMM)  # RFCOMM 포트를 통해 데이터 통신을 하기 위한 준비
+        server_sock.bind(('', PORT_ANY))
+        server_sock.listen(1)
+
+        port = server_sock.getsockname()[1]  # 연결된 소켓을 찾음
+        advertise_service(server_sock, "BtChat",
+                          service_id=uuid,
+                          service_classes=[uuid, SERIAL_PORT_CLASS],
+                          profiles=[SERIAL_PORT_PROFILE])  # 블루투스 서비스를 Advertise
+        print("Waiting for connection : channel %d" % port)  # 클라이언트가 연결될 때까지 대기
+        client_sock, client_info = server_sock.accept()
+        print("accepted")
+        display.lcd_clear()
+        display.lcd_display_string("Please register", 1)
+        display.lcd_display_string("your Key", 2)
+        while True:
+            data = client_sock.recv(1024)  # 블루투스로 데이터 받음
+            print(data)
+            if data == receive_Num:  # 받은 데이터가 100인 경우
+                client_sock.send(serialNum)  # 시리얼 번호를 보냄
+                continue
+            elif data == b'150':  # 받은 데이터가 150인 경우
+                client_sock.close()  # 블루투스 종료
+                display.lcd_clear()
+                display.lcd_display_string("Registration is ", 1)
+                display.lcd_display_string("complete", 2)
+                sleep(1)
+                break
+
     else:  # 서버와 연결이 되지 않을 경우
         print("서버와 연결이 되지 않았습니다.")
         display.lcd_display_string("No connection", 1)
