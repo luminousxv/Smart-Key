@@ -186,6 +186,7 @@ class SmartkeyMain : AppCompatActivity() {
                 Detialintent.putExtra("serialnum", data.id)
                 Detialintent.putExtra("keyname", data.name)
                 Detialintent.putExtra("keymode", keymode)
+                Detialintent.putExtra("keystate", keystate)
                 startActivity(Detialintent)
                 finish()
             }

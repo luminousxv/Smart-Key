@@ -43,7 +43,6 @@ class SmartkeyLogAct : AppCompatActivity() {
 
         val keynum = intent.getStringExtra("serialnum")
         val keyname = intent.getStringExtra("keyname")
-        Log.d("keynum",keynum!!)
 
         lateinit var logtable : List<KeyLog>
 
@@ -56,7 +55,8 @@ class SmartkeyLogAct : AppCompatActivity() {
             override fun onResponse(call: Call<GetKeyrecord>, response: Response<GetKeyrecord>) {
                 if(response.code() == 200){
 
-                    //Get 성공 시 테이블 레이아웃 생성 Log.d("SmartkeyLog","테이블 갯 성공")
+                    //Get 성공 시 테이블 레이아웃 생성
+                    Log.d("SmartkeyLog","테이블 갯 성공")
                     logtable = response.body()!!.message
 
                     var tablesize = logtable.size-1

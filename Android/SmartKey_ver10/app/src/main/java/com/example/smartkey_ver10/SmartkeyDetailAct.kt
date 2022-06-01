@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
+import android.location.LocationManager
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -13,6 +14,7 @@ import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.google.android.gms.common.internal.Objects
 import com.google.android.gms.location.*
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -31,11 +33,7 @@ class SmartkeyDetailAct : AppCompatActivity() {
     val cookie = CookieHandler().setCookie()
     val service = Retrofit_service.service
 
-    //위치받아오기 세팅
-    var mFusedLocationProviderClient: FusedLocationProviderClient? = null //현재위치 가져오는 변수
-    lateinit var mLastLocation: Location //위치 값을 가지는 객체
-    internal lateinit var mLocationRequest: LocationRequest //위치 정보 요청의 매개변수 저장
-    val REQUEST_PERMISSION_LOCATION = 10
+    //gps 변수
     var lat : Double = 0.0
     var long: Double = 0.0
 
@@ -48,15 +46,10 @@ class SmartkeyDetailAct : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_smartkey_detail)
 
-        mLocationRequest = LocationRequest.create().apply{
-            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-        }
-        /*if(checkPermissionForLocation(this)) { //위치 권한 동의
-            startLocationUpdates() //위치 업데이트
-        }
-        else { Toast.makeText(this, "위치 권한 사용에 동의 후 이용할 수 있습니다.", Toast.LENGTH_SHORT).show()
-            finish()
-        }*/
+        //gps 변수
+        val Im = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        val isGPSEnabled: Boolean = Im.isProviderEnabled(LocationManager.GPS_PROVIDER)
+        val isNetworkEnabled: Boolean = Im.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
 
         //SmartkeyMain에서 넘겨받은 키 정보
         val keynum = intent.getStringExtra("serialnum") //선택한 key의 serialnum
@@ -106,10 +99,12 @@ class SmartkeyDetailAct : AppCompatActivity() {
             }
         }
 
+
         //------------------------버튼시작 --------------------//
         //잠금
         imv_lock.setOnClickListener {
-            startLocationUpdates()
+            getGPSInfo(isGPSEnabled, isNetworkEnabled, Im)
+
             var Keyinput = HashMap<String, String>()
             Keyinput.put("serialNum", keynum!!)
             Keyinput.put("GPSLong", long.toString())
@@ -122,7 +117,6 @@ class SmartkeyDetailAct : AppCompatActivity() {
                         Log.d("response", response.raw().toString())
                         imv_lock.visibility = View.GONE
                         imv_unlock.visibility = View.VISIBLE
-                        stopLocationUpdates() //위치 업데이트 멈추기
                     } else {
                         Log.d("LockPost", "오류가 발생했습니다.")
                         Toast.makeText(this@SmartkeyDetailAct,
@@ -137,7 +131,7 @@ class SmartkeyDetailAct : AppCompatActivity() {
 
         //열림
         imv_unlock.setOnClickListener {
-            startLocationUpdates()
+            getGPSInfo(isGPSEnabled, isNetworkEnabled, Im)
             var Keyinput = HashMap<String, String>()
             Keyinput.put("serialNum", keynum!!)
             Keyinput.put("GPSLong", long.toString())
@@ -150,7 +144,6 @@ class SmartkeyDetailAct : AppCompatActivity() {
                         Log.d("response", response.raw().toString())
                         imv_unlock.visibility = View.GONE
                         imv_lock.visibility = View.VISIBLE
-                        stopLocationUpdates() //위치 업데이트 멈추기
                     } else {
                         Toast.makeText(this@SmartkeyDetailAct, "오류가 발생했습니다.", Toast.LENGTH_SHORT)
                             .show()
@@ -349,69 +342,28 @@ class SmartkeyDetailAct : AppCompatActivity() {
         })//postDelKey 끝
     }
 
-    //----------------------위치 얻어오는 메서드--------------------------------------
-    fun startLocationUpdates(){
-        //FusedLocationProviderClient의 인스턴스를 생성
-        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
-        if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)!= PackageManager.PERMISSION_GRANTED
-            && ActivityCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return
-        }
-        // 기기의 위치에 관한 정기 업데이트를 요청하는 메서드 실행
-        // 지정한 루퍼 스레드(Looper.myLooper())에서 콜백(mLocationCallback)으로 위치 업데이트를 요청
-        mFusedLocationProviderClient!!.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper())
-    }
+    //----------------------gps정보 받아오는 메서드--------------------------------//
 
-    //시스템으로부터 위치정보를 콜백 받음
-    private val mLocationCallback = object : LocationCallback(){
-        override fun onLocationResult(locationResult: LocationResult) {
-            //super.onLocationResult(location)
-            // 시스템에서 받은 location 정보를 onLocationChanged()에 전달
-            locationResult.lastLocation
-            onLocationChanged(locationResult.lastLocation)
-        }
-    }
-
-    //시스템으로 부터 받은 위치정보를 화면에 갱신해주는 메소드
-    fun onLocationChanged(location: Location){
-        mLastLocation = location
-        long = mLastLocation.longitude
-        lat = mLastLocation.latitude
-    }
-
-    // 위치 권한이 있는지 확인하는 메서드
-    private fun checkPermissionForLocation(context: Context): Boolean {
-        // Android 6.0 Marshmallow 이상에서는 위치 권한에 추가 런타임 권한이 필요
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (context.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                true
-            } else {
-                // 권한이 없으므로 권한 요청 알림 보내기
-                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), REQUEST_PERMISSION_LOCATION)
-                false
-            }
-        } else {
-            true
-        }
-    }
-
-    // 사용자에게 권한 요청 후 결과에 대한 처리 로직
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == REQUEST_PERMISSION_LOCATION) {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                startLocationUpdates()
-
-            } else {
-                Log.d("gps퍼미션", "onRequestPermissionsResult_권한 허용 거부")
-                Toast.makeText(this, "권한이 없어 해당 기능을 실행할 수 없습니다.", Toast.LENGTH_SHORT).show()
+    fun getGPSInfo(isGPSEnabled: Boolean, isNetworkEnabled: Boolean, Im: LocationManager){
+        //권한 체크
+        if(Build.VERSION.SDK_INT>=23 &&
+            ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.ACCESS_FINE_LOCATION)!=
+            PackageManager.PERMISSION_GRANTED){
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),0)
+        } else{
+            when{ //프로바이더 제공자 활성화 여부 체크
+                isNetworkEnabled ->{
+                    val location = Im.getLastKnownLocation(LocationManager.NETWORK_PROVIDER) //인터넷 기반 위치
+                    long = location?.longitude!!
+                    lat = location?.latitude!!
+                }
+                isGPSEnabled ->{
+                    val location = Im.getLastKnownLocation(LocationManager.GPS_PROVIDER) //gps기반
+                    long = location?.longitude!!
+                    lat = location?.latitude!!
+                }
             }
         }
     }
 
-    //다른작업 중 자원낭비를 줄이기위해 업데이트 해제
-    fun stopLocationUpdates(){
-        mFusedLocationProviderClient?.removeLocationUpdates(mLocationCallback)
-    }
 }
