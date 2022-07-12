@@ -56,7 +56,7 @@ to <img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&lo
 
             resetPW.js (reset_pw API)
 
-            keylist.js (view keylist API)
+            keylist.ts (view keylist API)
 
             register_key.js (register new key API)
 
