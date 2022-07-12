@@ -1,5 +1,4 @@
 import bodyParser from "body-parser";
-/* eslint import/no-extraneous-dependencies: ["error", {"peerDependencies": true}] */
 import express from "express";
 import joinRouter from "./routes/join";
 import loginRouter from "./routes/login";
