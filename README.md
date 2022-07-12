@@ -46,21 +46,21 @@ to <img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&lo
 
     - src
         
-        app.ts (main server program)
+        [app.ts](Server/src/app.ts) (main server program)
 
         - types
 
-            type.ts (API type definition)
+            [type.ts](Server/src/types/type.ts) (API type definition)
         
         - routes
             
-            join.ts (Join API)
+            [join.ts](Server/src/routes/join.ts) (Join API)
             
-            login.ts (Login API)
+            [login.ts](Server/src/routes/login.ts) (Login API)
 
             resetPW.js (reset_pw API)
 
-            keylist.ts (view keylist API)
+            [keylist.ts](Server/src/routes/keylist.ts) (view keylist API)
 
             register_key.js (register new key API)
 
