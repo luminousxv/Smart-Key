@@ -3,3 +3,6 @@ sessions/
 config/
 home_app.js
 home_routes/
+src/database
+dist/config
+dist/database
