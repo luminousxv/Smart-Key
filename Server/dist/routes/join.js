@@ -48,25 +48,22 @@ router.use((0, express_session_1.default)({
 }));
 // Join API
 router.post("/user/join/email-verification", (req, res) => {
-    const { userEmail } = req.body;
-    const { userPwd } = req.body;
-    const { userName } = req.body;
-    const { userBirth } = req.body;
+    const reqObj = req.body;
     console.log("---입력값---");
-    console.log(`이메일: ${userEmail}`);
-    console.log(`비밀번호: ${userPwd}`);
-    console.log(`이름: ${userName}`);
-    console.log(`생년월일: ${userBirth}`);
+    console.log(`이메일: ${reqObj.userEmail}`);
+    console.log(`비밀번호: ${reqObj.userPwd}`);
+    console.log(`이름: ${reqObj.userName}`);
+    console.log(`생년월일: ${reqObj.userBirth}`);
     console.log("----------");
     // Repetition Check SQL Query
     const sql2 = "SELECT * FROM Users WHERE UserEmail = ?";
     const form = {
-        pw: userPwd,
-        email: userEmail,
-        birth: userBirth,
-        name: userName,
+        pw: reqObj.userPwd,
+        email: reqObj.userEmail,
+        birth: reqObj.userBirth,
+        name: reqObj.userName,
     };
-    dbconnection_1.default.query(sql2, userEmail, (err, result) => {
+    dbconnection_1.default.query(sql2, reqObj.userEmail, (err, result) => {
         if (err) {
             console.log("select error from Users table");
             console.log(err);
@@ -74,29 +71,31 @@ router.post("/user/join/email-verification", (req, res) => {
                 code: 404,
                 message: "에러가 발생했습니다.",
             });
+            return;
         }
         // Form Check
-        else if (formSearch(form)) {
+        if (formSearch(form)) {
             res.status(400).json({
                 code: 400,
                 message: "이메일/이름/비밀번호의 양식이 틀렸습니다. 다시 입력해주세요!",
             });
+            return;
         }
         // Sending Verification Email
-        else if (result.length === 0) {
+        if (result.length === 0) {
             // Encryption: using salt as a key to encrypt the password
             const salt = crypto_1.default.randomBytes(32).toString("base64");
             const hashedPw = crypto_1.default
-                .pbkdf2Sync(userPwd, salt, 1, 32, "sha512")
+                .pbkdf2Sync(reqObj.userPwd, salt, 1, 32, "sha512")
                 .toString("base64");
             // Verification Number
             const authNum = Math.random().toString().substr(2, 6);
             // Define 'user' session
             req.session.user = {
-                Email: userEmail,
+                Email: reqObj.userEmail,
                 Password: hashedPw,
-                Name: userName,
-                Birthday: userBirth,
+                Name: reqObj.userName,
+                Birthday: reqObj.userBirth,
                 Salt: salt,
                 Auth: authNum,
             };
@@ -125,9 +124,10 @@ router.post("/user/join/email-verification", (req, res) => {
                 code: 200,
                 message: `${req.session.user.Email} 로 인증 이메일을 보냈습니다. 확인해주세요!`,
             });
+            return;
         }
         // Account Exists
-        else if (userEmail === result[0].UserEmail) {
+        if (reqObj.userEmail === result[0].UserEmail) {
             res.status(400).json({
                 code: 400,
                 message: "존재하는 회원입니다.",
@@ -150,16 +150,17 @@ router.post("/user/join/join_success", (req, res) => {
             code: 404,
             message: "인증번호가 만료 되었습니다. 처음부터 다시 해주세요.",
         });
+        return;
     }
     // compare with input and session's verification number
-    else if (inputAuth !== req.session.user.Auth) {
-        res.status(400).json({
-            code: 400,
-            message: "인증번호가 틀렸습니다. 다시 입력 해주세요.",
-        });
-    }
-    else {
-        // DB Write Query
+    if (req.session.user !== undefined) {
+        if (inputAuth !== req.session.user.Auth) {
+            res.status(400).json({
+                code: 400,
+                message: "인증번호가 틀렸습니다. 다시 입력 해주세요.",
+            });
+            return;
+        }
         const sql = "INSERT INTO Users (UserEmail, UserPwd, UserName, UserBirth, Salt) VALUES(?, ?, ?, ?, ?)";
         const params = [
             req.session.user.Email,
@@ -176,8 +177,9 @@ router.post("/user/join/join_success", (req, res) => {
                     code: 404,
                     message: "에러가 발생했습니다.",
                 });
+                return;
             }
-            else {
+            if (!err2) {
                 res.status(200).json({
                     code: 200,
                     message: "회원가입이 되었습니다.",

@@ -4,12 +4,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const body_parser_1 = __importDefault(require("body-parser"));
-/* eslint import/no-extraneous-dependencies: ["error", {"peerDependencies": true}] */
 const express_1 = __importDefault(require("express"));
 const join_1 = __importDefault(require("./routes/join"));
 const login_1 = __importDefault(require("./routes/login"));
 // import resetPwRouter from "./routes/resetPW";
-// import keylistRouter from "./routes/keylist";
+const keylist_1 = __importDefault(require("./routes/keylist"));
 // import registerkeyRouter from "./routes/register_key";
 // import deletekeyRouter from "./routes/delete_key";
 // import keyrecordRouter from "./routes/keyrecord";
@@ -29,7 +28,7 @@ app.use(body_parser_1.default.urlencoded({
 app.use("/Smart-Key", join_1.default);
 app.use("/Smart-Key", login_1.default);
 // app.use("/Smart-Key", resetPwRouter);
-// app.use("/Smart-Key", keylistRouter);
+app.use("/Smart-Key", keylist_1.default);
 // app.use("/Smart-Key", registerkeyRouter);
 // app.use("/Smart-Key", deletekeyRouter);
 // app.use("/Smart-Key", keyrecordRouter);

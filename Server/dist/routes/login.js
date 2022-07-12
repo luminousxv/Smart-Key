@@ -25,7 +25,6 @@ router.use((0, express_session_1.default)({
 // Login API
 router.post("/user/login", (req, res) => {
     const reqObj = req.body;
-    console.log(reqObj);
     const UserEmail = Buffer.from(reqObj.userEmail, "base64").toString("utf-8");
     const UserPwd = Buffer.from(reqObj.userPwd, "base64").toString("utf-8");
     console.log("---입력값---");
