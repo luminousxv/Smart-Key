@@ -10,6 +10,14 @@
 |<img src = "https://github.com/Yonge2.png" width=100x100)>|<img src = "https://github.com/luminousxv.png" width=100x100)>|<img src = "https://github.com/createcodemyself.png" width=100x100)>
 |[Yonge2](https://github.com/Yonge2) |[luminousxv](https://github.com/luminousxv) | [createcodemyself](https://github.com/createcodemyself) |
 
+
+## What will be added
+### Server
+- Conversion from <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=JavaScript&logoColor=black"/>
+to <img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=TypeScript&logoColor=black"/> (Started 22.07.12)
+- Refactoring
+- Update Readme
+
 ## README 모음집
 
 - Server
@@ -31,18 +39,20 @@
     [Raspberry PI README](https://github.com/luminousxv/Smart-Key/blob/main/Raspberry_PI/RPI_README.md)
 
 
-## File Structure (2022.04.13 수정)
+## File Structure (2022.07.12 수정)
 
 - Server
+    - dist (actual running folder)
+
     - src
         
-        app.js (main server program)
+        app.ts (main server program)
         
         - routes
             
-            join.js (Join API)
+            join.ts (Join API)
             
-            login.js (Login API)
+            login.ts (Login API)
 
             resetPW.js (reset_pw API)
 
@@ -137,7 +147,7 @@
 |:---:|:---:|:---:|:---:|
 |**System**|Microsoft Azure|Raspberry PI 4B|Android Emulator(test)|
 |**OS**|Ubuntu Server 20.04 LTS|Raspberry PI OS|Android|
-|**Language**|Node.JS|Python|Kotlin|
+|**Language**|Node.JS(TypeScript)|Python|Kotlin|
 ||DB: MySQL|Motor: Servo|IDE: Android Studio|
 
 ## System Flowchart
@@ -251,18 +261,31 @@
 
 ### Share Key
 <img src = "images/Share_Register.png">
-앱에서 이메일/비밀번호 입력 후 서버로 전송.</br>
-서버는 해당 정보가 DB와 일치하는지 판단 후 결과 전송.</br>
-로그인 성공 시 사용자의 키 목록을 서버로 요청.</br>
-서버에서 키 목록을 받은 후, 제어 할 키 선택.</br>
-등록 버튼 클릭, 키 비밀번호 입력 후 서버로 전송.</br>
-해당 비밀번호가 맞으면 앱은 공유 할 아이디 입력 후 서버로 전송.</br>
-서버에서는 보낸 정보들이 유효한지 확인 후, 유효하면 DB에 기록.</br>
+앱에서 이메일/비밀번호 입력 후 서버로 전송.
+
+서버는 해당 정보가 DB와 일치하는지 판단 후 결과 전송.
+
+로그인 성공 시 사용자의 키 목록을 서버로 요청.
+
+서버에서 키 목록을 받은 후, 제어 할 키 선택.
+
+등록 버튼 클릭, 키 비밀번호 입력 후 서버로 전송.
+
+해당 비밀번호가 맞으면 앱은 공유 할 아이디 입력 후 서버로 전송.
+
+서버에서는 보낸 정보들이 유효한지 확인 후, 유효하면 DB에 기록.
+
 <img src = "images/Share_Delete.png">
-앱에서 이메일/비밀번호 입력 후 서버로 전송.</br>
-서버는 해당 정보가 DB와 일치하는지 판단 후 결과 전송.</br>
-로그인 성공 시 사용자의 키 목록을 서버로 요청.</br>
-서버에서 키 목록을 받은 후, 제어 할 키 선택.</br>
-등록 버튼 클릭, 키 비밀번호 입력 후 서버로 전송.</br>
-해당 비밀번호가 맞으면 앱은 삭제 API 호출.</br>
-서버는 DB에 해당 키 공유 관련 데이터 삭제.</br>
+
+앱에서 이메일/비밀번호 입력 후 서버로 전송.
+서버는 해당 정보가 DB와 일치하는지 판단 후 결과 전송.
+
+로그인 성공 시 사용자의 키 목록을 서버로 요청.
+
+서버에서 키 목록을 받은 후, 제어 할 키 선택.
+
+등록 버튼 클릭, 키 비밀번호 입력 후 서버로 전송.
+
+해당 비밀번호가 맞으면 앱은 삭제 API 호출.
+
+서버는 DB에 해당 키 공유 관련 데이터 삭제.
