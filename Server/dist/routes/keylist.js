@@ -21,26 +21,22 @@ router.get("/main/view_keylist", (req, res) => {
         });
         return;
     }
-    if (req.session.login !== undefined) {
-        const params = [req.session.login.Email, req.session.login.Email];
-        // get serial number, key name, key's state(open/close), owner email, shared pending value from KeyInfo DB
-        dbconnection_1.default.query(sql1, params, (err, result1) => {
-            if (err) {
-                console.log("select error from KeyInfo table");
-                console.log(err);
-                res.status(500).json({
-                    code: 500,
-                    message: "DB 오류가 발생했습니다.",
-                });
-                return;
-            }
-            if (!err) {
-                res.status(200).json({
-                    code: 200,
-                    message: result1,
-                });
-            }
+    const params = [req.session.login.Email, req.session.login.Email];
+    // get serial number, key name, key's state(open/close), owner email, shared pending value from KeyInfo DB
+    dbconnection_1.default.query(sql1, params, (err, result1) => {
+        if (err) {
+            console.log("select error from KeyInfo table");
+            console.log(err);
+            res.status(500).json({
+                code: 500,
+                message: "DB 오류가 발생했습니다.",
+            });
+            return;
+        }
+        res.status(200).json({
+            code: 200,
+            message: result1,
         });
-    }
+    });
 });
 module.exports = router;

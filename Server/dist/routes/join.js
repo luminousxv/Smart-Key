@@ -23,7 +23,6 @@ function formSearch(reqdata) {
     }
     return false;
 }
-const app = (0, express_1.default)();
 const router = express_1.default.Router();
 router.use(body_parser_1.default.json());
 router.use(body_parser_1.default.urlencoded({ extended: true }));
@@ -81,58 +80,56 @@ router.post("/user/join/email-verification", (req, res) => {
             });
             return;
         }
-        // Sending Verification Email
-        if (result.length === 0) {
-            // Encryption: using salt as a key to encrypt the password
-            const salt = crypto_1.default.randomBytes(32).toString("base64");
-            const hashedPw = crypto_1.default
-                .pbkdf2Sync(reqObj.userPwd, salt, 1, 32, "sha512")
-                .toString("base64");
-            // Verification Number
-            const authNum = Math.random().toString().substr(2, 6);
-            // Define 'user' session
-            req.session.user = {
-                Email: reqObj.userEmail,
-                Password: hashedPw,
-                Name: reqObj.userName,
-                Birthday: reqObj.userBirth,
-                Salt: salt,
-                Auth: authNum,
-            };
-            // Email
-            const mailOptions = {
-                from: "Smart_Key_KPU <noreply.drgvyhn@gmail.com>",
-                to: req.session.user.Email,
-                subject: "Smart Key 회원가입 인증 번호 메일입니다.",
-                text: `인증번호는 ${authNum} 입니다.`,
-            };
-            // Send Email
-            smtpTransport.sendMail(mailOptions, () => {
-                if (err) {
-                    console.log("Email not sent.");
-                    console.log(err);
-                }
-                else {
-                    console.log(" Email sent.");
-                }
-            });
-            console.log("----user 세션----");
-            console.log(`세션 아이디: ${req.sessionID}`);
-            console.log(req.session.user);
-            console.log("----------");
-            res.status(200).json({
-                code: 200,
-                message: `${req.session.user.Email} 로 인증 이메일을 보냈습니다. 확인해주세요!`,
-            });
-            return;
-        }
         // Account Exists
         if (reqObj.userEmail === result[0].UserEmail) {
             res.status(400).json({
                 code: 400,
                 message: "존재하는 회원입니다.",
             });
+            return;
         }
+        // Sending Verification Email
+        // Encryption: using salt as a key to encrypt the password
+        const salt = crypto_1.default.randomBytes(32).toString("base64");
+        const hashedPw = crypto_1.default
+            .pbkdf2Sync(reqObj.userPwd, salt, 1, 32, "sha512")
+            .toString("base64");
+        // Verification Number
+        const authNum = Math.random().toString().substr(2, 6);
+        // Define 'user' session
+        req.session.user = {
+            Email: reqObj.userEmail,
+            Password: hashedPw,
+            Name: reqObj.userName,
+            Birthday: reqObj.userBirth,
+            Salt: salt,
+            Auth: authNum,
+        };
+        // Email
+        const mailOptions = {
+            from: "Smart_Key_KPU <noreply.drgvyhn@gmail.com>",
+            to: req.session.user.Email,
+            subject: "Smart Key 회원가입 인증 번호 메일입니다.",
+            text: `인증번호는 ${authNum} 입니다.`,
+        };
+        // Send Email
+        smtpTransport.sendMail(mailOptions, () => {
+            if (err) {
+                console.log("Email not sent.");
+                console.log(err);
+            }
+            else {
+                console.log(" Email sent.");
+            }
+        });
+        console.log("----user 세션----");
+        console.log(`세션 아이디: ${req.sessionID}`);
+        console.log(req.session.user);
+        console.log("----------");
+        res.status(200).json({
+            code: 200,
+            message: `${req.session.user.Email} 로 인증 이메일을 보냈습니다. 확인해주세요!`,
+        });
     });
 });
 // After verification
@@ -153,49 +150,46 @@ router.post("/user/join/join_success", (req, res) => {
         return;
     }
     // compare with input and session's verification number
-    if (req.session.user !== undefined) {
-        if (inputAuth !== req.session.user.Auth) {
-            res.status(400).json({
-                code: 400,
-                message: "인증번호가 틀렸습니다. 다시 입력 해주세요.",
+    if (inputAuth !== req.session.user.Auth) {
+        res.status(400).json({
+            code: 400,
+            message: "인증번호가 틀렸습니다. 다시 입력 해주세요.",
+        });
+        return;
+    }
+    const sql = "INSERT INTO Users (UserEmail, UserPwd, UserName, UserBirth, Salt) VALUES(?, ?, ?, ?, ?)";
+    const params = [
+        req.session.user.Email,
+        req.session.user.Password,
+        req.session.user.Name,
+        req.session.user.Birthday,
+        req.session.user.Salt,
+    ];
+    dbconnection_1.default.query(sql, params, (err2) => {
+        if (err2) {
+            console.log("insert error from Users table");
+            console.log(err2);
+            res.status(404).json({
+                code: 404,
+                message: "에러가 발생했습니다.",
             });
             return;
         }
-        const sql = "INSERT INTO Users (UserEmail, UserPwd, UserName, UserBirth, Salt) VALUES(?, ?, ?, ?, ?)";
-        const params = [
-            req.session.user.Email,
-            req.session.user.Password,
-            req.session.user.Name,
-            req.session.user.Birthday,
-            req.session.user.Salt,
-        ];
-        dbconnection_1.default.query(sql, params, (err2) => {
-            if (err2) {
-                console.log("insert error from Users table");
-                console.log(err2);
-                res.status(404).json({
-                    code: 404,
-                    message: "에러가 발생했습니다.",
-                });
-                return;
-            }
-            if (!err2) {
-                res.status(200).json({
-                    code: 200,
-                    message: "회원가입이 되었습니다.",
-                });
-            }
-            // delete session
-            if (req.session.user) {
-                req.session.destroy((err) => {
-                    if (err) {
-                        throw err;
-                    }
-                });
-                console.log("User Session deleted.");
-            }
-        });
-    }
+        if (!err2) {
+            res.status(200).json({
+                code: 200,
+                message: "회원가입이 되었습니다.",
+            });
+        }
+        // delete session
+        if (req.session.user) {
+            req.session.destroy((err) => {
+                if (err) {
+                    throw err;
+                }
+            });
+            console.log("User Session deleted.");
+        }
+    });
 });
-app.use("/", router);
 module.exports = router;

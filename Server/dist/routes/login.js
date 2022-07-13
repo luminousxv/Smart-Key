@@ -53,28 +53,24 @@ router.post("/user/login", (req, res) => {
             });
             return;
         }
-        if (result.length !== 0) {
-            const hashedPw2 = crypto_1.default
-                .pbkdf2Sync(UserPwd, result[0].Salt, 1, 32, "sha512")
-                .toString("base64");
-            if (result[0].UserPwd !== hashedPw2) {
-                res.status(401).json({
-                    code: 401,
-                    message: "비밀번호가 틀렸습니다!",
-                });
-                return;
-            }
-            if (result[0].UserPwd === hashedPw2) {
-                req.session.login = {
-                    Email: UserEmail,
-                    Name: result[0].UserName,
-                };
-                res.status(200).json({
-                    code: 200,
-                    message: `로그인 성공! ${result[0].UserName}님 환영합니다!`,
-                });
-            }
+        const hashedPw2 = crypto_1.default
+            .pbkdf2Sync(UserPwd, result[0].Salt, 1, 32, "sha512")
+            .toString("base64");
+        if (result[0].UserPwd !== hashedPw2) {
+            res.status(401).json({
+                code: 401,
+                message: "비밀번호가 틀렸습니다!",
+            });
+            return;
         }
+        req.session.login = {
+            Email: UserEmail,
+            Name: result[0].UserName,
+        };
+        res.status(200).json({
+            code: 200,
+            message: `로그인 성공! ${result[0].UserName}님 환영합니다!`,
+        });
     });
 });
 module.exports = router;
