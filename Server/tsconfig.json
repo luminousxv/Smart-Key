@@ -102,7 +102,7 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "moduleResolution": "node",
-    "noImplicitAny": false,
+    "noImplicitAny": true,
     "resolveJsonModule": true
   }
 }
