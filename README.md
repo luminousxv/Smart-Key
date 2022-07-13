@@ -15,7 +15,7 @@
 ### Server
 - Conversion from <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=JavaScript&logoColor=black"/>
 to <img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=TypeScript&logoColor=black"/> (Started 22.07.12)
-- Refactoring
+- Refactoring (Started 22.07.13)
 - Update Readme
 
 ## README 모음집
@@ -64,11 +64,11 @@ to <img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&lo
 
             register_key.js (register new key API)
 
-            delete_key.js (delete key API)
+            [delete_key.ts](Server/src/routes/delete_key.ts) (delete key API)
 
             keyrecord.js (view keyrecord API)
 
-            keyPW.js (key password verification API)
+            [keyPW.ts](Server/src/routes/keyPW.ts) (key password verification API)
 
             keycontrol.js (key control API)
 
@@ -80,7 +80,7 @@ to <img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&lo
             
         - database
             
-            dbconnection.js (Database Connection Configuration)
+            dbconnection.ts (Database Connection Configuration)(not in the repository)
 
 - Android
 
