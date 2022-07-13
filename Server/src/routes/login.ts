@@ -5,7 +5,7 @@ import bodyParser from "body-parser";
 import session from "express-session";
 import cookieParser from "cookie-parser";
 import connection from "../database/dbconnection";
-import { RequestLogin } from "../types/type";
+import { RequestLogin, Users } from "../types/type";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const FileStore = require("session-file-store")(session);
@@ -46,7 +46,7 @@ router.post("/user/login", (req, res) => {
   // Check if account exists
   const sql = "SELECT * FROM Users WHERE UserEmail = ?";
 
-  connection.query(sql, UserEmail, (err, result) => {
+  connection.query(sql, UserEmail, (err, result: Users[]) => {
     if (err) {
       console.log("select error from Users table");
       console.log(err);
@@ -64,28 +64,24 @@ router.post("/user/login", (req, res) => {
       });
       return;
     }
-    if (result.length !== 0) {
-      const hashedPw2 = crypto
-        .pbkdf2Sync(UserPwd, result[0].Salt, 1, 32, "sha512")
-        .toString("base64");
-      if (result[0].UserPwd !== hashedPw2) {
-        res.status(401).json({
-          code: 401,
-          message: "비밀번호가 틀렸습니다!",
-        });
-        return;
-      }
-      if (result[0].UserPwd === hashedPw2) {
-        req.session.login = {
-          Email: UserEmail,
-          Name: result[0].UserName,
-        };
-        res.status(200).json({
-          code: 200,
-          message: `로그인 성공! ${result[0].UserName}님 환영합니다!`,
-        });
-      }
+    const hashedPw2 = crypto
+      .pbkdf2Sync(UserPwd, result[0].Salt, 1, 32, "sha512")
+      .toString("base64");
+    if (result[0].UserPwd !== hashedPw2) {
+      res.status(401).json({
+        code: 401,
+        message: "비밀번호가 틀렸습니다!",
+      });
+      return;
     }
+    req.session.login = {
+      Email: UserEmail,
+      Name: result[0].UserName,
+    };
+    res.status(200).json({
+      code: 200,
+      message: `로그인 성공! ${result[0].UserName}님 환영합니다!`,
+    });
   });
 });
 
