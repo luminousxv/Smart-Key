@@ -74,8 +74,14 @@ export interface KeyInfo {
   SharedID: string;
   Mode: number;
 }
+export interface ModuleReturn {
+  code: number;
+  message: string;
+  flag: boolean;
+}
 
 export type OwnerId = Pick<KeyAuthority, "OwnerID">;
 export type KeyList = Omit<KeyInfo, "KeyID" | "SmartPwd" | "Salt" | "SharedID">;
 export type KeyPwd = Pick<KeyInfo, "SmartPwd" | "Salt">;
+export type KeyState = Pick<KeyInfo, "KeyState">;
 export type EmailVerification = Omit<RequestJoin, "inputAuth">;
