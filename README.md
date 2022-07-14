@@ -39,7 +39,7 @@ to <img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&lo
     [Raspberry PI README](https://github.com/luminousxv/Smart-Key/blob/main/Raspberry_PI/RPI_README.md)
 
 
-## File Structure (2022.07.12 수정)
+## File Structure (Updated: 22.07.14)
 
 - Server
     - dist (actual running folder)
@@ -47,6 +47,10 @@ to <img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&lo
     - src
         
         [app.ts](Server/src/app.ts) (main server program)
+
+        - modules
+
+        [keycontrol_modules.ts](Server/src/modules/keycontrol_modules.ts) (key control API module)
 
         - types
 
@@ -70,7 +74,7 @@ to <img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&lo
 
             [keyPW.ts](Server/src/routes/keyPW.ts) (key password verification API)
 
-            keycontrol.js (key control API)
+            [keycontrol.ts](Server/src/routes/keycontrol.ts) (key control API)
 
             keyshare.js (Key Share API)
 
