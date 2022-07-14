@@ -50,7 +50,7 @@ to <img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&lo
 
         - modules
 
-        [keycontrol_modules.ts](Server/src/modules/keycontrol_modules.ts) (key control API module)
+            [keycontrol_modules.ts](Server/src/modules/keycontrol_modules.ts) (key control API module)
 
         - types
 
