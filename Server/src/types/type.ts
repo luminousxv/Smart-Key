@@ -25,9 +25,21 @@ export interface RequestSerial {
 export interface RequestKey extends RequestSerial {
   smartPwd: string;
 }
+
 export interface RequestGPS extends RequestSerial {
   GPSLong: string;
   GPSLat: string;
+}
+
+export interface RequestRegister extends RequestSerial {
+  keyName: string;
+  smartPwd: string;
+}
+
+export interface RequestResetPw {
+  userEmail: string;
+  userName: string;
+  userBirth: string;
 }
 
 export interface Response {
@@ -82,6 +94,8 @@ export interface ModuleReturn {
 
 export type OwnerId = Pick<KeyAuthority, "OwnerID">;
 export type KeyList = Omit<KeyInfo, "KeyID" | "SmartPwd" | "Salt" | "SharedID">;
+export type Record = Omit<KeyRecord, "RecordID" | "Image">;
 export type KeyPwd = Pick<KeyInfo, "SmartPwd" | "Salt">;
+export type RecordImage = Pick<KeyRecord, "Image">;
 export type KeyState = Pick<KeyInfo, "KeyState">;
 export type EmailVerification = Omit<RequestJoin, "inputAuth">;
