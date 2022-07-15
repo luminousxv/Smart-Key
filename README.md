@@ -39,7 +39,7 @@ to <img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&lo
     [Raspberry PI README](https://github.com/luminousxv/Smart-Key/blob/main/Raspberry_PI/RPI_README.md)
 
 
-## File Structure (Updated: 22.07.14)
+## File Structure (Updated: 22.07.15)
 
 - Server
     - dist (actual running folder)
@@ -62,21 +62,21 @@ to <img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&lo
             
             [login.ts](Server/src/routes/login.ts) (Login API)
 
-            resetPW.js (reset_pw API)
+            [resetPW.ts](Server/src/routes/resetPW.ts) (reset_pw API)
 
             [keylist.ts](Server/src/routes/keylist.ts) (view keylist API)
 
-            register_key.js (register new key API)
+            [register_key.ts](Server/src/routes/register_key.ts) (register new key API)
 
             [delete_key.ts](Server/src/routes/delete_key.ts) (delete key API)
 
-            keyrecord.js (view keyrecord API)
+            [keyrecord.ts](Server/src/routes/keycontrol.ts) (view keyrecord API)
 
             [keyPW.ts](Server/src/routes/keyPW.ts) (key password verification API)
 
             [keycontrol.ts](Server/src/routes/keycontrol.ts) (key control API)
 
-            keyshare.js (Key Share API)
+            [keyshare.ts](Server/src/routes/keyshare.ts) (Key Share API)
 
             rpi_control.js (Raspberry Pi control API)
 
