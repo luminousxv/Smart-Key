@@ -7,15 +7,15 @@ const body_parser_1 = __importDefault(require("body-parser"));
 const express_1 = __importDefault(require("express"));
 const join_1 = __importDefault(require("./routes/join"));
 const login_1 = __importDefault(require("./routes/login"));
-// import resetPwRouter from "./routes/resetPW";
+const resetPW_1 = __importDefault(require("./routes/resetPW"));
 const keylist_1 = __importDefault(require("./routes/keylist"));
-// import registerkeyRouter from "./routes/register_key";
+const register_key_1 = __importDefault(require("./routes/register_key"));
 const delete_key_1 = __importDefault(require("./routes/delete_key"));
-// import keyrecordRouter from "./routes/keyrecord";
+const keyrecord_1 = __importDefault(require("./routes/keyrecord"));
 const keycontrol_1 = __importDefault(require("./routes/keycontrol"));
 const keyPW_1 = __importDefault(require("./routes/keyPW"));
 // import rpiRouter from "./routes/rpi_control";
-// import shareRouter from "./routes/keyshare";
+const keyshare_1 = __importDefault(require("./routes/keyshare"));
 // import rpiImageRouter from "./routes/rpi_image";
 const app = (0, express_1.default)();
 app.use(body_parser_1.default.json({
@@ -27,15 +27,15 @@ app.use(body_parser_1.default.urlencoded({
 }));
 app.use("/Smart-Key", join_1.default);
 app.use("/Smart-Key", login_1.default);
-// app.use("/Smart-Key", resetPwRouter);
+app.use("/Smart-Key", resetPW_1.default);
 app.use("/Smart-Key", keylist_1.default);
-// app.use("/Smart-Key", registerkeyRouter);
+app.use("/Smart-Key", register_key_1.default);
 app.use("/Smart-Key", delete_key_1.default);
-// app.use("/Smart-Key", keyrecordRouter);
+app.use("/Smart-Key", keyrecord_1.default);
 app.use("/Smart-Key", keycontrol_1.default);
 app.use("/Smart-Key", keyPW_1.default);
 // app.use("/Smart-Key", rpiRouter);
-// app.use("/Smart-Key", shareRouter);
+app.use("/Smart-Key", keyshare_1.default);
 // app.use("/Smart-Key", rpiImageRouter);
 // Server
 app.listen(80, () => {
