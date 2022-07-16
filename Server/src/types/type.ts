@@ -36,6 +36,14 @@ export interface RequestRegister extends RequestSerial {
   smartPwd: string;
 }
 
+export interface RequestBluetooth extends RequestSerial {
+  keyState: string;
+}
+
+export interface RequestImage extends RequestSerial {
+  image: string;
+}
+
 export interface RequestResetPw {
   userEmail: string;
   userName: string;
@@ -97,5 +105,6 @@ export type KeyList = Omit<KeyInfo, "KeyID" | "SmartPwd" | "Salt" | "SharedID">;
 export type Record = Omit<KeyRecord, "RecordID" | "Image">;
 export type KeyPwd = Pick<KeyInfo, "SmartPwd" | "Salt">;
 export type RecordImage = Pick<KeyRecord, "Image">;
+export type RPIRemote = Pick<KeyInfo, "KeyState" | "Mode">;
 export type KeyState = Pick<KeyInfo, "KeyState">;
 export type EmailVerification = Omit<RequestJoin, "inputAuth">;
