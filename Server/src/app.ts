@@ -9,9 +9,9 @@ import deletekeyRouter from "./routes/delete_key";
 import keyrecordRouter from "./routes/keyrecord";
 import keycontrolRouter from "./routes/keycontrol";
 import keyPwdRouter from "./routes/keyPW";
-// import rpiRouter from "./routes/rpi_control";
+import rpiRouter from "./routes/rpi_control";
 import shareRouter from "./routes/keyshare";
-// import rpiImageRouter from "./routes/rpi_image";
+import rpiImageRouter from "./routes/rpi_image";
 
 const app = express();
 
@@ -36,9 +36,9 @@ app.use("/Smart-Key", deletekeyRouter);
 app.use("/Smart-Key", keyrecordRouter);
 app.use("/Smart-Key", keycontrolRouter);
 app.use("/Smart-Key", keyPwdRouter);
-// app.use("/Smart-Key", rpiRouter);
+app.use("/Smart-Key", rpiRouter);
 app.use("/Smart-Key", shareRouter);
-// app.use("/Smart-Key", rpiImageRouter);
+app.use("/Smart-Key", rpiImageRouter);
 
 // Server
 app.listen(80, () => {
