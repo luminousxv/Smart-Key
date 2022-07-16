@@ -13,8 +13,8 @@
 
 ## What will be added
 ### Server
-- Conversion from <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=JavaScript&logoColor=black"/>
-to <img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=TypeScript&logoColor=black"/> (Started 22.07.12)
+- <strike>Conversion from <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=JavaScript&logoColor=black"/>
+to <img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=TypeScript&logoColor=black"/> (Started 22.07.12)</strike> (Done 22.07.16)
 - Refactoring (Started 22.07.13)
 - Update Readme
 
@@ -39,7 +39,7 @@ to <img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&lo
     [Raspberry PI README](https://github.com/luminousxv/Smart-Key/blob/main/Raspberry_PI/RPI_README.md)
 
 
-## File Structure (Updated: 22.07.15)
+## File Structure (Updated: 22.07.16)
 
 - Server
     - dist (actual running folder)
@@ -78,9 +78,9 @@ to <img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&lo
 
             [keyshare.ts](Server/src/routes/keyshare.ts) (Key Share API)
 
-            rpi_control.js (Raspberry Pi control API)
+            [rpi_control.ts](Server/src/routes/rpi_control.ts) (Raspberry Pi control API)
 
-            rpi_image.js (Raspberry Pi Image API)
+            [rpi_image.ts](Server/src/routes/rpi_image.ts) (Raspberry Pi Image API)
             
         - database
             
