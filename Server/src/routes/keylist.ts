@@ -4,6 +4,7 @@ import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 import connection from "../database/dbconnection";
 import { KeyList } from "../types/type";
+import Sql from "../modules/sql";
 
 const router = express.Router();
 
@@ -12,8 +13,7 @@ router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 
 router.get("/main/view_keylist", (req, res) => {
-  const sql1 =
-    "select SerialNum, KeyName, KeyState, UserID, Shared, Mode from KeyInfo where UserID = ? or SharedID = ?";
+  const sql1: string = Sql.List.select;
   // check login session
   if (req.session.login === undefined) {
     res.status(404).json({

@@ -8,6 +8,7 @@ import cookieParser from "cookie-parser";
 import connection from "../database/dbconnection";
 import GoogleLogin from "../config/google.json";
 import { Form, EmailVerification, Users, RequestJoin } from "../types/type";
+import Sql from "../modules/sql";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const FileStore = require("session-file-store")(session);
@@ -66,7 +67,7 @@ router.post("/user/join/email-verification", (req, res) => {
   console.log("----------");
 
   // Repetition Check SQL Query
-  const sql2 = "SELECT * FROM Users WHERE UserEmail = ?";
+  const sql2: string = Sql.Join.select;
   const form: Form = {
     pw: reqObj.userPwd,
     email: reqObj.userEmail,
@@ -103,8 +104,8 @@ router.post("/user/join/email-verification", (req, res) => {
     }
     // Sending Verification Email
     // Encryption: using salt as a key to encrypt the password
-    const salt = crypto.randomBytes(32).toString("base64");
-    const hashedPw = crypto
+    const salt: string = crypto.randomBytes(32).toString("base64");
+    const hashedPw: string = crypto
       .pbkdf2Sync(reqObj.userPwd, salt, 1, 32, "sha512")
       .toString("base64");
 
@@ -176,8 +177,7 @@ router.post("/user/join/join_success", (req, res) => {
     });
     return;
   }
-  const sql =
-    "INSERT INTO Users (UserEmail, UserPwd, UserName, UserBirth, Salt) VALUES(?, ?, ?, ?, ?)";
+  const sql: string = Sql.Join.insert;
   const params = [
     req.session.user.Email,
     req.session.user.Password,

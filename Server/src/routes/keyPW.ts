@@ -5,6 +5,7 @@ import crypto from "crypto";
 import cookieParser from "cookie-parser";
 import connection from "../database/dbconnection";
 import { RequestKey, KeyPwd } from "../types/type";
+import Sql from "../modules/sql";
 
 const router = express.Router();
 
@@ -20,7 +21,7 @@ router.post("/main/key_pw", (req, res) => {
   console.log(`스마트키 비밀번호: ${reqObj.smartPwd}`);
   console.log("----------");
 
-  const sql1 = "select SmartPwd, Salt from KeyInfo where SerialNum = ?";
+  const sql1: string = Sql.KeyPw.select;
   // check login session
   if (req.session.login === undefined) {
     res.status(404).json({

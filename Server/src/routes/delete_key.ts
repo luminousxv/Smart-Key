@@ -4,6 +4,7 @@ import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 import connection from "../database/dbconnection";
 import { RequestSerial, OwnerId } from "../types/type";
+import Sql from "../modules/sql";
 
 const router = express.Router();
 
@@ -14,8 +15,8 @@ router.use(bodyParser.urlencoded({ extended: true }));
 // Smart Key Delete API
 router.post("/main/delete_key", (req, res) => {
   const { serialNum }: RequestSerial = req.body;
-  const sql1 = "select OwnerID from Key_Authority where SerialNum = ?";
-  const sql2 = "update KeyInfo set KeyState = ? where SerialNum = ?";
+  const sql1: string = Sql.Delete.select;
+  const sql2: string = Sql.Delete.update;
   const params2 = ["delete", serialNum];
 
   console.log("---입력값---");

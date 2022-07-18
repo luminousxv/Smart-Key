@@ -7,6 +7,7 @@ import { MysqlError } from "mysql";
 import connection from "../database/dbconnection";
 import { RequestGPS, ModuleReturn, KeyAuthority, KeyInfo } from "../types/type";
 import { AuthorityCheck, KeyStateCheck } from "../modules/keycontrol_modules";
+import Sql from "../modules/sql";
 
 const router = express.Router();
 
@@ -24,106 +25,117 @@ router.post("/main/open_key", (req, res) => {
   console.log(`GPS Latitude: ${reqObj.GPSLat}`);
   console.log("----------");
 
-  const sql5 = "select * from Key_Authority where SerialNum = ?";
-  const sql1 = "select * from KeyInfo where SerialNum = ?";
-  const sql4 = "select KeyState from KeyInfo where SerialNum = ?";
-  const sql2 = "update KeyInfo set KeyState = ? where SerialNum = ?";
-  const sql3 =
-    "insert into KeyRecord (SerialNum, Time, KeyState, GPSLat, GPSLong, Method, Email) values (?, ?, ?, ?, ? ,?, ?)";
+  const sql = Sql.KeyControl;
 
   const time = moment().format("YYYY-MM-DD HH:mm:ss");
   const params = ["open", reqObj.serialNum];
 
   // check authority
-  connection.query(sql5, reqObj.serialNum, (err, result5: KeyAuthority[]) => {
-    // check login session
-    if (req.session.login === undefined) {
-      res.status(404).json({
-        code: 404,
-        message: "세션이 만료되었습니다. 다시 로그인 해주세요",
-      });
-      return;
-    }
-    const params2 = [
-      reqObj.serialNum,
-      time,
-      "open",
-      reqObj.GPSLat,
-      reqObj.GPSLong,
-      "원격",
-      req.session.login.Email,
-    ];
-    let moduleResponse: ModuleReturn = AuthorityCheck(
-      result5,
-      err as MysqlError
-    );
-    if (moduleResponse.flag) {
-      res.status(moduleResponse.code).json({
-        code: moduleResponse.code,
-        message: moduleResponse.message,
-      });
-      if (moduleResponse.code === 500) {
-        console.log("Select error in Key_Authority table.");
-        console.log(err);
+  connection.query(
+    sql.select_Authority,
+    reqObj.serialNum,
+    (err, result5: KeyAuthority[]) => {
+      // check login session
+      if (req.session.login === undefined) {
+        res.status(404).json({
+          code: 404,
+          message: "세션이 만료되었습니다. 다시 로그인 해주세요",
+        });
+        return;
       }
-      return;
-    }
-    if (
-      result5[0].OwnerID === req.session.login.Email ||
-      result5[0].ShareID === req.session.login.Email
-    ) {
-      // get Smart Key from KeyInfo DB table
-      connection.query(sql1, reqObj.serialNum, (err2, result1: KeyInfo[]) => {
-        moduleResponse = AuthorityCheck(result1, err2 as MysqlError);
-        if (moduleResponse.flag) {
-          res.status(moduleResponse.code).json({
-            code: moduleResponse.code,
-            message: moduleResponse.message,
-          });
-          return;
+      const params2 = [
+        reqObj.serialNum,
+        time,
+        "open",
+        reqObj.GPSLat,
+        reqObj.GPSLong,
+        "원격",
+        req.session.login.Email,
+      ];
+      let moduleResponse: ModuleReturn = AuthorityCheck(
+        result5,
+        err as MysqlError
+      );
+      if (moduleResponse.flag) {
+        res.status(moduleResponse.code).json({
+          code: moduleResponse.code,
+          message: moduleResponse.message,
+        });
+        if (moduleResponse.code === 500) {
+          console.log("Select error in Key_Authority table.");
+          console.log(err);
         }
-        // check Smart Key's state(open/close)
-        connection.query(sql4, reqObj.serialNum, (err3, result4) => {
-          moduleResponse = KeyStateCheck(result4, err3 as MysqlError, "open");
-          if (moduleResponse.flag) {
-            res.status(moduleResponse.code).json({
-              code: moduleResponse.code,
-              message: moduleResponse.message,
-            });
-            return;
-          }
-          // change Smart Key's state(close -> open) from KeyInfo DB table
-          connection.query(sql2, params, (err4) => {
-            if (err4) {
-              res.status(500).json({
-                code: 500,
-                message: "DB 오류가 발생했습니다.",
+        return;
+      }
+      if (
+        result5[0].OwnerID === req.session.login.Email ||
+        result5[0].ShareID === req.session.login.Email
+      ) {
+        // get Smart Key from KeyInfo DB table
+        connection.query(
+          sql.select_Info,
+          reqObj.serialNum,
+          (err2, result1: KeyInfo[]) => {
+            moduleResponse = AuthorityCheck(result1, err2 as MysqlError);
+            if (moduleResponse.flag) {
+              res.status(moduleResponse.code).json({
+                code: moduleResponse.code,
+                message: moduleResponse.message,
               });
-              console.log("update error from KeyInfo table");
-              console.log(err);
               return;
             }
-            // add Smart Key's record to KeyRecord DB table
-            connection.query(sql3, params2, (err5) => {
-              if (err5) {
-                res.status(500).json({
-                  code: 500,
-                  message: "DB 오류가 발생했습니다.",
+            // check Smart Key's state(open/close)
+            connection.query(
+              sql.select_State,
+              reqObj.serialNum,
+              (err3, result4) => {
+                moduleResponse = KeyStateCheck(
+                  result4,
+                  err3 as MysqlError,
+                  "open"
+                );
+                if (moduleResponse.flag) {
+                  res.status(moduleResponse.code).json({
+                    code: moduleResponse.code,
+                    message: moduleResponse.message,
+                  });
+                  return;
+                }
+                // change Smart Key's state(close -> open) from KeyInfo DB table
+                connection.query(sql.update_Info, params, (err4) => {
+                  if (err4) {
+                    res.status(500).json({
+                      code: 500,
+                      message: "DB 오류가 발생했습니다.",
+                    });
+                    console.log("update error from KeyInfo table");
+                    console.log(err);
+                    return;
+                  }
+                  // add Smart Key's record to KeyRecord DB table
+                  connection.query(sql.insert_Record, params2, (err5) => {
+                    if (err5) {
+                      res.status(500).json({
+                        code: 500,
+                        message: "DB 오류가 발생했습니다.",
+                      });
+                      console.log("insert error from KeyRecord table");
+                      console.log(err);
+                      return;
+                    }
+                    res.status(200).json({
+                      code: 200,
+                      message: "스마트키가 열렸습니다.",
+                    });
+                  });
                 });
-                console.log("insert error from KeyRecord table");
-                console.log(err);
-                return;
               }
-              res.status(200).json({
-                code: 200,
-                message: "스마트키가 열렸습니다.",
-              });
-            });
-          });
-        });
-      });
+            );
+          }
+        );
+      }
     }
-  });
+  );
 });
 
 // Smart Key Remote Close API
@@ -136,106 +148,117 @@ router.post("/main/close_key", (req, res) => {
   console.log(`GPS Latitude: ${reqObj.GPSLat}`);
   console.log("----------");
 
-  const sql5 = "select * from Key_Authority where SerialNum = ?";
-  const sql1 = "select * from KeyInfo where SerialNum = ?";
-  const sql4 = "select KeyState from KeyInfo where SerialNum = ?";
-  const sql2 = "update KeyInfo set KeyState = ? where SerialNum = ?";
-  const sql3 =
-    "insert into KeyRecord (SerialNum, Time, KeyState, GPSLat, GPSLong, Method, Email) values (?, ?, ?, ?, ? ,?, ?)";
+  const sql = Sql.KeyControl;
 
   const time = moment().format("YYYY-MM-DD HH:mm:ss");
-  const params = ["close", reqObj.serialNum];
+  const params = ["open", reqObj.serialNum];
 
   // check authority
-  connection.query(sql5, reqObj.serialNum, (err, result5: KeyAuthority[]) => {
-    // check login session
-    if (req.session.login === undefined) {
-      res.status(404).json({
-        code: 404,
-        message: "세션이 만료되었습니다. 다시 로그인 해주세요",
-      });
-      return;
-    }
-    const params2 = [
-      reqObj.serialNum,
-      time,
-      "close",
-      reqObj.GPSLat,
-      reqObj.GPSLong,
-      "원격",
-      req.session.login.Email,
-    ];
-    let moduleResponse: ModuleReturn = AuthorityCheck(
-      result5,
-      err as MysqlError
-    );
-    if (moduleResponse.flag) {
-      res.status(moduleResponse.code).json({
-        code: moduleResponse.code,
-        message: moduleResponse.message,
-      });
-      if (moduleResponse.code === 500) {
-        console.log("Select error in Key_Authority table.");
-        console.log(err);
+  connection.query(
+    sql.select_Authority,
+    reqObj.serialNum,
+    (err, result5: KeyAuthority[]) => {
+      // check login session
+      if (req.session.login === undefined) {
+        res.status(404).json({
+          code: 404,
+          message: "세션이 만료되었습니다. 다시 로그인 해주세요",
+        });
+        return;
       }
-      return;
-    }
-    if (
-      result5[0].OwnerID === req.session.login.Email ||
-      result5[0].ShareID === req.session.login.Email
-    ) {
-      // get Smart Key from KeyInfo DB table
-      connection.query(sql1, reqObj.serialNum, (err2, result1: KeyInfo[]) => {
-        moduleResponse = AuthorityCheck(result1, err2 as MysqlError);
-        if (moduleResponse.flag) {
-          res.status(moduleResponse.code).json({
-            code: moduleResponse.code,
-            message: moduleResponse.message,
-          });
-          return;
+      const params2 = [
+        reqObj.serialNum,
+        time,
+        "close",
+        reqObj.GPSLat,
+        reqObj.GPSLong,
+        "원격",
+        req.session.login.Email,
+      ];
+      let moduleResponse: ModuleReturn = AuthorityCheck(
+        result5,
+        err as MysqlError
+      );
+      if (moduleResponse.flag) {
+        res.status(moduleResponse.code).json({
+          code: moduleResponse.code,
+          message: moduleResponse.message,
+        });
+        if (moduleResponse.code === 500) {
+          console.log("Select error in Key_Authority table.");
+          console.log(err);
         }
-        // check Smart Key's state(open/close)
-        connection.query(sql4, reqObj.serialNum, (err3, result4) => {
-          moduleResponse = KeyStateCheck(result4, err3 as MysqlError, "close");
-          if (moduleResponse.flag) {
-            res.status(moduleResponse.code).json({
-              code: moduleResponse.code,
-              message: moduleResponse.message,
-            });
-            return;
-          }
-          // change Smart Key's state(close -> open) from KeyInfo DB table
-          connection.query(sql2, params, (err4) => {
-            if (err4) {
-              res.status(500).json({
-                code: 500,
-                message: "DB 오류가 발생했습니다.",
+        return;
+      }
+      if (
+        result5[0].OwnerID === req.session.login.Email ||
+        result5[0].ShareID === req.session.login.Email
+      ) {
+        // get Smart Key from KeyInfo DB table
+        connection.query(
+          sql.select_Info,
+          reqObj.serialNum,
+          (err2, result1: KeyInfo[]) => {
+            moduleResponse = AuthorityCheck(result1, err2 as MysqlError);
+            if (moduleResponse.flag) {
+              res.status(moduleResponse.code).json({
+                code: moduleResponse.code,
+                message: moduleResponse.message,
               });
-              console.log("update error from KeyInfo table");
-              console.log(err);
               return;
             }
-            // add Smart Key's record to KeyRecord DB table
-            connection.query(sql3, params2, (err5) => {
-              if (err5) {
-                res.status(500).json({
-                  code: 500,
-                  message: "DB 오류가 발생했습니다.",
+            // check Smart Key's state(open/close)
+            connection.query(
+              sql.select_State,
+              reqObj.serialNum,
+              (err3, result4) => {
+                moduleResponse = KeyStateCheck(
+                  result4,
+                  err3 as MysqlError,
+                  "close"
+                );
+                if (moduleResponse.flag) {
+                  res.status(moduleResponse.code).json({
+                    code: moduleResponse.code,
+                    message: moduleResponse.message,
+                  });
+                  return;
+                }
+                // change Smart Key's state(close -> open) from KeyInfo DB table
+                connection.query(sql.update_Info, params, (err4) => {
+                  if (err4) {
+                    res.status(500).json({
+                      code: 500,
+                      message: "DB 오류가 발생했습니다.",
+                    });
+                    console.log("update error from KeyInfo table");
+                    console.log(err);
+                    return;
+                  }
+                  // add Smart Key's record to KeyRecord DB table
+                  connection.query(sql.insert_Record, params2, (err5) => {
+                    if (err5) {
+                      res.status(500).json({
+                        code: 500,
+                        message: "DB 오류가 발생했습니다.",
+                      });
+                      console.log("insert error from KeyRecord table");
+                      console.log(err);
+                      return;
+                    }
+                    res.status(200).json({
+                      code: 200,
+                      message: "스마트키가 닫혔습니다.",
+                    });
+                  });
                 });
-                console.log("insert error from KeyRecord table");
-                console.log(err);
-                return;
               }
-              res.status(200).json({
-                code: 200,
-                message: "스마트키가 닫혔습니다.",
-              });
-            });
-          });
-        });
-      });
+            );
+          }
+        );
+      }
     }
-  });
+  );
 });
 
 router.post("/main/mode", (req, res) => {
@@ -245,8 +268,8 @@ router.post("/main/mode", (req, res) => {
   console.log(`시리얼번호: ${serialNum}`);
   console.log("----------");
 
-  const sql1 = "select KeyState, Mode from KeyInfo where SerialNum = ?";
-  const sql2 = "update KeyInfo set Mode = ? where SerialNum = ?";
+  const sql1: string = Sql.Mode.select;
+  const sql2: string = Sql.Mode.update;
   const time = new Date(+new Date() + 3240 * 10000)
     .toISOString()
     .replace("T", " ")
