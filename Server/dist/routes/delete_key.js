@@ -7,6 +7,7 @@ const express_1 = __importDefault(require("express"));
 const body_parser_1 = __importDefault(require("body-parser"));
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const dbconnection_1 = __importDefault(require("../database/dbconnection"));
+const sql_1 = __importDefault(require("../modules/sql"));
 const router = express_1.default.Router();
 router.use((0, cookie_parser_1.default)());
 router.use(body_parser_1.default.json());
@@ -14,8 +15,8 @@ router.use(body_parser_1.default.urlencoded({ extended: true }));
 // Smart Key Delete API
 router.post("/main/delete_key", (req, res) => {
     const { serialNum } = req.body;
-    const sql1 = "select OwnerID from Key_Authority where SerialNum = ?";
-    const sql2 = "update KeyInfo set KeyState = ? where SerialNum = ?";
+    const sql1 = sql_1.default.Delete.select;
+    const sql2 = sql_1.default.Delete.update;
     const params2 = ["delete", serialNum];
     console.log("---입력값---");
     console.log(`시리얼번호: ${serialNum}`);

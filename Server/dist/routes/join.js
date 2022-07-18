@@ -11,6 +11,7 @@ const body_parser_1 = __importDefault(require("body-parser"));
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const dbconnection_1 = __importDefault(require("../database/dbconnection"));
 const google_json_1 = __importDefault(require("../config/google.json"));
+const sql_1 = __importDefault(require("../modules/sql"));
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const FileStore = require("session-file-store")(express_session_1.default);
 // Form Checking function
@@ -55,7 +56,7 @@ router.post("/user/join/email-verification", (req, res) => {
     console.log(`생년월일: ${reqObj.userBirth}`);
     console.log("----------");
     // Repetition Check SQL Query
-    const sql2 = "SELECT * FROM Users WHERE UserEmail = ?";
+    const sql2 = sql_1.default.Join.select;
     const form = {
         pw: reqObj.userPwd,
         email: reqObj.userEmail,
@@ -157,7 +158,7 @@ router.post("/user/join/join_success", (req, res) => {
         });
         return;
     }
-    const sql = "INSERT INTO Users (UserEmail, UserPwd, UserName, UserBirth, Salt) VALUES(?, ?, ?, ?, ?)";
+    const sql = sql_1.default.Join.insert;
     const params = [
         req.session.user.Email,
         req.session.user.Password,

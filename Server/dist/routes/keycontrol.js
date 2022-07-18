@@ -9,6 +9,7 @@ const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const moment_1 = __importDefault(require("moment"));
 const dbconnection_1 = __importDefault(require("../database/dbconnection"));
 const keycontrol_modules_1 = require("../modules/keycontrol_modules");
+const sql_1 = __importDefault(require("../modules/sql"));
 const router = express_1.default.Router();
 router.use((0, cookie_parser_1.default)());
 router.use(body_parser_1.default.json());
@@ -21,15 +22,11 @@ router.post("/main/open_key", (req, res) => {
     console.log(`GPS Longitude: ${reqObj.GPSLong}`);
     console.log(`GPS Latitude: ${reqObj.GPSLat}`);
     console.log("----------");
-    const sql5 = "select * from Key_Authority where SerialNum = ?";
-    const sql1 = "select * from KeyInfo where SerialNum = ?";
-    const sql4 = "select KeyState from KeyInfo where SerialNum = ?";
-    const sql2 = "update KeyInfo set KeyState = ? where SerialNum = ?";
-    const sql3 = "insert into KeyRecord (SerialNum, Time, KeyState, GPSLat, GPSLong, Method, Email) values (?, ?, ?, ?, ? ,?, ?)";
+    const sql = sql_1.default.KeyControl;
     const time = (0, moment_1.default)().format("YYYY-MM-DD HH:mm:ss");
     const params = ["open", reqObj.serialNum];
     // check authority
-    dbconnection_1.default.query(sql5, reqObj.serialNum, (err, result5) => {
+    dbconnection_1.default.query(sql.select_Authority, reqObj.serialNum, (err, result5) => {
         // check login session
         if (req.session.login === undefined) {
             res.status(404).json({
@@ -62,7 +59,7 @@ router.post("/main/open_key", (req, res) => {
         if (result5[0].OwnerID === req.session.login.Email ||
             result5[0].ShareID === req.session.login.Email) {
             // get Smart Key from KeyInfo DB table
-            dbconnection_1.default.query(sql1, reqObj.serialNum, (err2, result1) => {
+            dbconnection_1.default.query(sql.select_Info, reqObj.serialNum, (err2, result1) => {
                 moduleResponse = (0, keycontrol_modules_1.AuthorityCheck)(result1, err2);
                 if (moduleResponse.flag) {
                     res.status(moduleResponse.code).json({
@@ -72,7 +69,7 @@ router.post("/main/open_key", (req, res) => {
                     return;
                 }
                 // check Smart Key's state(open/close)
-                dbconnection_1.default.query(sql4, reqObj.serialNum, (err3, result4) => {
+                dbconnection_1.default.query(sql.select_State, reqObj.serialNum, (err3, result4) => {
                     moduleResponse = (0, keycontrol_modules_1.KeyStateCheck)(result4, err3, "open");
                     if (moduleResponse.flag) {
                         res.status(moduleResponse.code).json({
@@ -82,7 +79,7 @@ router.post("/main/open_key", (req, res) => {
                         return;
                     }
                     // change Smart Key's state(close -> open) from KeyInfo DB table
-                    dbconnection_1.default.query(sql2, params, (err4) => {
+                    dbconnection_1.default.query(sql.update_Info, params, (err4) => {
                         if (err4) {
                             res.status(500).json({
                                 code: 500,
@@ -93,7 +90,7 @@ router.post("/main/open_key", (req, res) => {
                             return;
                         }
                         // add Smart Key's record to KeyRecord DB table
-                        dbconnection_1.default.query(sql3, params2, (err5) => {
+                        dbconnection_1.default.query(sql.insert_Record, params2, (err5) => {
                             if (err5) {
                                 res.status(500).json({
                                     code: 500,
@@ -122,15 +119,11 @@ router.post("/main/close_key", (req, res) => {
     console.log(`GPS Longitude: ${reqObj.GPSLong}`);
     console.log(`GPS Latitude: ${reqObj.GPSLat}`);
     console.log("----------");
-    const sql5 = "select * from Key_Authority where SerialNum = ?";
-    const sql1 = "select * from KeyInfo where SerialNum = ?";
-    const sql4 = "select KeyState from KeyInfo where SerialNum = ?";
-    const sql2 = "update KeyInfo set KeyState = ? where SerialNum = ?";
-    const sql3 = "insert into KeyRecord (SerialNum, Time, KeyState, GPSLat, GPSLong, Method, Email) values (?, ?, ?, ?, ? ,?, ?)";
+    const sql = sql_1.default.KeyControl;
     const time = (0, moment_1.default)().format("YYYY-MM-DD HH:mm:ss");
-    const params = ["close", reqObj.serialNum];
+    const params = ["open", reqObj.serialNum];
     // check authority
-    dbconnection_1.default.query(sql5, reqObj.serialNum, (err, result5) => {
+    dbconnection_1.default.query(sql.select_Authority, reqObj.serialNum, (err, result5) => {
         // check login session
         if (req.session.login === undefined) {
             res.status(404).json({
@@ -163,7 +156,7 @@ router.post("/main/close_key", (req, res) => {
         if (result5[0].OwnerID === req.session.login.Email ||
             result5[0].ShareID === req.session.login.Email) {
             // get Smart Key from KeyInfo DB table
-            dbconnection_1.default.query(sql1, reqObj.serialNum, (err2, result1) => {
+            dbconnection_1.default.query(sql.select_Info, reqObj.serialNum, (err2, result1) => {
                 moduleResponse = (0, keycontrol_modules_1.AuthorityCheck)(result1, err2);
                 if (moduleResponse.flag) {
                     res.status(moduleResponse.code).json({
@@ -173,7 +166,7 @@ router.post("/main/close_key", (req, res) => {
                     return;
                 }
                 // check Smart Key's state(open/close)
-                dbconnection_1.default.query(sql4, reqObj.serialNum, (err3, result4) => {
+                dbconnection_1.default.query(sql.select_State, reqObj.serialNum, (err3, result4) => {
                     moduleResponse = (0, keycontrol_modules_1.KeyStateCheck)(result4, err3, "close");
                     if (moduleResponse.flag) {
                         res.status(moduleResponse.code).json({
@@ -183,7 +176,7 @@ router.post("/main/close_key", (req, res) => {
                         return;
                     }
                     // change Smart Key's state(close -> open) from KeyInfo DB table
-                    dbconnection_1.default.query(sql2, params, (err4) => {
+                    dbconnection_1.default.query(sql.update_Info, params, (err4) => {
                         if (err4) {
                             res.status(500).json({
                                 code: 500,
@@ -194,7 +187,7 @@ router.post("/main/close_key", (req, res) => {
                             return;
                         }
                         // add Smart Key's record to KeyRecord DB table
-                        dbconnection_1.default.query(sql3, params2, (err5) => {
+                        dbconnection_1.default.query(sql.insert_Record, params2, (err5) => {
                             if (err5) {
                                 res.status(500).json({
                                     code: 500,
@@ -220,8 +213,8 @@ router.post("/main/mode", (req, res) => {
     console.log("---입력값---");
     console.log(`시리얼번호: ${serialNum}`);
     console.log("----------");
-    const sql1 = "select KeyState, Mode from KeyInfo where SerialNum = ?";
-    const sql2 = "update KeyInfo set Mode = ? where SerialNum = ?";
+    const sql1 = sql_1.default.Mode.select;
+    const sql2 = sql_1.default.Mode.update;
     const time = new Date(+new Date() + 3240 * 10000)
         .toISOString()
         .replace("T", " ")

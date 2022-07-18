@@ -8,6 +8,7 @@ const body_parser_1 = __importDefault(require("body-parser"));
 const crypto_1 = __importDefault(require("crypto"));
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const dbconnection_1 = __importDefault(require("../database/dbconnection"));
+const sql_1 = __importDefault(require("../modules/sql"));
 const router = express_1.default.Router();
 router.use((0, cookie_parser_1.default)());
 router.use(body_parser_1.default.json());
@@ -18,7 +19,7 @@ router.post("/main/key_pw", (req, res) => {
     console.log(`시리얼번호: ${reqObj.serialNum}`);
     console.log(`스마트키 비밀번호: ${reqObj.smartPwd}`);
     console.log("----------");
-    const sql1 = "select SmartPwd, Salt from KeyInfo where SerialNum = ?";
+    const sql1 = sql_1.default.KeyPw.select;
     // check login session
     if (req.session.login === undefined) {
         res.status(404).json({

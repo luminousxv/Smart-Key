@@ -7,12 +7,13 @@ const express_1 = __importDefault(require("express"));
 const body_parser_1 = __importDefault(require("body-parser"));
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const dbconnection_1 = __importDefault(require("../database/dbconnection"));
+const sql_1 = __importDefault(require("../modules/sql"));
 const router = express_1.default.Router();
 router.use((0, cookie_parser_1.default)());
 router.use(body_parser_1.default.json());
 router.use(body_parser_1.default.urlencoded({ extended: true }));
 router.get("/main/view_keylist", (req, res) => {
-    const sql1 = "select SerialNum, KeyName, KeyState, UserID, Shared, Mode from KeyInfo where UserID = ? or SharedID = ?";
+    const sql1 = sql_1.default.List.select;
     // check login session
     if (req.session.login === undefined) {
         res.status(404).json({
