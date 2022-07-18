@@ -39,7 +39,7 @@ to <img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&lo
     [Raspberry PI README](https://github.com/luminousxv/Smart-Key/blob/main/Raspberry_PI/RPI_README.md)
 
 
-## File Structure (Updated: 22.07.16)
+## File Structure (Updated: 22.07.18)
 
 - Server
     - dist (actual running folder)
@@ -51,6 +51,8 @@ to <img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&lo
         - modules
 
             [keycontrol_modules.ts](Server/src/modules/keycontrol_modules.ts) (key control API module)
+            
+            [sql.ts](Server/src/modules/sql.ts) (sql definition module)
 
         - types
 
