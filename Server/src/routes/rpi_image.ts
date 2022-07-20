@@ -4,6 +4,7 @@ import bodyParser from "body-parser";
 import moment from "moment";
 import connection from "../database/dbconnection";
 import { RequestImage, KeyState } from "../types/type";
+import Sql from "../modules/sql";
 
 const router = express.Router();
 
@@ -18,9 +19,8 @@ router.post("/rpi/image", (req, res) => {
   console.log("----------");
 
   const time = moment().format("YYYY-MM-DD HH:mm:ss");
-  const sql1 = "select KeyState from KeyInfo where SerialNum = ?";
-  const sql2 =
-    "insert into KeyRecord (SerialNum, Time, KeyState, Method, Image) values (?, ?, ?, ?, ?)";
+  const sql1: string = Sql.Register.select_KeyInfo;
+  const sql2: string = Sql.Image.insert;
 
   connection.query(sql1, reqObj.serialNum, (err, result1: KeyState[]) => {
     const params2 = [

@@ -6,6 +6,7 @@ import session from "express-session";
 import cookieParser from "cookie-parser";
 import connection from "../database/dbconnection";
 import { RequestLogin, Users } from "../types/type";
+import Sql from "../modules/sql";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const FileStore = require("session-file-store")(session);
@@ -44,7 +45,7 @@ router.post("/user/login", (req, res) => {
   console.log("----------");
 
   // Check if account exists
-  const sql = "SELECT * FROM Users WHERE UserEmail = ?";
+  const sql: string = Sql.Join.select;
 
   connection.query(sql, UserEmail, (err, result: Users[]) => {
     if (err) {

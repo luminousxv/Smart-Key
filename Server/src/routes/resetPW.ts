@@ -8,6 +8,7 @@ import cookieParser from "cookie-parser";
 import connection from "../database/dbconnection";
 import GoogleLogin from "../config/google.json";
 import { RequestResetPw, Users } from "../types/type";
+import Sql from "../modules/sql";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const FileStore = require("session-file-store")(session);
@@ -55,8 +56,7 @@ router.post("/user/reset/email", (req, res) => {
   console.log(`생년월일: ${reqObj.userBirth}`);
   console.log("-----------");
 
-  const sql1 =
-    "select * from Users where UserEmail = ? and UserName = ? and UserBirth = ?";
+  const sql1: string = Sql.PWReset.select;
   const params = [reqObj.userEmail, reqObj.userName, reqObj.userBirth];
   const authNum = Math.random().toString().substr(2, 6);
 
@@ -169,8 +169,6 @@ router.post("/user/reset/change_pw", (req, res) => {
     .pbkdf2Sync(userPwd, salt, 1, 32, "sha512")
     .toString("base64");
 
-  const sql = "update Users set UserPwd = ?, Salt = ? where UserEmail = ?";
-
   if (req.session.reset === undefined) {
     res.status(404).json({
       code: 404,
@@ -179,6 +177,7 @@ router.post("/user/reset/change_pw", (req, res) => {
     return;
   }
 
+  const sql: string = Sql.PWReset.update;
   const params = [hashedPw, salt, req.session.reset.Email];
 
   connection.query(sql, params, (err) => {

@@ -6,6 +6,7 @@ import crypto from "crypto";
 import moment from "moment";
 import connection from "../database/dbconnection";
 import { RequestRegister, KeyState } from "../types/type";
+import Sql from "../modules/sql";
 
 const router = express.Router();
 
@@ -27,13 +28,11 @@ router.post("/main/register_key", (req, res) => {
   console.log(`스마트키 비밀번호: ${reqObj.smartPwd}`);
   console.log("----------");
 
-  const sql1 = "select KeyState from KeyInfo where SerialNum = ?";
-  const sql2 =
-    "insert into KeyInfo (SerialNum, KeyName, KeyState, UserID, SmartPwd, Salt, Shared, Mode) values (?, ?, ?, ?, ?, ?, ?, ?)";
-  const sql3 =
-    "insert into KeyRecord (SerialNum, Time, KeyState, Method, Email) values (?, ?, ?, ?, ?)";
-  const sql4 = "insert into Key_Authority(SerialNum, OwnerID) values (?, ?)";
-  const salt = crypto.randomBytes(32).toString("base64");
+  const sql1: string = Sql.Register.select_KeyInfo;
+  const sql2: string = Sql.Register.insert_KeyInfo;
+  const sql3: string = Sql.Register.insert_Record;
+  const sql4: string = Sql.Register.insert_Authority;
+  const salt: string = crypto.randomBytes(32).toString("base64");
 
   const hashedPw = crypto
     .pbkdf2Sync(reqObj.smartPwd, salt, 1, 32, "sha512")

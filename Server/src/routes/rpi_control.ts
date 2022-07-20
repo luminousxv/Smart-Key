@@ -4,6 +4,7 @@ import bodyParser from "body-parser";
 import moment from "moment";
 import connection from "../database/dbconnection";
 import { RPIRemote, RequestBluetooth, KeyState } from "../types/type";
+import Sql from "../modules/sql";
 
 const router = express.Router();
 
@@ -18,10 +19,10 @@ router.get("/rpi/remote", (req, res) => {
   console.log(`시리얼 번호: ${serialNum}`);
   console.log("----------");
 
-  const sql1 = "select KeyState, Mode from KeyInfo where SerialNum = ?";
-  const sql2 = "delete from KeyInfo where SerialNum = ?";
-  const sql3 = "delete from KeyRecord where SerialNum = ?";
-  const sql4 = "delete from Key_Authority where SerialNum = ?";
+  const sql1: string = Sql.RPIControl.select;
+  const sql2: string = Sql.RPIControl.delete_KeyInfo;
+  const sql3: string = Sql.RPIControl.delete_Record;
+  const sql4: string = Sql.RPIControl.delete_Authority;
   // get KeyState from KeyInfo DB table
   connection.query(sql1, serialNum, (err, result1: RPIRemote[]) => {
     if (err) {
@@ -97,10 +98,9 @@ router.post("/rpi/bluetooth", (req, res) => {
   console.log(`키 상태: ${reqObj.keyState}`);
   console.log("----------");
 
-  const sql1 = "select KeyState from KeyInfo where SerialNum = ?";
-  const sql2 = "update KeyInfo set KeyState = ? where SerialNum = ?";
-  const sql3 =
-    "insert into KeyRecord (SerialNum, Time, KeyState, Method) values (?, ?, ?, ?)";
+  const sql1: string = Sql.Register.select_KeyInfo;
+  const sql2: string = Sql.RPIControl.update_KeyInfo;
+  const sql3: string = Sql.RPIControl.insert_Record;
 
   const time = moment().format("YYYY-MM-DD HH:mm:ss");
   const params2 = [reqObj.keyState, reqObj.serialNum];

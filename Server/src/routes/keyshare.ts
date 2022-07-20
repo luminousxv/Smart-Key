@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import moment from "moment";
 import connection from "../database/dbconnection";
 import { KeyAuthority, Users } from "../types/type";
+import Sql from "../modules/sql";
 
 const router = express.Router();
 
@@ -21,13 +22,11 @@ router.post("/main/share_key/register", (req, res) => {
   console.log(`공유할 이메일: ${shareEmail}`);
   console.log("---------");
 
-  const sql1 = "select * from Key_Authority where SerialNum = ?";
-  const sql2 =
-    "update KeyInfo set Shared = ?, SharedID = ? where SerialNum = ?";
-  const sql3 = "update Key_Authority set ShareID = ? where SerialNum = ?";
-  const sql4 = "select * from Users where UserEmail = ?";
-  const sql5 =
-    "insert into KeyRecord (SerialNum, Time, Method, Email) values (?, ?, ?, ?)";
+  const sql1 = Sql.KeyShare.select_Authority;
+  const sql2 = Sql.KeyShare.update_KeyInfo;
+  const sql3 = Sql.KeyShare.update_Authority;
+  const sql4 = Sql.KeyShare.select_User;
+  const sql5 = Sql.KeyShare.insert_Record;
 
   const time = moment().format("YYYY-MM-DD HH:mm:ss");
 
@@ -142,12 +141,10 @@ router.post("/main/share_key/delete", (req, res) => {
   console.log(`시리얼번호: ${serialNum}`);
   console.log("---------");
 
-  const sql1 = "select * from Key_Authority where SerialNum = ?";
-  const sql2 = "update Key_Authority set ShareID = ? where SerialNum = ?";
-  const sql3 =
-    "update KeyInfo set Shared = ?, SharedID = ? where SerialNum = ?";
-  const sql4 =
-    "insert into KeyRecord (SerialNum, Time, Method, Email) values (?, ?, ?, ?)";
+  const sql1 = Sql.KeyShare.select_Authority;
+  const sql2 = Sql.KeyShare.update_Authority;
+  const sql3 = Sql.KeyShare.update_KeyInfo;
+  const sql4 = Sql.KeyShare.insert_Record;
   const params2 = [null, serialNum];
   const params3 = [0, null, serialNum];
 
