@@ -7,6 +7,7 @@ const express_1 = __importDefault(require("express"));
 const body_parser_1 = __importDefault(require("body-parser"));
 const moment_1 = __importDefault(require("moment"));
 const dbconnection_1 = __importDefault(require("../database/dbconnection"));
+const sql_1 = __importDefault(require("../modules/sql"));
 const router = express_1.default.Router();
 router.use(body_parser_1.default.json());
 router.use(body_parser_1.default.urlencoded({ extended: true }));
@@ -16,10 +17,10 @@ router.get("/rpi/remote", (req, res) => {
     console.log("---입력값---");
     console.log(`시리얼 번호: ${serialNum}`);
     console.log("----------");
-    const sql1 = "select KeyState, Mode from KeyInfo where SerialNum = ?";
-    const sql2 = "delete from KeyInfo where SerialNum = ?";
-    const sql3 = "delete from KeyRecord where SerialNum = ?";
-    const sql4 = "delete from Key_Authority where SerialNum = ?";
+    const sql1 = sql_1.default.RPIControl.select;
+    const sql2 = sql_1.default.RPIControl.delete_KeyInfo;
+    const sql3 = sql_1.default.RPIControl.delete_Record;
+    const sql4 = sql_1.default.RPIControl.delete_Authority;
     // get KeyState from KeyInfo DB table
     dbconnection_1.default.query(sql1, serialNum, (err, result1) => {
         if (err) {
@@ -93,9 +94,9 @@ router.post("/rpi/bluetooth", (req, res) => {
     console.log(`시리얼 번호: ${reqObj.serialNum}`);
     console.log(`키 상태: ${reqObj.keyState}`);
     console.log("----------");
-    const sql1 = "select KeyState from KeyInfo where SerialNum = ?";
-    const sql2 = "update KeyInfo set KeyState = ? where SerialNum = ?";
-    const sql3 = "insert into KeyRecord (SerialNum, Time, KeyState, Method) values (?, ?, ?, ?)";
+    const sql1 = sql_1.default.Register.select_KeyInfo;
+    const sql2 = sql_1.default.RPIControl.update_KeyInfo;
+    const sql3 = sql_1.default.RPIControl.insert_Record;
     const time = (0, moment_1.default)().format("YYYY-MM-DD HH:mm:ss");
     const params2 = [reqObj.keyState, reqObj.serialNum];
     const parmas3 = [reqObj.serialNum, time, reqObj.keyState, "블루투스"];

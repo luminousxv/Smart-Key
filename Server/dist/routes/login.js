@@ -9,6 +9,7 @@ const body_parser_1 = __importDefault(require("body-parser"));
 const express_session_1 = __importDefault(require("express-session"));
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const dbconnection_1 = __importDefault(require("../database/dbconnection"));
+const sql_1 = __importDefault(require("../modules/sql"));
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const FileStore = require("session-file-store")(express_session_1.default);
 const router = express_1.default.Router();
@@ -34,7 +35,7 @@ router.post("/user/login", (req, res) => {
     console.log(`비밀번호: ${UserPwd}`);
     console.log("----------");
     // Check if account exists
-    const sql = "SELECT * FROM Users WHERE UserEmail = ?";
+    const sql = sql_1.default.Join.select;
     dbconnection_1.default.query(sql, UserEmail, (err, result) => {
         if (err) {
             console.log("select error from Users table");

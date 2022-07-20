@@ -9,6 +9,7 @@ const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const crypto_1 = __importDefault(require("crypto"));
 const moment_1 = __importDefault(require("moment"));
 const dbconnection_1 = __importDefault(require("../database/dbconnection"));
+const sql_1 = __importDefault(require("../modules/sql"));
 const router = express_1.default.Router();
 router.use((0, cookie_parser_1.default)());
 router.use(body_parser_1.default.json());
@@ -23,10 +24,10 @@ router.post("/main/register_key", (req, res) => {
     console.log(`스마트키 이름: ${reqObj.keyName}`);
     console.log(`스마트키 비밀번호: ${reqObj.smartPwd}`);
     console.log("----------");
-    const sql1 = "select KeyState from KeyInfo where SerialNum = ?";
-    const sql2 = "insert into KeyInfo (SerialNum, KeyName, KeyState, UserID, SmartPwd, Salt, Shared, Mode) values (?, ?, ?, ?, ?, ?, ?, ?)";
-    const sql3 = "insert into KeyRecord (SerialNum, Time, KeyState, Method, Email) values (?, ?, ?, ?, ?)";
-    const sql4 = "insert into Key_Authority(SerialNum, OwnerID) values (?, ?)";
+    const sql1 = sql_1.default.Register.select_KeyInfo;
+    const sql2 = sql_1.default.Register.insert_KeyInfo;
+    const sql3 = sql_1.default.Register.insert_Record;
+    const sql4 = sql_1.default.Register.insert_Authority;
     const salt = crypto_1.default.randomBytes(32).toString("base64");
     const hashedPw = crypto_1.default
         .pbkdf2Sync(reqObj.smartPwd, salt, 1, 32, "sha512")

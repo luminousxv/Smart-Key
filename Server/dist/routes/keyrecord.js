@@ -7,6 +7,7 @@ const express_1 = __importDefault(require("express"));
 const body_parser_1 = __importDefault(require("body-parser"));
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const dbconnection_1 = __importDefault(require("../database/dbconnection"));
+const sql_1 = __importDefault(require("../modules/sql"));
 const router = express_1.default.Router();
 router.use((0, cookie_parser_1.default)());
 router.use(body_parser_1.default.json());
@@ -16,8 +17,8 @@ router.get("/main/view_keyrecord", (req, res) => {
     console.log("---입력값---");
     console.log(`시리얼번호: ${serialNum}`);
     console.log("---------");
-    const sql1 = "select SerialNum, Time, KeyState, GPSLat, GPSLong, Method, Email from KeyRecord where serialNum = ?";
-    const sql2 = "select OwnerID from Key_Authority where SerialNum = ?";
+    const sql1 = sql_1.default.KeyRecord.select_Record;
+    const sql2 = sql_1.default.KeyRecord.select_Authority;
     // check key's authority(whether the login email is the owner)
     dbconnection_1.default.query(sql2, serialNum, (err, result1) => {
         // check login session
@@ -79,7 +80,7 @@ router.get("/main/view_keyrecord/image", (req, res) => {
     console.log(`시리얼 번호: ${serialNum}`);
     console.log(`시간 : ${time}`);
     console.log("----------");
-    const sql1 = "select Image from KeyRecord where SerialNum = ? and Time = ?";
+    const sql1 = sql_1.default.KeyRecord.select_Image;
     const params1 = [serialNum, time];
     // check login session
     if (req.session.login === undefined) {

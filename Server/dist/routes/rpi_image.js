@@ -7,6 +7,7 @@ const express_1 = __importDefault(require("express"));
 const body_parser_1 = __importDefault(require("body-parser"));
 const moment_1 = __importDefault(require("moment"));
 const dbconnection_1 = __importDefault(require("../database/dbconnection"));
+const sql_1 = __importDefault(require("../modules/sql"));
 const router = express_1.default.Router();
 router.use(body_parser_1.default.json());
 router.use(body_parser_1.default.urlencoded({ extended: true }));
@@ -16,8 +17,8 @@ router.post("/rpi/image", (req, res) => {
     console.log(`시리얼 번호: ${reqObj.serialNum}`);
     console.log("----------");
     const time = (0, moment_1.default)().format("YYYY-MM-DD HH:mm:ss");
-    const sql1 = "select KeyState from KeyInfo where SerialNum = ?";
-    const sql2 = "insert into KeyRecord (SerialNum, Time, KeyState, Method, Image) values (?, ?, ?, ?, ?)";
+    const sql1 = sql_1.default.Register.select_KeyInfo;
+    const sql2 = sql_1.default.Image.insert;
     dbconnection_1.default.query(sql1, reqObj.serialNum, (err, result1) => {
         const params2 = [
             reqObj.serialNum,

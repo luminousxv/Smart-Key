@@ -11,6 +11,7 @@ const body_parser_1 = __importDefault(require("body-parser"));
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const dbconnection_1 = __importDefault(require("../database/dbconnection"));
 const google_json_1 = __importDefault(require("../config/google.json"));
+const sql_1 = __importDefault(require("../modules/sql"));
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const FileStore = require("session-file-store")(express_session_1.default);
 const router = express_1.default.Router();
@@ -48,7 +49,7 @@ router.post("/user/reset/email", (req, res) => {
     console.log(`이름: ${reqObj.userName}`);
     console.log(`생년월일: ${reqObj.userBirth}`);
     console.log("-----------");
-    const sql1 = "select * from Users where UserEmail = ? and UserName = ? and UserBirth = ?";
+    const sql1 = sql_1.default.PWReset.select;
     const params = [reqObj.userEmail, reqObj.userName, reqObj.userBirth];
     const authNum = Math.random().toString().substr(2, 6);
     // check whether input data is valid in Users DB table
@@ -153,7 +154,6 @@ router.post("/user/reset/change_pw", (req, res) => {
     const hashedPw = crypto_1.default
         .pbkdf2Sync(userPwd, salt, 1, 32, "sha512")
         .toString("base64");
-    const sql = "update Users set UserPwd = ?, Salt = ? where UserEmail = ?";
     if (req.session.reset === undefined) {
         res.status(404).json({
             code: 404,
@@ -161,6 +161,7 @@ router.post("/user/reset/change_pw", (req, res) => {
         });
         return;
     }
+    const sql = sql_1.default.PWReset.update;
     const params = [hashedPw, salt, req.session.reset.Email];
     dbconnection_1.default.query(sql, params, (err) => {
         if (err) {
