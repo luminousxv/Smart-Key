@@ -45,7 +45,7 @@ sleep(2)
 
 while True:
     json_1 = serial.msg  # serial.py에 저장된 시리얼넘버 불러옴
-    req_get = requests.get('http://3.35.57.189:80/Smart-Key/rpi/remote/', json=json_1)  # 서버 주소
+    req_get = requests.get('http://serverIP:80/Smart-Key/rpi/remote/', json=json_1)  # 서버 주소
     res2 = req_get.json()
     res_code2 = res2["code"]  # 서버에 저장되어 있는 code
 
