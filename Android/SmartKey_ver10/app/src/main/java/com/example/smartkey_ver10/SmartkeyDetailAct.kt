@@ -17,10 +17,6 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.gms.common.internal.Objects
 import com.google.android.gms.location.*
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationResult
-import com.google.android.gms.location.LocationServices
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -34,22 +30,17 @@ class SmartkeyDetailAct : AppCompatActivity() {
     val service = Retrofit_service.service
 
     //gps 변수
-    var lat : Double = 0.0
-    var long: Double = 0.0
+    var locationManager : LocationManager? = null
+    private val REQUEST_CODE_LOCATION : Int = 2
 
     //같은 스마트키 다이얼로그를 쓰는 메서드에 공유해제인지 키 삭제인지 확인
-    private val SHARED_DEL = 1001
-    private val KEY_DEL = 1002
+    private val SHARED_DEL : Int = 1001
+    private val KEY_DEL : Int = 1002
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_smartkey_detail)
-
-        //gps 변수
-        val Im = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        val isGPSEnabled: Boolean = Im.isProviderEnabled(LocationManager.GPS_PROVIDER)
-        val isNetworkEnabled: Boolean = Im.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
 
         //SmartkeyMain에서 넘겨받은 키 정보
         val keynum = intent.getStringExtra("serialnum") //선택한 key의 serialnum
@@ -75,7 +66,6 @@ class SmartkeyDetailAct : AppCompatActivity() {
         //공유키, 등록키, 공유가능여부, 키모드에 따라 다른 초기 UI
         init_UI_set(unregisterd!!, keyshared!!, keymode!!, keystate!!,
             imv_log, btn_sharing, btn_Delete, imv_lock, imv_unlock, switch_mode)
-
 
         //보안모드
         switch_mode.setOnCheckedChangeListener { compoundButton, on ->
@@ -103,57 +93,65 @@ class SmartkeyDetailAct : AppCompatActivity() {
         //------------------------버튼시작 --------------------//
         //잠금
         imv_lock.setOnClickListener {
-            getGPSInfo(isGPSEnabled, isNetworkEnabled, Im)
+
+            var gpsinfo = getCurrentLoc()
 
             var Keyinput = HashMap<String, String>()
             Keyinput.put("serialNum", keynum!!)
-            Keyinput.put("GPSLong", long.toString())
-            Keyinput.put("GPSLat", lat.toString())
+            Keyinput.put("GPSLong", gpsinfo.get("longitude")!!)
+            Keyinput.put("GPSLat", gpsinfo.get("latitude")!!)
 
-            service.postClose(cookieid = cookie, Keyinput).enqueue(object : Callback<P_op_cl> {
-                override fun onResponse(call: Call<P_op_cl>, response: Response<P_op_cl>) {
-                    if (response.code() == 200) {
-                        Log.d("LockPost", "클로즈 성공")
-                        Log.d("response", response.raw().toString())
-                        imv_lock.visibility = View.GONE
-                        imv_unlock.visibility = View.VISIBLE
-                    } else {
-                        Log.d("LockPost", "오류가 발생했습니다.")
-                        Toast.makeText(this@SmartkeyDetailAct,
-                            "이미 닫혀있습니다.", Toast.LENGTH_SHORT).show()
+            if(Keyinput.size == 3) {
+                service.postClose(cookieid = cookie, Keyinput).enqueue(object : Callback<P_op_cl> {
+                    override fun onResponse(call: Call<P_op_cl>, response: Response<P_op_cl>) {
+                        if (response.code() == 200) {
+                            Log.d("LockPost", "클로즈 성공")
+                            Log.d("response", response.raw().toString())
+                            imv_lock.visibility = View.GONE
+                            imv_unlock.visibility = View.VISIBLE
+                        } else {
+                            Log.d("LockPost", "오류가 발생했습니다.")
+                            Toast.makeText(this@SmartkeyDetailAct,
+                                "이미 닫혀있습니다.", Toast.LENGTH_SHORT).show()
+                        }
                     }
-                }
-                override fun onFailure(call: Call<P_op_cl>, t: Throwable) {
-                    Log.d("LockPost", "t" + t.message)
-                }
-            })
+                    override fun onFailure(call: Call<P_op_cl>, t: Throwable) {
+                        Log.d("LockPost", "t" + t.message)
+                    }
+                })
+            }
+            else Log.d("Keyinputsize", Keyinput.size.toString())
         }//잠금 끝
 
         //열림
         imv_unlock.setOnClickListener {
-            getGPSInfo(isGPSEnabled, isNetworkEnabled, Im)
+            var gpsinfo = getCurrentLoc()
+
             var Keyinput = HashMap<String, String>()
             Keyinput.put("serialNum", keynum!!)
-            Keyinput.put("GPSLong", long.toString())
-            Keyinput.put("GPSLat", lat.toString())
+            Keyinput.put("GPSLong", gpsinfo.get("longitude")!!)
+            Keyinput.put("GPSLat", gpsinfo.get("latitude")!!)
 
-            service.postOpen(cookieid = cookie, Keyinput).enqueue(object : Callback<P_op_cl> {
-                override fun onResponse(call: Call<P_op_cl>, response: Response<P_op_cl>) {
-                    if (response.code() == 200) {
-                        Log.d("UnlockPost", "오픈 성공")
-                        Log.d("response", response.raw().toString())
-                        imv_unlock.visibility = View.GONE
-                        imv_lock.visibility = View.VISIBLE
-                    } else {
-                        Toast.makeText(this@SmartkeyDetailAct, "오류가 발생했습니다.", Toast.LENGTH_SHORT)
-                            .show()
-                        Log.d("UnlockPost", "response badcode")
+            if(Keyinput.size == 3){
+                service.postOpen(cookieid = cookie, Keyinput).enqueue(object : Callback<P_op_cl> {
+                    override fun onResponse(call: Call<P_op_cl>, response: Response<P_op_cl>) {
+                        if (response.code() == 200) {
+                            Log.d("UnlockPost", "오픈 성공")
+                            Log.d("response", response.raw().toString())
+                            imv_unlock.visibility = View.GONE
+                            imv_lock.visibility = View.VISIBLE
+                        } else {
+                            Toast.makeText(this@SmartkeyDetailAct, "오류가 발생했습니다.", Toast.LENGTH_SHORT)
+                                .show()
+                            Log.d("UnlockPost", "response badcode")
+                        }
                     }
-                }
-                override fun onFailure(call: Call<P_op_cl>, t: Throwable) {
-                    Log.d("UnlockPost", "t" + t.message)
-                }
-            })
+                    override fun onFailure(call: Call<P_op_cl>, t: Throwable) {
+                        Log.d("UnlockPost", "t" + t.message)
+                    }
+                })
+            }
+            else Log.d("Keyinputsize", Keyinput.size.toString())
         }//열림 끝
 
         //이력
@@ -204,6 +202,7 @@ class SmartkeyDetailAct : AppCompatActivity() {
             btn_Delete.visibility = View.INVISIBLE
             switch_mode.visibility = View.INVISIBLE
         }
+
         //이미 공유 된 키일 때 공유 삭제로 작동
         if(keyshared=="1"){
             btn_sharing.text = "스마트키 공유해제"
@@ -231,7 +230,7 @@ class SmartkeyDetailAct : AppCompatActivity() {
 
     fun postMODE(keynum: String){
         var inputNum = HashMap<String, String>()
-        inputNum.put("serialNum", keynum!!)
+        inputNum.put("serialNum", keynum)
 
         service.postMode(cookieid = cookie, inputNum).enqueue(object : Callback<PostserialNum> {
             override fun onResponse(call: Call<PostserialNum>, response: Response<PostserialNum>) {
@@ -344,26 +343,40 @@ class SmartkeyDetailAct : AppCompatActivity() {
 
     //----------------------gps정보 받아오는 메서드--------------------------------//
 
-    fun getGPSInfo(isGPSEnabled: Boolean, isNetworkEnabled: Boolean, Im: LocationManager){
-        //권한 체크
-        if(Build.VERSION.SDK_INT>=23 &&
-            ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.ACCESS_FINE_LOCATION)!=
-            PackageManager.PERMISSION_GRANTED){
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),0)
-        } else{
-            when{ //프로바이더 제공자 활성화 여부 체크
-                isNetworkEnabled ->{
-                    val location = Im.getLastKnownLocation(LocationManager.NETWORK_PROVIDER) //인터넷 기반 위치
-                    long = location?.longitude!!
-                    lat = location?.latitude!!
-                }
-                isGPSEnabled ->{
-                    val location = Im.getLastKnownLocation(LocationManager.GPS_PROVIDER) //gps기반
-                    long = location?.longitude!!
-                    lat = location?.latitude!!
-                }
-            }
+    private fun getCurrentLoc() : HashMap<String,String>{
+        locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager?
+        var longlat = HashMap<String, String>()
+        val userLocation : Location? = getLatLng()
+        if (userLocation != null){
+            longlat.put("longitude", userLocation.longitude.toString())
+            longlat.put("latitude", userLocation.latitude.toString())
+            Log.d("check", "long"+userLocation.longitude)
+            Log.d("check", "lat"+userLocation.latitude)
         }
+        else {
+            longlat.put("longitude", "0.0")
+            longlat.put("latitude", "0.0")
+        }
+
+        return longlat
+    }
+
+    private fun getLatLng() : Location? {
+        var currentLatLng: Location? = null
+        if(ActivityCompat.checkSelfPermission(applicationContext, Manifest.permission.ACCESS_FINE_LOCATION) !=
+            PackageManager.PERMISSION_GRANTED
+            && ActivityCompat.checkSelfPermission(applicationContext, Manifest.permission
+                .ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED){
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission
+                .ACCESS_FINE_LOCATION), REQUEST_CODE_LOCATION)
+            getLatLng()
+        } else{
+            val locationProvider = LocationManager.GPS_PROVIDER
+            val networkProvider = LocationManager.NETWORK_PROVIDER
+            currentLatLng = locationManager?.getLastKnownLocation(locationProvider)
+            if(currentLatLng == null) currentLatLng = locationManager?.getLastKnownLocation(networkProvider)
+        }
+        return currentLatLng
     }
 
 }

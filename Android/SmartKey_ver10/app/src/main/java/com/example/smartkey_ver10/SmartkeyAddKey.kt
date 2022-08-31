@@ -86,7 +86,7 @@ class SmartkeyAddKey : AppCompatActivity() {
             finish()
         }
 
-        if(serial_Num == null){ //이거 안되면 6자리만 짤라서 사용하기
+        if(serial_Num == null){
             if(bluetoothService.mBluetoothAdapter != null){
                 bluetoothService.mBluetoothHandler = object : Handler() {
                     override fun handleMessage(msg: Message) {
