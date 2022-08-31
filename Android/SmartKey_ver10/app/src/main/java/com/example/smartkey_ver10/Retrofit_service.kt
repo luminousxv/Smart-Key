@@ -5,7 +5,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object Retrofit_service {
 
-    private const val baseUrl = "http://3.35.57.189:80/Smart-Key/"
+    private const val baseUrl = "http://serverIP:80/Smart-Key/"
     private val retrofit = Retrofit.Builder()
         .baseUrl(baseUrl)
         .addConverterFactory(GsonConverterFactory.create())
